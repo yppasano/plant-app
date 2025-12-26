@@ -3,8 +3,6 @@ import './style.css'
 const STORAGE_KEY = 'plantCycleData'
 let plants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 let targetPlantId = null
-
-// 警告を出す日数（7日以上水やりがないと警告）
 const ALERT_DAYS = 7
 
 const save = () => {
@@ -23,7 +21,6 @@ window.addLog = (id, type) => {
   const today = new Date()
   const dateStr = `${today.getMonth() + 1}/${today.getDate()}`
   const timestamp = today.getTime()
-  
   plant.logs.unshift({ type, date: dateStr, ts: timestamp })
   if (plant.logs.length > 50) plant.logs.pop()
   save()
@@ -66,7 +63,6 @@ const compressImage = (file) => {
   })
 }
 
-// 写真選択時の処理
 document.getElementById('cameraInput').addEventListener('change', async (e) => {
   if (!e.target.files || !e.target.files[0] || !targetPlantId) return
   const file = e.target.files[0]
@@ -79,14 +75,13 @@ document.getElementById('cameraInput').addEventListener('change', async (e) => {
   e.target.value = ''
 })
 
-// 経過日数の計算関数（数値で返す版）
+// 日数計算
 const calculateDaysAgo = (log) => {
   if (!log) return null
   if (log.ts) {
     const diff = Date.now() - log.ts
     return Math.floor(diff / (1000 * 60 * 60 * 24))
   }
-  // 古いデータ互換性用
   try {
     const now = new Date()
     const [m, d] = log.date.split('/').map(Number)
@@ -99,7 +94,6 @@ const calculateDaysAgo = (log) => {
   }
 }
 
-// 表示用HTML生成
 const getDaysAgoHtml = (log) => {
   const days = calculateDaysAgo(log)
   if (days === null) return ''
@@ -107,17 +101,43 @@ const getDaysAgoHtml = (log) => {
   return `<span class="text-gray-500 font-bold ml-1">(${days}日前)</span>`
 }
 
-// 水やり警告判定
+// 警告判定
 const isAlertNeeded = (plant) => {
-  // 最新の「水」ログを探す
   const lastWaterLog = plant.logs.find(l => l.type === '水')
-  
-  // まだ水やり記録がないなら警告対象（新規株など）
-  if (!lastWaterLog) return false // または true にして「まず水やりして！」と促すことも可能
-
+  if (!lastWaterLog) return false // 未記録は一旦スルー（必要ならtrueへ）
   const days = calculateDaysAgo(lastWaterLog)
-  // 7日以上経過していたら警告
   return days !== null && days >= ALERT_DAYS
+}
+
+// ▼▼▼ 並び替えロジック ▼▼▼
+const sortPlants = (plantsList) => {
+  const sortType = document.getElementById('sortSelect').value
+  // 元の配列を壊さないようにコピーしてソート
+  const sorted = [...plantsList]
+
+  if (sortType === 'created') {
+    // そのまま（新しい順）
+    return sorted
+  } else if (sortType === 'id') {
+    // ID順（辞書順）
+    return sorted.sort((a, b) => a.id.localeCompare(b.id))
+  } else if (sortType === 'alert') {
+    // 水やり待ち順（警告が出ているものを上に、それ以外は日数経過順）
+    return sorted.sort((a, b) => {
+      const aDanger = isAlertNeeded(a)
+      const bDanger = isAlertNeeded(b)
+      if (aDanger && !bDanger) return -1 // aを上に
+      if (!aDanger && bDanger) return 1  // bを上に
+      
+      // 両方警告、または両方平気なら、最後の水やりが古い順に並べる
+      const aLog = a.logs.find(l => l.type === '水')
+      const bLog = b.logs.find(l => l.type === '水')
+      const aTime = aLog ? (aLog.ts || 0) : 0
+      const bTime = bLog ? (bLog.ts || 0) : 0
+      return aTime - bTime // 古い（数値が小さい）ほうが上
+    })
+  }
+  return sorted
 }
 
 // 描画
@@ -125,16 +145,16 @@ const render = () => {
   const listEl = document.getElementById('plantList')
   listEl.innerHTML = ''
 
-  plants.forEach(plant => {
-    // アラート判定
+  // ソートしてから描画
+  const sortedPlants = sortPlants(plants)
+
+  sortedPlants.forEach(plant => {
     const isDanger = isAlertNeeded(plant)
     
-    // カードのスタイル（警告なら赤枠＆薄赤背景、通常なら白背景）
     const cardClass = isDanger 
       ? 'bg-red-50 p-4 rounded-xl shadow border-2 border-red-400 relative overflow-hidden'
       : 'bg-white p-4 rounded-xl shadow border border-gray-100'
 
-    // 警告バッジ
     const alertBadge = isDanger
       ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
       : ''
@@ -183,7 +203,11 @@ const render = () => {
   })
 }
 
-// イベントリスナー
+// 並び替えメニューを変えたら再描画
+document.getElementById('sortSelect').addEventListener('change', () => {
+  render()
+})
+
 document.getElementById('addBtn').addEventListener('click', () => {
   const input = document.getElementById('plantIdInput')
   const id = input.value.trim()

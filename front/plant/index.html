@@ -7,9 +7,17 @@
 </head>
 <body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
   <div id="app">
-    <header class="mb-6 text-center">
+    <header class="mb-4 text-center">
       <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
     </header>
+
+    <div class="flex justify-end mb-2">
+      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2">
+        <option value="created">▼ 登録順 (新しい順)</option>
+        <option value="id">A-Z ID順</option>
+        <option value="alert">💧 水やり待ち順</option>
+      </select>
+    </div>
 
     <div class="flex gap-2 mb-6">
       <input type="text" id="plantIdInput" placeholder="ID (例: A-01)" 
