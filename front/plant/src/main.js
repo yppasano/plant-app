@@ -4,6 +4,9 @@ const STORAGE_KEY = 'plantCycleData'
 let plants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 let targetPlantId = null
 
+// 警告を出す日数（7日以上水やりがないと警告）
+const ALERT_DAYS = 7
+
 const save = () => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(plants))
@@ -18,12 +21,10 @@ window.addLog = (id, type) => {
   const plant = plants.find(p => p.id === id)
   if (!plant) return
   const today = new Date()
-  // 日付だけでなく、計算用にタイムスタンプも保存するようにアップグレード
   const dateStr = `${today.getMonth() + 1}/${today.getDate()}`
   const timestamp = today.getTime()
   
   plant.logs.unshift({ type, date: dateStr, ts: timestamp })
-  
   if (plant.logs.length > 50) plant.logs.pop()
   save()
 }
@@ -78,33 +79,45 @@ document.getElementById('cameraInput').addEventListener('change', async (e) => {
   e.target.value = ''
 })
 
-// ▼▼▼ 新機能: 経過日数の計算ロジック ▼▼▼
-const getDaysAgo = (log) => {
-  if (!log) return ''
-  
-  // 新しいデータ(tsあり)なら正確に計算
+// 経過日数の計算関数（数値で返す版）
+const calculateDaysAgo = (log) => {
+  if (!log) return null
   if (log.ts) {
     const diff = Date.now() - log.ts
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    if (days === 0) return '<span class="text-teal-600 font-bold ml-1">(今日)</span>'
-    return `<span class="text-red-500 font-bold ml-1">(${days}日前)</span>`
+    return Math.floor(diff / (1000 * 60 * 60 * 24))
   }
-
-  // 古いデータ(文字列のみ)の場合は日付文字から推測
+  // 古いデータ互換性用
   try {
     const now = new Date()
     const [m, d] = log.date.split('/').map(Number)
     const logDate = new Date(now.getFullYear(), m - 1, d)
-    // もし未来の日付になっちゃったら去年のことだと判断
     if (logDate > now) logDate.setFullYear(now.getFullYear() - 1)
-    
     const diff = now - logDate
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-    if (days === 0) return '<span class="text-teal-600 font-bold ml-1">(今日)</span>'
-    return `<span class="text-red-500 font-bold ml-1">(${days}日前)</span>`
+    return Math.floor(diff / (1000 * 60 * 60 * 24))
   } catch (e) {
-    return ''
+    return null
   }
+}
+
+// 表示用HTML生成
+const getDaysAgoHtml = (log) => {
+  const days = calculateDaysAgo(log)
+  if (days === null) return ''
+  if (days === 0) return '<span class="text-teal-600 font-bold ml-1">(今日)</span>'
+  return `<span class="text-gray-500 font-bold ml-1">(${days}日前)</span>`
+}
+
+// 水やり警告判定
+const isAlertNeeded = (plant) => {
+  // 最新の「水」ログを探す
+  const lastWaterLog = plant.logs.find(l => l.type === '水')
+  
+  // まだ水やり記録がないなら警告対象（新規株など）
+  if (!lastWaterLog) return false // または true にして「まず水やりして！」と促すことも可能
+
+  const days = calculateDaysAgo(lastWaterLog)
+  // 7日以上経過していたら警告
+  return days !== null && days >= ALERT_DAYS
 }
 
 // 描画
@@ -113,16 +126,23 @@ const render = () => {
   listEl.innerHTML = ''
 
   plants.forEach(plant => {
-    // ログ情報を作成（経過日数を付与）
+    // アラート判定
+    const isDanger = isAlertNeeded(plant)
+    
+    // カードのスタイル（警告なら赤枠＆薄赤背景、通常なら白背景）
+    const cardClass = isDanger 
+      ? 'bg-red-50 p-4 rounded-xl shadow border-2 border-red-400 relative overflow-hidden'
+      : 'bg-white p-4 rounded-xl shadow border border-gray-100'
+
+    // 警告バッジ
+    const alertBadge = isDanger
+      ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
+      : ''
+
     let log1Html = 'ー'
     let log2Html = 'ー'
-
-    if (plant.logs[0]) {
-      log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgo(plant.logs[0])}`
-    }
-    if (plant.logs[1]) {
-      log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgo(plant.logs[1])}`
-    }
+    if (plant.logs[0]) log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgoHtml(plant.logs[0])}`
+    if (plant.logs[1]) log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgoHtml(plant.logs[1])}`
 
     const imageHtml = plant.image 
       ? `<img src="${plant.image}" class="w-full h-48 object-cover rounded-lg mb-3 cursor-pointer hover:opacity-90 shadow-sm" onclick="openCamera('${plant.id}')">`
@@ -131,9 +151,10 @@ const render = () => {
          </div>`
 
     const card = document.createElement('div')
-    card.className = 'bg-white p-4 rounded-xl shadow border border-gray-100'
+    card.className = cardClass
     
     card.innerHTML = `
+      ${alertBadge}
       <div class="flex justify-between items-center mb-3">
         <h2 class="text-xl font-bold text-gray-700">${plant.id}</h2>
         <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
@@ -141,7 +162,7 @@ const render = () => {
       
       ${imageHtml}
       
-      <div class="bg-gray-50 p-3 rounded-lg mb-4 text-sm">
+      <div class="bg-white/50 p-3 rounded-lg mb-4 text-sm">
         <div class="flex justify-between mb-1 items-center">
           <span class="font-bold text-gray-500 w-12">前回</span> 
           <span class="flex-1 text-right">${log1Html}</span>
