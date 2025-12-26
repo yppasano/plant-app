@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSR - 企業の社会的責任</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .glow-effect {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 40px rgba(59, 130, 246, 0.2);
+    }
+    
+    .icon-glow-green {
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.4), 0 0 40px rgba(16, 185, 129, 0.2);
+    }
+    
+    .icon-glow-amber {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), 0 0 40px rgba(245, 158, 11, 0.2);
+    }
+    
+    .icon-glow-purple {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .float-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    .pulse-glow {
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    
+    .stat-number {
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    
+    .hero-title {
+      text-shadow: 0 0 40px rgba(255, 255, 255, 0.3);
+    }
+    
+    .nav-link {
+      position: relative;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after {
+      width: 100%;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+    }
+    
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- CSR First View -->
+  <div class="flex flex-col w-full max-w-[1200px] mx-auto relative z-10">
+    
+    <!-- Header -->
+    <header class="glass flex flex-row justify-between items-center w-full px-12 py-4 mt-6 rounded-2xl mx-4 sticky top-4 z-50">
+      <!-- Logo Area -->
+      <div class="flex flex-row items-center gap-3">
+        <div class="flex flex-col justify-center items-center w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl glow-effect pulse-glow">
+          <span class="text-white font-bold text-lg leading-tight">C</span>
+        </div>
+        <span class="text-white font-bold text-xl leading-tight">Company</span>
+      </div>
+      
+      <!-- Menu Items -->
+      <nav class="flex flex-row items-center gap-8">
+        <a href="#" class="nav-link text-gray-300 font-medium text-sm leading-tight hover:text-white transition-colors">サービス</a>
+        <a href="#" class="nav-link text-gray-300 font-medium text-sm leading-tight hover:text-white transition-colors">会社情報</a>
+        <a href="#" class="nav-link text-blue-400 font-semibold text-sm leading-tight">CSR</a>
+        <a href="#" class="nav-link text-gray-300 font-medium text-sm leading-tight hover:text-white transition-colors">採用情報</a>
+        <a href="#" class="nav-link text-gray-300 font-medium text-sm leading-tight hover:text-white transition-colors">お問い合わせ</a>
+      </nav>
+      
+      <!-- CTA Button -->
+      <button class="btn-primary flex flex-row justify-center items-center px-6 h-10 rounded-xl">
+        <span class="text-white font-semibold text-sm leading-tight">資料請求</span>
+      </button>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="flex flex-col justify-center items-center w-full gap-10 py-32 px-12 my-12 relative">
+      <div class="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-emerald-600/20 rounded-3xl blur-3xl float-animation"></div>
+      <div class="flex flex-col items-center gap-8 w-full max-w-[900px] relative z-10">
+        <div class="inline-block px-4 py-2 glass rounded-full mb-4">
+          <span class="text-blue-400 text-sm font-semibold">Sustainability First</span>
+        </div>
+        <h1 class="hero-title text-white font-black text-5xl md:text-6xl leading-tight text-center gradient-text">
+          持続可能な未来のために
+        </h1>
+        <p class="text-gray-300 font-normal text-lg md:text-xl leading-relaxed text-center max-w-[700px]">
+          私たちは事業を通じて社会課題の解決に取り組み、<br class="hidden md:block">
+          次世代により良い地球を残すことを使命としています。
+        </p>
+        
+        <!-- Hero Buttons -->
+        <div class="flex flex-row items-center gap-4 mt-4">
+          <button class="btn-primary flex flex-row justify-center items-center px-8 h-14 rounded-xl">
+            <span class="text-white font-semibold text-base leading-tight">CSRの取り組みを見る</span>
+          </button>
+          <button class="btn-secondary flex flex-row justify-center items-center px-8 h-14 rounded-xl">
+            <span class="text-white font-semibold text-base leading-tight">サステナビリティレポート</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CSR Overview -->
+    <section class="flex flex-col w-full gap-16 py-24 px-12 mb-12">
+      <!-- Section Header -->
+      <div class="flex flex-col items-center w-full gap-6">
+        <div class="inline-block px-4 py-2 glass rounded-full">
+          <span class="text-purple-400 text-sm font-semibold">Our Commitment</span>
+        </div>
+        <h2 class="text-white font-black text-4xl md:text-5xl leading-tight text-center gradient-text">
+          私たちのCSR活動
+        </h2>
+        <p class="text-gray-400 font-normal text-lg leading-relaxed text-center max-w-[700px]">
+          環境保護、社会貢献、ガバナンス強化を通じて、持続可能な社会の実現に貢献しています。
+        </p>
+      </div>
+      
+      <!-- CSR Cards -->
+      <div class="flex flex-row w-full gap-6 flex-wrap justify-center">
+        
+        <!-- Environment Card -->
+        <div class="glass-card flex flex-col gap-6 p-8 w-full max-w-[380px] rounded-2xl group">
+          <!-- Icon Container -->
+          <div class="flex flex-col justify-center items-center w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl icon-glow-green pulse-glow">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+              <path d="M5.3 2.67L28 2.67L28 26.67" stroke="white" stroke-width="2.67" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2.67 16L14.67 16" stroke="white" stroke-width="2.67" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h3 class="text-white font-bold text-2xl leading-tight">
+            環境への取り組み
+          </h3>
+          <p class="text-gray-300 font-normal text-base leading-relaxed">
+            CO2削減目標の設定、再生可能エネルギーの導入、廃棄物削減など、環境負荷を最小限に抑える取り組みを推進しています。
+          </p>
+          
+          <!-- Stats -->
+          <div class="flex flex-col w-full gap-3 pt-4 border-t border-white/10">
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">CO2削減率</span>
+              <span class="text-green-400 font-black text-2xl leading-tight stat-number">35%</span>
+            </div>
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">再生可能エネルギー</span>
+              <span class="text-green-400 font-black text-2xl leading-tight stat-number">80%</span>
+            </div>
+          </div>
+          
+          <!-- Learn More -->
+          <a href="#" class="flex flex-row items-center w-full gap-2 group/link mt-2">
+            <span class="text-green-400 font-semibold text-base leading-tight group-hover/link:underline">詳細を見る</span>
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover/link:translate-x-1 transition-transform">
+              <path d="M3.33 8L12.67 8" stroke="#34d399" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 3.33L12.67 8L8 12.67" stroke="#34d399" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Social Card -->
+        <div class="glass-card flex flex-col gap-6 p-8 w-full max-w-[380px] rounded-2xl group">
+          <!-- Icon Container -->
+          <div class="flex flex-col justify-center items-center w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl icon-glow-amber pulse-glow" style="animation-delay: 0.5s;">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+              <path d="M2.67 4L26.67 4L26.67 28" stroke="white" stroke-width="2.67" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h3 class="text-white font-bold text-2xl leading-tight">
+            社会貢献活動
+          </h3>
+          <p class="text-gray-300 font-normal text-base leading-relaxed">
+            教育支援、地域コミュニティとの連携、ダイバーシティ&インクルージョン推進など、社会の発展に貢献する活動を行っています。
+          </p>
+          
+          <!-- Stats -->
+          <div class="flex flex-col w-full gap-3 pt-4 border-t border-white/10">
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">教育支援プログラム</span>
+              <span class="text-amber-400 font-black text-2xl leading-tight stat-number">12件</span>
+            </div>
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">地域プロジェクト</span>
+              <span class="text-amber-400 font-black text-2xl leading-tight stat-number">28件</span>
+            </div>
+          </div>
+          
+          <!-- Learn More -->
+          <a href="#" class="flex flex-row items-center w-full gap-2 group/link mt-2">
+            <span class="text-amber-400 font-semibold text-base leading-tight group-hover/link:underline">詳細を見る</span>
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover/link:translate-x-1 transition-transform">
+              <path d="M3.33 8L12.67 8" stroke="#fbbf24" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 3.33L12.67 8L8 12.67" stroke="#fbbf24" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Governance Card -->
+        <div class="glass-card flex flex-col gap-6 p-8 w-full max-w-[380px] rounded-2xl group">
+          <!-- Icon Container -->
+          <div class="flex flex-col justify-center items-center w-20 h-20 bg-gradient-to-br from-purple-500 to-violet-600 rounded-2xl icon-glow-purple pulse-glow" style="animation-delay: 1s;">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-white">
+              <path d="M5.33 2.67L21.33 2.67L21.33 29.33" stroke="white" stroke-width="2.67" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          
+          <h3 class="text-white font-bold text-2xl leading-tight">
+            ガバナンス強化
+          </h3>
+          <p class="text-gray-300 font-normal text-base leading-relaxed">
+            透明性のある企業経営、コンプライアンス体制の強化、ステークホルダーとの対話を通じて、信頼される企業を目指しています。
+          </p>
+          
+          <!-- Stats -->
+          <div class="flex flex-col w-full gap-3 pt-4 border-t border-white/10">
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">コンプライアンス研修</span>
+              <span class="text-purple-400 font-black text-2xl leading-tight stat-number">100%</span>
+            </div>
+            <div class="flex flex-row justify-between items-center w-full">
+              <span class="text-gray-400 font-medium text-sm leading-tight">役員の多様性</span>
+              <span class="text-purple-400 font-black text-2xl leading-tight stat-number">40%</span>
+            </div>
+          </div>
+          
+          <!-- Learn More -->
+          <a href="#" class="flex flex-row items-center w-full gap-2 group/link mt-2">
+            <span class="text-purple-400 font-semibold text-base leading-tight group-hover/link:underline">詳細を見る</span>
+            <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="group-hover/link:translate-x-1 transition-transform">
+              <path d="M3.33 8L12.67 8" stroke="#a78bfa" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 3.33L12.67 8L8 12.67" stroke="#a78bfa" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</body>
+
+</html>
+
+
+

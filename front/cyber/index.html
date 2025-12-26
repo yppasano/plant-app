@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      font-size: 100%;
+      font-weight: normal;
+      vertical-align: baseline;
+      background: transparent;
+      overflow: hidden;
+      scrollbar-gutter: stable;
+      width: 100%;
+      height: 100%;
+    }
+
+    #galapon-wrapper {
+      background-color: black;
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #galapon-container {
+      background-color: black;
+      aspect-ratio: 1;
+      position: relative;
+      width: 90%;
+      max-width: 700px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      isolation: isolate;
+    }
+
+    @media screen and (max-width: 480px) {
+      #galapon-container {
+        top: 44%;
+        width: 99%;
+      }
+    }
+
+    #galapon-container .g-inner {
+      position: absolute;
+      width: 100%;
+      top: 0;
+      left: 0;
+    }
+
+    #galapon-container .g-inner.u-z-02 {
+      z-index: 2;
+    }
+
+    #galapon-container .g-inner.u-z-04 {
+      z-index: 4;
+    }
+
+    #galapon-container .g-inner.u-z-06 {
+      z-index: 6;
+    }
+
+    #galapon-container .g-inner.u-z-08 {
+      z-index: 8;
+    }
+
+    #galapon-container .g-inner.c-handle,
+    #galapon-container .g-inner.c-gear {
+      left: 18%;
+      top: 18%;
+      width: 52%;
+    }
+
+    #galapon-container .g-inner.c-frame {
+      left: 24%;
+      top: 28%;
+      width: 40%;
+    }
+
+    #galapon-container .g-inner.c-base {
+      top: 66%;
+      height: auto;
+      max-height: min-content;
+    }
+
+    #galapon-container .g-inner.c-spinit {
+      left: 9%;
+      top: 9%;
+      width: 18%;
+    }
+
+    #galapon-container .g-inner svg {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      overflow: visible;
+    }
+
+    #galapon-container .g-inner svg.u-wheel,
+    #galapon-container .g-inner svg.u-wheel-sub {
+      cursor: grab;
+    }
+
+    #galapon-container .logoShape-handle-01 {
+      filter: drop-shadow(#55d6ff 0 0 0.3em);
+    }
+
+    #galapon-container .logoShape-handle-02 {
+      filter: drop-shadow(#ff43c2 0 0 0.3em);
+    }
+
+    #ball {
+      width: 5%;
+      height: 5%;
+      border-radius: 50%;
+      background-color: #86faff;
+      filter: drop-shadow(#55d6ff 0 0 0.3em);
+      position: absolute;
+      bottom: 25%;
+      right: 28%;
+      opacity: 0;
+      z-index: 10;
+    }
+
+    #ball.u-1st-prize {
+      background-color: #ff5751;
+      filter: drop-shadow(#ec4842 0 0 0.3em);
+    }
+    #ball.u-2nd-prize {
+      background-color: #ee6aff;
+      filter: drop-shadow(#d042ec 0 0 0.3em);
+    }
+    #ball.u-3rd-prize {
+      background-color: #f7ff85;
+      filter: drop-shadow(#dbec42 0 0 0.3em);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="galapon-wrapper">
+    <div id="galapon-container">
+      <div class="g-inner c-bg u-z-02">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+          <defs>
+            <linearGradient id="cyberGradient-bg" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#db0043" />
+              <stop offset="100%" stop-color="#002FFF" />
+            </linearGradient>
+            <filter id="cyberShadow-bg" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="80" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-bg" viewBox="0 0 500 500">
+              <path
+                d="M448.43,380h-178.43l-5.02-40.14c48.5-18.21,83.02-65,83.02-119.86,0-70.69-57.31-128-128-128s-128,57.31-128,128c0,54.86,34.52,101.65,83.02,119.86l-5.02,40.14H51.57c-.87,0-1.57.7-1.57,1.57v26.86c0,.87.7,1.57,1.57,1.57h396.86c.87,0,1.57-.7,1.57-1.57v-26.86c0-.87-.7-1.57-1.57-1.57ZM200,380l4.12-32.98c5.2.64,10.5.98,15.88.98s10.67-.34,15.88-.98l4.12,32.98h-40Z" />
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-bg)" opacity="1">
+            <use href="#logoShape-bg" fill="url(#cyberGradient-bg)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-bg" fill="black" />
+          </g>
+        </svg>
+      </div>
+      <div class="g-inner c-base u-z-08">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 130" width="500" height="130">
+          <defs>
+            <linearGradient id="cyberGradient-base" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#ffcde3" />
+              <stop offset="40%" stop-color="#ff43c2" />
+              <stop offset="70%" stop-color="#55d6ff" />
+              <stop offset="100%" stop-color="#86faff" />
+            </linearGradient>
+            <filter id="cyberShadow-base" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-base" viewBox="0 0 500 130">
+              <rect x="50" y="50" width="400" height="30" rx="1.57" ry="1.57" />
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-base)" opacity="0.3">
+            <use href="#logoShape-base" fill="url(#cyberGradient-base)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-base" fill="black" stroke="url(#cyberGradient-base)" stroke-width="2" />
+          </g>
+        </svg>
+      </div>
+      <div class="g-inner c-frame u-z-06">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 290" width="200" height="290">
+          <defs>
+            <linearGradient id="cyberGradient-frame" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#ff43c2" />
+              <stop offset="100%" stop-color="#55d6ff" />
+            </linearGradient>
+            <filter id="cyberShadow-frame" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-frame" viewBox="0 0 200 290">
+              <path d="M130,80s-2.39-30-30-30-30,30-30,30l-20,160h30l8-64s.96-12,12-12,12,12,12,12l8,64h30l-20-160Z" />
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-frame)" opacity="0.4">
+            <use href="#logoShape-frame" fill="url(#cyberGradient-frame)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-frame" fill="balck" stroke="url(#cyberGradient-frame)" stroke-width="2" />
+          </g>
+        </svg>
+      </div>
+      <div class="g-inner c-gear u-z-04">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="260" height="260" class="u-wheel">
+          <defs>
+            <linearGradient id="cyberGradient-gear" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#ffcde3" />
+              <stop offset="40%" stop-color="#ff43c2" />
+              <stop offset="70%" stop-color="#55d6ff" />
+              <stop offset="100%" stop-color="#86faff" />
+            </linearGradient>
+            <filter id="cyberShadow-gear" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-gear" viewBox="0 0 260 260">
+              <path stroke="#86faff"
+                d="M208.78,234.23l25.46-25.46,6.79,6.79c.94.94.94,2.46,0,3.39l-22.06,22.06c-.94.94-2.46.94-3.39,0l-6.79-6.79Z" />
+              <path
+                d="M183.01,0h-106.01c-.54,0-1.06.21-1.44.59L.59,75.56c-.38.38-.59.9-.59,1.44v106.01c0,.54.21,1.06.59,1.44l74.96,74.96c.38.38.9.59,1.44.59h106.01c.54,0,1.06-.21,1.44-.59l74.96-74.96c.38-.38.59-.9.59-1.44v-106.01c0-.54-.21-1.06-.59-1.44L184.44.59c-.38-.38-.9-.59-1.44-.59Z" />
+              <path
+                d="M178.52,11h-97.04c-.49,0-.97.2-1.31.54L11.54,80.16c-.35.35-.54.82-.54,1.31v97.04c0,.49.2.97.54,1.31l68.62,68.62c.35.35.82.54,1.31.54h97.04c.49,0,.97-.2,1.31-.54l68.62-68.62c.35-.35.54-.82.54-1.31v-97.04c0-.49-.2-.97-.54-1.31L179.84,11.54c-.35-.35-.82-.54-1.31-.54Z" />
+              <circle cx="130" cy="130" r="64" />
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-gear)" opacity="0.3">
+            <use href="#logoShape-gear" fill="url(#cyberGradient-gear)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-gear" fill="black" stroke="url(#cyberGradient-gear)" stroke-width="2" />
+          </g>
+        </svg>
+      </div>
+      <div class="g-inner c-handle u-z-08">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="260" height="260" class="u-wheel-sub">
+          <defs>
+            <linearGradient id="cyberGradient-handle" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#ffcde3" />
+              <stop offset="40%" stop-color="#ff43c2" />
+              <stop offset="70%" stop-color="#55d6ff" />
+              <stop offset="100%" stop-color="#86faff" />
+            </linearGradient>
+            <filter id="cyberShadow-handle" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-handle" viewBox="0 0 260 260">
+              <path
+                d="M149,130c0-10.49-8.51-19-19-19-10.49,0-19,8.51-19,19,0,.65.03,1.3.1,1.93l-64.54,64.54c-4.69,4.69-4.69,12.28,0,16.97,4.69,4.69,12.28,4.69,16.97,0l64.54-64.54c.64.06,1.28.1,1.93.1,10.49,0,19-8.51,19-19Z" />
+              <circle class="logoShape-handle-01" cx="130" cy="130" r="10" stroke="#86faff" fill="none" />
+              <circle class="logoShape-handle-02" cx="55.32" cy="204.76" stroke="#ffcde3" fill="none" r="4.5" />
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-handle)" opacity="0.4">
+            <use href="#logoShape-handle" fill="url(#cyberGradient-handle)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-handle" fill="black" stroke="url(#cyberGradient-handle)" stroke-width="2" />
+          </g>
+        </svg>
+      </div>
+      <div class="g-inner c-spinit u-z-02">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+          <defs>
+            <linearGradient id="cyberGradient-spinit" x1="0%" y1="0%" x2="100%" y2="0%"
+              gradientTransform="rotate(-10 0.5 0.5)">
+              <stop offset="0%" stop-color="#ffcde3" />
+              <stop offset="40%" stop-color="#ff43c2" />
+              <stop offset="70%" stop-color="#55d6ff" />
+              <stop offset="100%" stop-color="#86faff" />
+            </linearGradient>
+            <filter id="cyberShadow-spinit" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+              <feOffset in="blur" dx="0" dy="0" result="offsetBlur" />
+              <feMerge>
+                <feMergeNode in="offsetBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <symbol id="logoShape-spinit" viewBox="0 0 80 80">
+              <g stroke="none" fill="white">
+                <path d="M8.4,14.48l.39-4.45h10.07l-.19,2.15h-3.11l.12-1.26h-3.86l-.24,2.66h6.97l-.45,5.08h-10.1l.09-.9h6.98l.3-3.29h-6.97Z"/>
+                <path d="M19.8,18.67l.03-.22.42-4.86h10.1l-.45,5.08h-7l-.18,2.08h-3.11l.18-2.08ZM27.17,14.48h-3.89l-.3,3.29h3.89l.3-3.29Z"/>
+                <path d="M31.86,18.67l.43-5.08h3.11l-.43,5.08h-3.11ZM32.48,11.43l.12-1.43h3.11l-.12,1.43h-3.11Z"/>
+                <path d="M36.58,18.67l.45-5.08h10.1l-.45,5.08h-3.11l.37-4.19h-3.89l-.37,4.19h-3.11Z"/>
+                <path d="M53.39,18.67l.43-5.08h3.11l-.43,5.08h-3.11ZM54,11.43l.12-1.43h3.11l-.12,1.43h-3.11Z"/>
+                <path d="M58.46,14.48l.09-.9h.7l.19-2.26h3.11l-.19,2.26h1.73l-.07.9h-1.73l-.28,3.29h1.73l-.07.9h-4.84l.36-4.19h-.72Z"/>
+                <path d="M66.34,18.67l.1-1.12h2.9l-.1,1.12h-2.9ZM66.73,16.67l.37-6.64h2.9l-.85,6.64h-2.42Z"/>
+              </g>
+              <path stroke="none" fill="url(#cyberGradient-spinit)" d="M52,31h-22.61s2.94,5.1,2.94,5.1c-14.8,11.3-13.62,27.08-10.01,34.43-2.44-13.75,10.28-23.1,14.88-25.99l3.49,6.04,11.31-19.58Z"/>
+            </symbol>
+          </defs>
+          <g filter="url(#cyberShadow-spinit)" opacity="0.8">
+            <use href="#logoShape-spinit" fill="url(#cyberGradient-spinit)" stroke="none" />
+          </g>
+          <g>
+            <use href="#logoShape-spinit" fill="black" stroke="url(#cyberGradient-spinit)" stroke-width="2" />
+          </g>
+        </svg>
+      </div>
+      <div id="ball" class="u-2nd-prize"></div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      gsap.registerPlugin(Draggable);
+      const wheel = document.querySelector(".u-wheel");
+      const subWheel = document.querySelector(".u-wheel-sub");
+      const ball = document.getElementById("ball");
+
+      let totalRotation = 0;
+      const targetRotation = 360 * 2.5; // 🎯 2.5回転（900°）
+      let lastRotation = 0;
+
+      // 🎯 玉排出アニメーション（重みのある3段バウンド）
+      function ejectBall() {
+        // ✅ バイブレーション（対応端末のみ）
+        if (navigator.vibrate) {
+          navigator.vibrate(120); // 中〜強めの1発振動
+        }
+        if (window.navigator?.webkit?.vibrate) {
+          window.navigator.webkit.vibrate(); // 短く “コツッ”
+        }
+        // 初期設定
+        gsap.set(ball, { x: 0, y: 0, rotation: 0, opacity: 0, scale: 1 });
+
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+        // 1. 小さく跳ね上がり（初期回転）
+        tl.to(ball, { y: -25, x: 5, duration: 0.15, opacity: 1, ease: "power2.out", rotation: 90 }) // 90度回転
+
+          // 2. 1回目のバウンド（勢いよく回転させる）
+          .to(ball, { y: 2, x: 10, rotation: 270, ease: "power4.in", duration: 0.2 }) // 180度追加 (90+180=270)
+          .to(ball, { y: -10, x: 15, scale: 0.98, duration: 0.1, ease: "power2.out", rotation: 360 }) // 90度追加 (270+90=360: ちょうど1周)
+
+          // 3. 2回目のバウンド（まだ勢いを保つ）
+          .to(ball, { y: 1, x: 25, rotation: 500, ease: "power4.in", duration: 0.15 }) // 140度追加 (360+140=500)
+          .to(ball, { y: -5, x: 30, scale: 0.96, duration: 0.08, ease: "power2.out", rotation: 550 }) // 50度追加
+
+          // 4. 3回目のバウンド（回転を緩め始める）
+          .to(ball, { y: 0, x: 40, rotation: 580, ease: "power4.in", duration: 0.12 }) // 30度追加
+
+          // 5. 最終的な移動とわずかな転がり（回転の勢いを大きく落とす）
+          .to(ball, { y: 0, x: 50, rotation: 600, ease: "power1.out", duration: 0.5 }) // 長い時間で20度しか回転させない
+
+          // 6. フェードアウト
+          .to(ball, { opacity: 0, duration: 0.6 }, "+=0.6");
+      }
+
+      // 🎡 メイン・サブ共通のドラッグ処理（どちらを回しても両方が同期）
+      let draggables;
+
+      draggables = Draggable.create([wheel, subWheel], {
+        type: "rotation",
+        inertia: false,
+        onPress: function () {
+          // 押した瞬間の角度を基準として記録
+          lastRotation = this.rotation;
+        },
+        onDrag: function () {
+          const current = this.rotation;
+          let delta = current - lastRotation;
+
+          // 回転方向を補正（180度以上のジャンプを防止）
+          if (delta > 180) delta -= 360;
+          if (delta < -180) delta += 360;
+
+          // どちらをドラッグしていても共通の合計回転量として加算
+          totalRotation += delta;
+          lastRotation = current;
+
+          // 相方ホイールにも角度を同期
+          const other = this.target === wheel ? subWheel : wheel;
+          gsap.set(other, { rotation: current });
+
+          // 🎯 2.5回転（900°）達成
+          if (Math.abs(totalRotation) >= targetRotation) {
+            // 両方のドラッグを一時停止
+            draggables.forEach(d => d.disable());
+
+            // いまの角度を元に最寄りの 360° 単位へスナップ
+            const finalRotation = Math.round(current / 360) * 360;
+
+            // メインとサブ両方をピタッと止める
+            gsap.to([wheel, subWheel], {
+              rotation: finalRotation,
+              duration: 1.0,
+              ease: "power2.out",
+              onComplete: () => {
+                ejectBall(); // 玉排出！
+                totalRotation = 0;
+                lastRotation = 0;
+
+                // 少し待ってから再び両方を操作可能に
+                setTimeout(() => {
+                  draggables.forEach(d => d.enable());
+                }, 1500);
+              }
+            });
+          }
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>

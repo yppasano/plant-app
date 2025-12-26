@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      font-size: 100%;
+      font-weight: normal;
+      vertical-align: baseline;
+      background: transparent;
+      overflow: hidden;
+      scrollbar-gutter: stable;
+      width: 100%;
+      height: 100%;
+    }
+
+/*:::::::::::::::
+base
+:::::::::::::::*/
+/* frame */
+.main {
+  padding-top: 50px;
+}
+@media (min-width: 768px) {
+  .main {
+    padding-top: 0;
+  }
+}
+.containere {
+  width: 92%;
+  margin-inline: auto;
+  max-width: 1080px;
+}
+.p-product,
+.p-project,
+.p-movie,
+.contact,
+#footer {
+  padding: 0;
+  padding-block: clamp(70px, 9.2vw, 90px);
+  text-align: center;
+}
+/* テキスト */
+@media (max-width: 480px) {
+  .c-left-sp {
+    text-align: left;
+  }
+  .u-hidden-sp {
+    display: none;
+  }
+}
+@media (min-width: 480px) {
+  .u-hidden-pc {
+    display: none;
+  }
+}
+/* 余白付与 */
+.u-mt-sss {
+  margin-top: clamp(5px, 9.2vw, 10px);
+}
+.u-mt-ss {
+  margin-top: clamp(10px, 9.2vw, 15px);
+}
+.u-mt-s {
+  margin-top: clamp(20px, 9.2vw, 30px);
+}
+.u-mt-m {
+  margin-top: clamp(30px, 9.2vw, 40px);
+}
+.u-mt-l {
+  margin-top: clamp(40px, 9.2vw, 50px);
+}
+.u-mt-xl {
+  margin-top: clamp(50px, 9.2vw, 60px);
+}
+/* img */
+.p-product .c-title img,
+.p-project .c-title img,
+.p-movie .c-title img {
+  width: 100%;
+  display: block;
+  margin-inline: auto;
+  max-height: 42px;
+}
+img.c-base {
+  width: 100%;
+  display: block;
+  margin-inline: auto;
+}
+img.c-base.u-h-16 {
+  max-height: 16px;
+}
+img.c-base.u-h-42 {
+  max-height: 42px;
+}
+img.c-base.u-h-66 {
+  max-height: 66px;
+}
+img.c-base.u-h-90 {
+  max-height: 90px;
+}
+img.c-base.u-w-340 {
+  max-width: 340px;
+}
+img.c-base.u-w-480 {
+  max-width: 480px;
+}
+img.c-base.u-w-540 {
+  max-width: 540px;
+}
+img.c-base.u-w-640 {
+  max-width: 640px;
+}
+/* ボタン */
+.c-button {
+  display: inline-block;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-inline: auto;
+  transition: all .3s;
+  cursor: pointer;
+  line-height: 0;
+}
+.c-button:hover {
+  transform: scale(1.1, 1.1);
+  opacity: 1;
+}
+/* 影付与 */
+.u-shadow {
+  filter: drop-shadow(6px 6px 6px rgba(0, 0, 0, 0.4));
+}
+
+/*:::::::::::::::
+ページナビ
+:::::::::::::::*/
+.p-bdnavi {
+  background-color: black;
+  color: white;
+  padding: 0;
+  padding-block: clamp(50px, 9.2vw, 70px);
+  text-align: center;
+  width: 100%;
+}
+.p-bdnavi-card {
+  align-items: center;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 662px) {
+  .p-bdnavi-card {
+    width: 90%;
+    margin-inline: auto;
+  }
+  .p-bdnavi-card-list:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    width: calc(50% - 10px);
+    margin-inline: auto;
+  }
+}
+@media (min-width: 662px) {
+  .p-bdnavi-card {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+/*:::::::::::::::
+メイン画像
+:::::::::::::::*/
+.p-main {
+  background-color: black;
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+@media (min-width: 992px) {
+  .p-main {
+    aspect-ratio: inherit;
+    max-height: 620px;
+  }
+}
+/* タイトル画像 */
+.p-main-img {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 960px;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-inline: auto;
+}
+
+.p-main-img .u-bg {
+  width: 120%;
+  height: 120%;
+  object-fit: cover;
+  object-position: center;
+}
+@media (min-width: 992px) {
+  .p-main-img .u-bg {
+  width: 100%;
+  height: 100%;
+}
+}
+.p-main-img .u-blackthunder {
+  position: absolute;
+  bottom:5%;
+  right: 5%;
+  width: 25%;
+}
+@media (min-width: 992px) {
+  .p-main-img .u-blackthunder {
+    bottom:15%;
+    right: 0;
+  }
+}
+.p-main-img .u-copy {
+  position: absolute;
+  top:5%;
+  left: 5%;
+  width: 30%;
+}
+@media (min-width: 992px) {
+  .p-main-img .u-copy {
+  left: 0;
+}
+}
+.p-main-img .u-item {
+  position: absolute;
+  top:48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45%;
+  max-width: 430px;
+}
+@media (max-width: 662px) {
+.p-main-img img.u-item {
+  top: 49%;
+  left: 53%;
+  width: 58%;
+}
+}
+/* スクロール */
+.p-main-scroll {
+  position: absolute;
+  z-index: 100;
+  right: 20px;
+  bottom: 140px;
+}
+@media (max-width: 480px) {
+  .p-main-scroll {
+    display: none;
+  }
+}
+.p-main-scroll-inner {
+  position: relative;
+}
+.p-main-scroll-inner::before {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 26px;
+  width: 1px;
+  height: 100px;
+  margin: auto;
+  background: #B2B2B2;
+}
+.p-main-scroll-inner::after {
+  border-radius: 100%;
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 20px;
+  width: 7px;
+  height: 7px;
+  margin-left: -4px;
+  background-color: #E41B24;
+  -webkit-animation: sdb 2s infinite;
+  animation: sdb 2s infinite;
+}
+/*:::::::::::::::
+BACKDOOR PROJECT とは
+:::::::::::::::*/
+.p-bdabout {
+  background-color: #282828;
+  color: white;
+  padding: 0;
+  padding-block: 50px;
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .p-bdabout {
+    padding-block: 40px;
+  }
+}
+.p-bdabout-group {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+@media (max-width: 768px) {
+  .p-bdabout-group {
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 768px) {
+  .p-bdabout-group-txt {
+    width: 100%;
+  }
+}
+.p-bdabout-group-txt h2 {
+  font-family: 'Castoro', serif;
+  font-size: clamp(1.75rem, 0.813rem + 2.08vw, 2.375rem);
+  display: flex;
+  gap: 0 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+.p-bdabout-group-txt h2 .small {
+  font-size: clamp(1.125rem, 0.188rem + 2.08vw, 1.75rem);
+}
+@media (min-width: 780px) {
+  .p-bdabout-group-txt h2 .big {
+    font-size: clamp(2.375rem, 1.438rem + 2.08vw, 3rem);
+  }
+}
+.p-bdabout-group-txt p {
+  font-size: clamp(1rem, 0.813rem + 0.42vw, 1.125rem);
+}
+.p-bdabout-group-btn {
+  margin-left: auto;
+}
+@media (max-width: 768px) {
+  .p-bdabout-group-btn {
+    line-height: 1.8;
+  }
+}
+.p-bdabout-group-btn p a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 50px;
+  background: #666;
+  color: #FFF;
+}
+@media (max-width: 768px) {
+  .p-bdabout-group-btn {
+    width: 100%;
+  }
+  .p-bdabout-group-btn p {
+    margin-inline: auto;
+    text-align: center;
+  }
+  .p-bdabout-group-btn p a {
+    width: 50%;
+    margin: auto;
+    letter-spacing: 1px;
+  }
+}
+/*:::::::::::::::
+outline
+:::::::::::::::*/
+.p-outline {
+  color: white;
+  text-align: center;
+  position: relative;
+  width: 100%;
+}
+/* txt */
+.p-outline p {
+  line-height: 2;
+}
+/* オーバーレイ画像 */
+.p-outline-overlay img {
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+@media (min-width: 992px) {
+  .p-outline .p-outline-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .p-outline-overlay img {
+    height: 100%;
+  }
+}
+/* コンテンツ */
+.p-outline .p-outline-img img {
+  max-width: clamp(180px, -73.6px + 33.02vw, 250px);
+}
+@media (max-width: 992px) {
+  .p-outline-overlay img {
+    aspect-ratio: 16 / 9;
+  }
+}
+@media (max-width: 662px) {
+  .p-outline-overlay img {
+    aspect-ratio: 15 / 9;
+  }
+}
+@media (min-width: 992px) {
+  .p-outline .containere {
+    position: relative;
+    z-index: 100;
+    padding-block: clamp(1.875rem, -4.721rem + 10.64vw, 3.125rem);
+    text-align: left;
+    aspect-ratio: 16 / 9;
+  }
+  .p-outline .p-outline-txt {
+    position: absolute;
+    right: 0;
+    bottom: clamp(1.875rem, -1.423rem + 5.32vw, 2.5rem);
+  }
+  .p-outline .p-outline-img img {
+    margin-inline: inherit;
+  }
+}
+@media (max-width: 992px) {
+  .p-outline .p-outline-img,
+  .p-outline .p-outline-txt {
+    margin-top: clamp(30px, 9.2vw, 40px);
+  }
+}
+/*:::::::::::::::
+product
+:::::::::::::::*/
+.p-product {
+  color: white;
+}
+/* txt */
+.p-product .c-title-item {
+  font-size: clamp(1.25rem, 0.393rem + 1.79vw, 1.5rem);
+  line-height: 1.6;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+.p-product strong {
+  display: block;
+}
+/* スライド */
+.p-product .p-product-slide {
+  max-width: 540px;
+  margin-inline: auto;
+}
+.p-product .p-product-slide .thumbnail-img {
+  opacity: .5;
+  transition: opacity .3s linear;
+  cursor: pointer;
+}
+.p-product .p-product-slide .thumbnail-img.slick-current {
+  opacity: 1;
+}
+.p-product .p-product-slide .slider-dt-thumbnail .slick-track {
+  display: flex;
+  gap: 20px;
+  width: 100% !important;
+  margin-top: 20px;
+}
+@media (max-width: 768px) {
+.p-product .p-product-slide .slider-dt-thumbnail .slick-track {
+  gap: 10px;
+  margin-top: 10px;
+}
+}
+.p-product .p-product-slide .slider-dt-thumbnail .slick-track:before,
+.p-product .p-product-slide .slider-dt-thumbnail .slick-track:after {
+  content: none;
+}
+.p-product .p-product-slide .slider-dt-thumbnail .slick-track .thumbnail-img {
+  width: 100% !important;
+  float: none;
+}
+/*:::::::::::::::
+project
+:::::::::::::::*/
+.p-project {
+  background-color: #ffe300;
+  color: black;
+}
+/* txt */
+.p-project .c-cacthcopy {
+  font-size: clamp(1.625rem, -0.518rem + 4.46vw, 2.25rem);
+  line-height: 1.3;
+  text-align: center;
+  font-weight: 900;
+}
+/* ボタン */
+.p-project .c-button img {
+  display: block;
+  max-height: 66px;
+  height: auto;
+}
+/*:::::::::::::::
+movie
+:::::::::::::::*/
+.p-movie {
+  color: white;
+}
+.p-movie .p-movie-group {
+  display: grid;
+  gap: 30px;
+  margin-inline: auto;
+  grid-template-columns: 1fr;
+  max-width: 480px;
+}
+@media (min-width: 992px) {
+  .p-movie .p-movie-group:has(> :nth-child(2)) {
+    grid-template-columns: 1fr 1fr;
+    max-width: inherit;
+  }
+}
+.p-movie-group-list {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+.p-movie-group-list iframe {
+  width: 100%;
+  height: 100%;
+}
+/*:::::::::::::::
+contact
+:::::::::::::::*/
+.containere {
+  width: 92%;
+  margin-inline: auto;
+  max-width: 1080px;
+}
+.contact_inner .c-title {
+  font-family: "游明朝", "ヒラギノ明朝 ProN W6", "HiraMinProN-W6", "HG明朝E", "ＭＳ Ｐ明朝", "MS PMincho", "MS 明朝", serif;
+  font-size: clamp(2.5rem, -1.786rem + 8.93vw, 3.75rem);
+  line-height: 1;
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+.contact_inner .c-title.u-title-white {
+  color: white;
+}
+.contact_inner .contact__send {
+  margin-bottom: 30px;
+}
+.contact_inner .grecaptcha-badge {
+  margin-inline: auto;
+}
+/*:::::::::::::::
+footer
+:::::::::::::::*/
+#footer .footer__logo {
+  margin-bottom: 40px;
+}
+/*:::::::::::::::
+keyframes
+:::::::::::::::*/
+@-webkit-keyframes sdb {
+  0% {
+    -webkit-transform: translate(0, 0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  80% {
+    -webkit-transform: translate(0, 100px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes sdb {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  80% {
+    transform: translate(0, 100px);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+/* =========================================
+     アニメーション設定：メイン短縮・追加10秒版
+========================================= */
+
+  /* --- 共通設定 --- */
+.color-y1 { fill: #ffe300; }
+.color-y2 { fill: #ffff00; }
+.bg-svg { overflow: visible; }
+  /* --- 1. 中央の吹き出し（ボヨヨン登場・静止） --- */
+  .burst-anim {
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity: 0;
+    animation: pop-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes pop-in {
+    0%   { opacity: 0; transform: scale(0); }
+    60%  { opacity: 1; transform: scale(1.1); } 
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+
+  /* --- 2. メインの雷（間隔をさらに短く！ 3〜5秒周期） --- */
+  .bolt-anim {
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity: 0;
+    
+    /* 基本周期を 4s に設定（結構頻繁に光ります） */
+    animation: 
+      bolt-entry-sharp 0.3s cubic-bezier(0.19, 1, 0.22, 1) forwards,
+      electric-loop-early 4s 0.3s infinite;
+  }
+  
+  /* ランダムにバラす（2.8秒〜5.2秒の範囲） */
+  .bolt-anim:nth-of-type(2n) { 
+    animation-duration: 0.3s, 3.5s; /* 3.5秒に1回 */
+    animation-delay: 0.05s, 0.35s; 
+  }
+  
+  .bolt-anim:nth-of-type(3n) { 
+    animation-duration: 0.3s, 5.2s; /* 5.2秒に1回 */
+    animation-delay: 0.1s, 0.4s; 
+  }
+  
+  .bolt-anim:nth-of-type(5n) { 
+    animation-duration: 0.3s, 2.8s; /* 2.8秒に1回（早い） */
+    animation-delay: 0s, 0.3s; 
+  }
+  .bolt-anim:nth-of-type(7n) { 
+    animation-duration: 0.3s, 8.0s; /* 8秒に1回（早い） */
+    animation-delay: 0s, 0.3s; 
+  }
+
+  /* エッジの効いた登場 */
+  @keyframes bolt-entry-sharp {
+    0%   { opacity: 0; transform: scale(0.4); } 
+    60%  { opacity: 1; transform: scale(1.2); } 
+    100% { opacity: 1; transform: scale(1); }   
+  }
+
+  /* ループアニメ：周期が短いので、光る区間を少し広めに確保 */
+  @keyframes electric-loop-early {
+    0%   { opacity: 1; transform: scale(1); filter: brightness(1); }
+    
+    /* 10%〜15% あたりで光る */
+    10%  { opacity: 0.3; transform: scale(0.95); }
+    12%  { opacity: 1;   transform: scale(1.1); filter: brightness(2); }
+    14%  { opacity: 0.3; }
+    15%  { opacity: 1;   filter: brightness(1.5); }
+    
+    /* あとは待機 */
+    25%  { opacity: 1;   transform: scale(1); filter: brightness(1); }
+    100% { opacity: 1;   transform: scale(1); filter: brightness(1); }
+  }
+
+
+  /* --- 3. 追加の雷（10秒周期） --- */
+  .bolt-reverse-anim {
+    transform-origin: center;
+    transform-box: fill-box;
+    opacity: 0;
+    
+    /* 基本10秒周期 */
+    animation: electric-appear-loop 10s infinite;
+    animation-delay: 2s;
+  }
+
+  /* 10秒前後で少しバラす */
+  .bolt-reverse-anim:nth-of-type(2n) { animation-delay: 3.0s; animation-duration: 9.5s; }
+  .bolt-reverse-anim:nth-of-type(3n) { animation-delay: 5.0s; animation-duration: 11s; }
+  .bolt-reverse-anim:nth-of-type(5n) { animation-delay: 7.0s; animation-duration: 8.5s; }
+  .bolt-reverse-anim:nth-of-type(7n) { animation-delay: 9.0s; animation-duration: 13s; }
+  @keyframes electric-appear-loop {
+    0%, 90% { opacity: 0; }
+    91%  { opacity: 1; transform: scale(1.1); filter: brightness(2); }
+    92%  { opacity: 0.2; }
+    93%  { opacity: 1; filter: brightness(1.5); }
+    95%  { opacity: 0; transform: scale(1); }
+    100% { opacity: 0; }
+  }
+  </style>
+</head>
+
+<body>
+  <main role="main">
+    <article class="main">
+
+      <section class="p-main">
+        <div class="p-main-img">
+            <svg class="bg-svg u-bg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 694">
+              <g id="ggCMed" class="burst-anim">
+                <polygon class="color-y1" points="364.15 144.13 431.03 187.14 431.03 86.54 495.1 170.28 551.3 96.1 562.54 168.04 631.1 102.28 638.97 165.23 726.9 129.13 680 223.68 776.67 225.36 689.55 275.94 762.29 314 682.25 318.1 743.69 386.35 638.72 356.69 654.64 407.89 591.2 391.16 603.05 468.14 530.16 438.25 527.13 522.67 471.49 459.72 427.09 564.26 368.09 476.45 248.96 543.07 295.79 435.02 230.52 431.33 260.69 393.15 156.02 385.76 260.11 344.73 212.78 313.42 280.28 293.7 217.46 252.9 345.55 254.54 328.15 218.48 383.52 224.88 364.15 144.13"/>
+              </g>
+              <path class="color-y2 bolt-anim" d="M482.47,512.88l25.77,76.54,17.17-36.2,24.3,75.66-28.71,53.57-4.78-74.56-17.37,37.2-16.39-132.22M475.84,483.8l3.65,29.45,16.39,132.22,1.28,10.35,4.41-9.45,12.41-26.57,4.03,62.85.67,10.49,4.97-9.27,28.71-53.57.6-1.12-.39-1.21-24.3-75.66-2.32-7.22-3.25,6.85-13.99,29.49-23.4-69.5-9.47-28.12h0Z"/>
+              <path class="color-y2 bolt-anim" d="M130.57,260.03l87.52,23.44-60.64-3.46,10.83,18.55-33.17-11.47,11.51,19.77-84.14-25.21,56.87,2.95-10.47-17.97,29.87,7.47-8.19-14.06M124.31,255.25l3.67,6.29,4.61,7.92-22.97-5.74-6.9-1.73,3.58,6.15,7.68,13.18-51.33-2.66-24.91-1.29,23.89,7.16,84.14,25.21,7.28,2.18-3.82-6.56-7.44-12.78,25.53,8.83,7.66,2.65-4.08-7-8.01-13.72,55.06,3.14,29.15,1.66-28.21-7.55-87.52-23.44-7.03-1.88h0Z"/>
+              <path class="color-y2 bolt-anim" d="M895.82,73.68l-61.8,41.25,24.96,10.64-37.07,15.47,19.53,8.33-109.84,43.71,66.14-43.66-25.79-10.96,43.65-13.86-27.45-11.7,107.68-39.21M918.23,62.33l-23.44,8.53-107.68,39.21-7.14,2.6,6.99,2.98,20.01,8.53-35.94,11.41-7.72,2.45,7.46,3.17,20.65,8.77-61.47,40.58-24.37,16.09,27.13-10.8,109.84-43.71,6.77-2.69-6.7-2.85-12.99-5.54,30.51-12.73,6.56-2.74-6.54-2.79-19.86-8.46,57.18-38.17,20.75-13.85h0Z"/>
+              <polygon class="color-y1 bolt-anim" points="588.09 86.64 575.19 90.61 587.98 55.21 570.24 56.35 597.91 .8 630.16 0 603.91 35.79 626.16 36.56 598.92 72.91 620.11 72.73 571.78 139.29 588.09 86.64"/>
+              <polygon class="color-y1 bolt-anim" points="282.01 443.93 187.8 483.1 194.31 445.69 51.64 543.97 162.52 493.88 153.47 535.99 282.01 443.93"/>
+              <polygon class="color-y1 bolt-anim" points="415.87 156.63 397.75 111.59 419.91 117.48 369.01 46.17 392.73 99.49 367.89 92.09 415.87 156.63"/>
+              <polygon class="color-y1 bolt-anim" points="876.2 275.24 813.73 273.25 827.91 253.08 722.22 272.86 796.88 272.87 779.98 295.12 876.2 275.24"/>
+              <polygon class="color-y1 bolt-reverse-anim" points="306.74 681.45 328.32 622.79 343 642.61 357.53 536.07 333.99 606.92 318.2 583.87 306.74 681.45"/>
+              <path class="color-y2 bolt-reverse-anim" d="M952.6,385.21l-70.95-15.62,6.82,17.97-23.28-10.12,4.84,12.75-112.01-50.91,79.37,17.9-7.48-19.66,25.45,13.83-6.46-17.03,103.72,50.88ZM876.87,365.47l52.01,11.45-74.5-36.55,6.63,17.49-25.43-13.82,6.59,17.31-56.33-12.71,78.79,35.81-4.78-12.6,23.29,10.12-6.26-16.51Z"/>
+              <polygon class="color-y1 bolt-reverse-anim" points="667.92 641.43 639.12 585.96 663.65 588.47 594.72 505.95 631.21 571.08 603.54 567.21 667.92 641.43"/>
+              <path class="color-y2 bolt-reverse-anim" d="M126.94,685.2l48.67-50.38-17.53-3.24,20.97-12.19-14.96-2.78,83.77-53.5-43.14,45.11,15.95,2.96-17.37,12.26,11.25,2.09-87.61,59.67ZM166.59,630.1l15.06,2.78-32.27,33.4,57.46-39.13-11.08-2.06,17.37-12.26-14.41-2.68,29.73-31.09-56.34,35.99,15.44,2.87-20.96,12.18Z"/>
+              <polygon class="color-y1 bolt-reverse-anim" points="680.62 107.54 727.99 66.77 731.18 91.22 795.67 5.18 740.66 55.66 738.06 27.83 680.62 107.54"/>
+              <path class="color-y2 bolt-reverse-anim" d="M495.82,152.2l-24.87-73.84-11.21,23.63-18.86-58.74,25.01-46.67,3.01,46.95,10.63-22.77,16.29,131.44ZM471.42,70.36l17.76,52.75-11.36-91.63-11.18,23.95-3.08-48.16-19.44,36.28.06.18,16.1,50.13,11.14-23.49Z"/>
+              <polygon class="color-y1 bolt-reverse-anim" points="853.78 205.87 844.96 198.8 875.51 191.01 866.37 179.25 917.89 172.27 933.63 194.25 896.47 192.9 906.41 208.68 868.4 206.92 878.49 221.52 809.62 219.36 853.78 205.87"/>
+              <polygon class="color-y1 bolt-reverse-anim" points="143.63 400.25 95.38 405.53 107.03 385.79 24.62 415.54 82.37 407.1 68.54 429.02 143.63 400.25"/>
+            </svg>
+            <img src="img/img-main-copy.svg" alt="イナズマ級に釣れる" class="u-copy">
+            <img src="img/img-main-blackthunder.svg" alt="ブラックサンダー" class="u-blackthunder">
+            <picture>
+              <source srcset="img/img-main-item.webp" type="image/png">
+              <img src="img/img-main-item.png" alt="ブラックサンダー" class="u-item">
+            </picture>
+        </div>
+      </section>
+
+      <section class="p-bdabout wow fadeIn">
+        <div class="containere">
+          <div class="p-bdabout-group">
+            <div class="p-bdabout-group-txt">
+              <h2>
+                <span class="big">BACKDOOR</span>
+                PROJECT
+                <span class="small">とは？</span>
+              </h2>
+              <p class="u-mt-ss">それは、日々生まれるちょっとしたアイデアや遊びゴコロを、<br class="u-hidden-sp">
+              本気でカタチにしていくプロジェクト。</p>
+            </div>
+            <div class="p-bdabout-group-btn">
+              <p><a href="concept/">CONCEPT</a></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="p-outline wow fadeIn">
+        <div class="p-outline-overlay">
+          <picture>
+            <source srcset="img/img-swim-blackthunder-xl.webp" media="(min-width: 1400px)" type="image/jpg">
+            <source srcset="img/img-swim-blackthunder-pc.webp" media="(min-width: 768px)" type="image/jpg">
+            <source srcset="img/img-swim-blackthunder-sp.webp" type="image/png">
+            <img src="img/img-swim-blackthunder.png" alt="ブラックサンダー">
+          </picture>
+        </div>
+        <div class="containere">
+          <p class="p-outline-img">
+            <img src="img/logo-duo-yuraku.svg" alt="DUO International × ユーラク" class="c-base">
+          </p>
+          <p class="p-outline-txt c-left-sp">DUOと有楽製菓の異色のコラボにより、<br class="u-hidden-sp">
+          『魚が食いつくブラックサンダー』が誕生。<br>
+          このルアーは、“ブラックサンダーの忠実な再現”と、<br class="u-hidden-sp">
+          “圧倒的な機能の追求”を実現した前代未聞の逸品である。<br>
+          まるで本物のブラックサンダーのようなボディを活かし、<br class="u-hidden-sp">
+          獲物をザクザク狙え。<br>
+          さぁ、イナズマ級に刺激的な釣りを体感しよう!!</p>
+        </div>
+      </section>
+
+      <section class="p-product wow fadeIn">
+        <div class="containere">
+          <h2 class="c-title"><img src="img/title-product.svg" alt="PRODUCT"></h2>
+          <p class="u-mt-m">
+            <strong class="c-title-item">ブラックサンダールアー</strong>
+            ・全長 / 75mm　・重量 / 17g　<br class="u-hidden-pc">・価格 / xxxx円(税込)
+          </p>
+          <p class="u-mt-xl"><img src="img/copy-commitment.svg" alt="こだわり" class="c-base u-h-42"></p>
+          <p>
+            <picture>
+              <source srcset="img/img-commitment-pc.webp" media="(min-width: 768px)" type="image/jpg">
+              <source srcset="img/img-commitment-sp.webp" type="image/png">
+              <img src="img/img-commitment.png" alt="獲物をおびき寄せる”黒き”造形。キラっと光るパッケージ風ボディ。前代未聞もギザギザリップ" class="c-base u-w-640">
+            </picture>
+          </p>
+          <p class="u-mt-l">
+            <img src="img/copy-20262-on-sale.svg" alt="2026年 2月下旬" class="c-base u-h-42">
+            <strong class="u-mt-sss">DUOオンラインストアで先行予約受付開始予定！</strong>
+          </p>
+          <p class="u-mt-s">
+            <img src="img/icon-down-arrow.svg" alt="" class="c-base u-h-16">
+          </p>
+          <p class="u-mt-s">
+            <img src="img/btn-pre-order.svg" alt="先行予約" class="c-base u-h-90">
+          </p>
+        </div>
+      </section>
+
+      <section class="p-project wow fadeIn">
+        <div class="containere">
+          <h2 class="c-title"><img src="img/title-project.svg" alt="PROJECT"></h2>
+          <p class="u-mt-l">
+            <picture>
+              <source srcset="img/img-blackthunder.webp" type="image/png">
+              <img src="img/img-blackthunder.png" alt="ブラックサンダー" class="c-base u-w-340 u-shadow">
+            </picture>
+          </p>
+          <p class="c-cacthcopy u-mt-l">実はブラックサンダーは<br>
+          釣りにピッタリ！</p>
+          <p class="c-left-sp u-mt-s">釣りの最中は、獲物を狙って試行錯誤をし、<br class="u-hidden-sp">
+          集中力と体力を使うため、「小腹が減った」「ひと息つきたい」 と感じる場面が多くありますよね。<br class="u-hidden-sp">
+          そんな釣り人にとって、手軽でおいしくエネルギー補給できるブラックサンダーは心強い味方です。</p>
+          <p class="c-left-sp u-mt-s">今回は、"釣り×ブラックサンダー"の楽しさを<br class="u-hidden-sp">
+          釣りを愛する皆様へ遊び心を込めて届けたいという想いから、<br class="u-hidden-sp">
+          魚が食いつく「ブラックサンダーオリジナルルアー」 を開発しました。</p>
+          <p class="c-left-sp u-mt-s">ぜひこだわりが詰まったルアーで、<br class="u-hidden-sp">
+          ユニークな釣り体験をお楽しみください！</p>
+          <p class="u-mt-m"><a href="https://www.kayac.com/news/2025/12/blackthunder" target="_blank" class="c-button u-shadow"><img src="img/btn-development-secrets.svg" width="332" height="66" alt="ブラックサンダー ルアー 開発秘話はこちら"></a></p>
+          <p class="u-mt-xl"><img src="img/img-hots-pot.svg" alt="釣りでひと息するならブラックサンダー！" class="c-base u-w-540"></p>
+        </div>
+      </section>
+
+      <section class="p-movie wow fadeIn">
+        <div class="containere">
+          <h2 class="c-title"><img src="img/title-movie.svg" alt="MOVIE"></h2>
+          <div class="p-movie-group u-mt-l">
+            <div class="p-movie-group-list">
+              <img src="img/img-coming-soon.svg" alt="COMING SOON" class="c-base u-w-480">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </article>
+  </main>
+</body>
+
+</html>

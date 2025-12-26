@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cyber Logo</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            background: #000;
+            display: grid;
+            place-items: center;
+        }
+
+        .stage {
+            width: min(80vw, 900px);
+        }
+
+        .stage svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stage">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+            <defs>
+                <!-- サイバーっぽいグラデーション（線・影どちらにも使う） -->
+                <linearGradient id="cyberGradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(30 0.5 0.5)">
+                    <stop offset="0%" stop-color="#00E5FF" />
+                    <stop offset="100%" stop-color="#FF2442" />
+                </linearGradient>
+
+                <!-- グラデーションをそのままぼかすドロップシャドウ -->
+                <filter id="cyberShadow" x="-40%" y="-40%" width="180%" height="180%">
+                    <!-- グラデーション付きの図形全体をぼかす -->
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="40" result="blur"/>
+                    <feOffset in="blur" dx="0" dy="0" result="offsetBlur"/>
+                    <feMerge>
+                        <feMergeNode in="offsetBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+
+                <!-- ロゴ形状（複数SVGで再利用しやすいようにまとめる） -->
+                <symbol id="logoShape" viewBox="0 0 500 500">
+                    <path
+                        d="M290.7,320.19c-11.57-8.05-25.56-12.78-40.75-12.78s-29.18,4.73-40.75,12.78c-18.52,12.88-30.59,34.31-30.59,58.57,0,39.35,31.9,71.25,71.35,71.25s71.35-31.9,71.35-71.25c0-24.25-12.08-45.69-30.59-58.57Z"
+                    />
+                    <polygon
+                        points="250.05 283.36 64.59 97.9 112.49 50 250.05 187.46 387.51 50 435.41 97.9 250.05 283.36"
+                    />
+                </symbol>
+            </defs>
+
+            <!-- グラデーション影（ロゴ形状をそのまま塗ってぼかす） -->
+            <g filter="url(#cyberShadow)" opacity="0.9">
+                <use href="#logoShape" fill="url(#cyberGradient)" stroke="none" />
+            </g>
+
+            <!-- 本体（白＋グラデーションの線だけ） -->
+            <g>
+                <use
+                    href="#logoShape"
+                    fill="white"
+                    stroke="url(#cyberGradient)"
+                    stroke-width="2"
+                />
+            </g>
+        </svg>
+    </div>
+</body>
+
+</html>

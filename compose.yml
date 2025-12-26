@@ -1,0 +1,16 @@
+services:
+  front:
+    build:
+      context: .
+      dockerfile: ./docker/front/Dockerfile
+    volumes:
+      - ./front:/front
+    ports:
+      - "3001:3000"
+    tty: true
+    # ▼▼▼ この1行を追加してください ▼▼▼
+    command: tail -f /dev/null
+    # ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+    environment:
+      - HOST=0.0.0.0
+      - CHOKIDAR_USEPOLLING=true

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>植物サイクル管理</title>
+</head>
+<body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
+  <div id="app">
+    <header class="mb-6 text-center">
+      <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
+    </header>
+
+    <div class="flex gap-2 mb-6">
+      <input type="text" id="plantIdInput" placeholder="ID (例: A-01)" 
+        class="flex-1 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:border-teal-500" />
+      <button id="addBtn" 
+        class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700 font-bold">
+        追加
+      </button>
+    </div>
+
+    <div id="plantList" class="space-y-4">
+      </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

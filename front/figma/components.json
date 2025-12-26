@@ -1,0 +1,1042 @@
+[
+  {
+    "name": "Background Pattern",
+    "section": "Other",
+    "type": "FRAME"
+  },
+  {
+    "name": "Accent Strip",
+    "section": "Other",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo Container",
+    "section": "Other",
+    "type": "FRAME"
+  },
+  {
+    "name": "Corporate Design System",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Colors",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Colors",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Color Sample",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Light",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Dark",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral Colors",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Gray 900",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Gray 600",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Gray 300",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Gray 50",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Typography",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Headings",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Text",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Buttons",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Buttons",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Large Button",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Medium Button",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Small Button",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Buttons",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Large Outline",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Medium Outline",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Small Outline",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Cards",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Card Examples",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Service Card",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Learn More",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Team Card",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Navigation",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Header Navigation",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo Area",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "Menu Items",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "CTA Button",
+    "section": "Corporate Design System",
+    "type": "FRAME"
+  },
+  {
+    "name": "CSR First View",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Header",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo Area",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Menu Items",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "CTA Button",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Hero Section",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Hero Content",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Hero Buttons",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary CTA",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary CTA",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "CSR Overview",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Section Header",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "CSR Cards",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Environment Card",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Stats",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "CO2 Reduction",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Renewable Energy",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Learn More",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Social Card",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Education Support",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Community Projects",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Governance Card",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Compliance Training",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Board Diversity",
+    "section": "CSR First View",
+    "type": "FRAME"
+  },
+  {
+    "name": "Landing Page",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Header",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Logo",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Nav Links",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Hero",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Hero Content",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "CTA Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Chat UI",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Chat Header",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Chat Messages",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "AI Message",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "User Message",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Chat Input",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Features",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Features Header",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Feature Cards",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Feature 1",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Feature 2",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Feature 3",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "CTA",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Footer",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Footer Content",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Footer Logo",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Footer Links",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Link Group 1",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Link Group 2",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Link Group 3",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Color Palette",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Colors",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Swatches",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-50",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-100",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-200",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-300",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-400",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-500",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-600",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-700",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-800",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary-900",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral Colors",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral Swatches",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-50",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-100",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-200",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-300",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-400",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-500",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-600",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-700",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-800",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Neutral-900",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Semantic Colors",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Semantic Swatches",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Success",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Warning",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Error",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Info",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Typography System",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Headings",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Heading Samples",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H1",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H2",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H3",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H4",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H5",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "H6",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Text",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Samples",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Large",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Default",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Body Small",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "UI Text",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "UI Samples",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Label",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Caption",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Button Text",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Button System",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Variants",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Default",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Default Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Hover Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Active Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Disabled Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Sizes",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Small Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Medium Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Primary Large Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Variants",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Default",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Default Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Hover Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Active Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Disabled Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Sizes",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Small Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Medium Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Secondary Large Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Variants",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Default",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Default Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Hover Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Active Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Tertiary Disabled Button",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Icon Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Icon Button Variants",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Icon with Text",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Text with Icon",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Form Elements",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Text Inputs",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Text Input States",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Default Input",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Default Input Field",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Focused Input",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Focused Input Field",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Error Input",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Error Input Field",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Input",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Input Field",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Checkboxes",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Checkbox States",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Unchecked",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Checkbox",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Checked",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Unchecked",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Checked",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Radio Buttons",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Radio States",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Unselected",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Radio",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Selected",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Dot",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Unselected",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Selected",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Toggle Switches",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Toggle States",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Off Toggle",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Toggle Track",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Toggle Handle",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "On Toggle",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled Off Toggle",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  },
+  {
+    "name": "Disabled On Toggle",
+    "section": "Generation Examples",
+    "type": "FRAME"
+  }
+]
