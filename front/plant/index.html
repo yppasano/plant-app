@@ -1,39 +1,134 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>植物サイクル管理</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>簡易OCRプロトタイプ</title>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; }
+        video, canvas, img { max-width: 100%; border: 1px solid #ccc; margin-bottom: 10px; }
+        #output { 
+            background: #f0f0f0; 
+            padding: 10px; 
+            white-space: pre-wrap; 
+            text-align: left; 
+            min-height: 100px;
+            border-radius: 5px;
+        }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 5px; }
+        .hidden { display: none; }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
-  <div id="app">
-    <header class="mb-4 text-center">
-      <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
-    </header>
+<body>
 
-    <div class="flex justify-end mb-2">
-      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2">
-        <option value="created">▼ 登録順 (新しい順)</option>
-        <option value="id">A-Z ID順</option>
-        <option value="alert">💧 水やり待ち順</option>
-      </select>
+    <h2>📷 カメラOCRテスト</h2>
+
+    <video id="video" autoplay playsinline></video>
+    
+    <div>
+        <button id="snap">撮影して解析</button>
+        <button id="retry" class="hidden">もう一度</button>
     </div>
 
-    <div class="flex gap-2 mb-6">
-      <input type="text" id="plantIdInput" placeholder="ID (例: A-01)" 
-        class="flex-1 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:border-teal-500" />
-      <button id="addBtn" 
-        class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700 font-bold">
-        追加
-      </button>
-    </div>
+    <canvas id="canvas" class="hidden"></canvas>
+    
+    <h3>解析結果:</h3>
+    <div id="status">カメラを起動中...</div>
+    <div id="output"></div>
 
-    <div id="plantList" class="space-y-4">
-      </div>
-  </div>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const snapBtn = document.getElementById('snap');
+        const retryBtn = document.getElementById('retry');
+        const statusDiv = document.getElementById('status');
+        const outputDiv = document.getElementById('output');
 
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+        // 1. カメラの起動
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }) // 背面カメラ優先
+            .then(stream => {
+                video.srcObject = stream;
+                statusDiv.textContent = "準備完了: 対象を映して「撮影」ボタンを押してください";
+            })
+            .catch(err => {
+                console.error("カメラ起動エラー:", err);
+                statusDiv.textContent = "カメラへのアクセスが許可されていません。";
+            });
 
-  <script type="module" src="./src/main.js"></script>
+        // 2. 撮影とOCR実行
+        snapBtn.addEventListener('click', () => {
+            // UI切り替え
+            video.classList.add('hidden');
+            canvas.classList.remove('hidden');
+            snapBtn.classList.add('hidden');
+            retryBtn.classList.remove('hidden');
+            
+            // 映像をキャンバスに描画（静止画化）
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+// 1. 画像データを取得
+let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+let data = imageData.data;
+
+// 2. ピクセルごとに処理（グレースケール化 ＆ 2値化）
+for (let i = 0; i < data.length; i += 4) {
+    // 明るさを計算 (RGBの加重平均)
+    const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
+    
+    // しきい値（例えば100〜128あたり）より明るければ「白」、暗ければ「黒」にする
+    const threshold = 100; 
+    const color = avg > threshold ? 255 : 0;
+
+    data[i] = color;     // Red
+    data[i + 1] = color; // Green
+    data[i + 2] = color; // Blue
+    // Alpha(透明度)はそのまま
+}
+
+// 3. 加工した画像をキャンバスに戻す
+context.putImageData(imageData, 0, 0);
+
+
+            // OCR開始
+            statusDiv.textContent = "⏳ 文字を解析中... (初回はデータDLに時間がかかります)";
+            outputDiv.textContent = "";
+
+            // Tesseract.jsによる解析
+            // 'eng'は英語, 'jpn'は日本語。混ぜる場合は 'eng+jpn'
+            Tesseract.recognize(
+                canvas, 
+                'eng+jpn', 
+                {
+                    logger: m => {
+                        // 進捗状況を表示
+                        if(m.status === 'recognizing text') {
+                            statusDiv.textContent = `解析中... ${Math.round(m.progress * 100)}%`;
+                        }
+                    }
+                }
+            ).then(({ data: { text } }) => {
+                statusDiv.textContent = "✅ 解析完了";
+                outputDiv.textContent = text; // 結果を表示
+                console.log(text);
+            }).catch(err => {
+                statusDiv.textContent = "❌ エラーが発生しました";
+                console.error(err);
+            });
+        });
+
+        // 3. リセット（もう一度撮影）
+        retryBtn.addEventListener('click', () => {
+            video.classList.remove('hidden');
+            canvas.classList.add('hidden');
+            snapBtn.classList.remove('hidden');
+            retryBtn.classList.add('hidden');
+            statusDiv.textContent = "準備完了";
+            outputDiv.textContent = "";
+        });
+    </script>
 </body>
 </html>
