@@ -113,6 +113,11 @@
     </div>
     
     <div id="status">カメラを起動中...</div>
+    
+    <details style="margin-top: 20px;">
+        <summary style="cursor: pointer; color: #666;">🔍 デバッグ情報を表示</summary>
+        <div id="debug" style="background: #f0f0f0; padding: 15px; margin-top: 10px; text-align: left; white-space: pre-wrap; font-size: 12px; border-radius: 8px;"></div>
+    </details>
 
     <script>
         const video = document.getElementById('video');
@@ -121,6 +126,7 @@
         const retryBtn = document.getElementById('retry');
         const statusDiv = document.getElementById('status');
         const plantIdInput = document.getElementById('plantIdInput');
+        const debugDiv = document.getElementById('debug');
 
         // カメラの起動
         navigator.mediaDevices.getUserMedia({ 
@@ -158,8 +164,10 @@
             plantIdInput.value = "";
 
             try {
-                // 画像をBase64に変換
-                const imageBase64 = canvas.toDataURL('image/jpeg', 0.9);
+                // 画像をBase64に変換（圧縮率を上げて高品質に）
+                const imageBase64 = canvas.toDataURL('image/jpeg', 0.95);
+                
+                debugDiv.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
                 
                 // Gemini Vision APIに送信
                 const response = await fetch('/api/scan-image', {
@@ -169,6 +177,9 @@
                 });
 
                 const result = await response.json();
+                
+                // デバッグ情報を表示
+                debugDiv.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
                 
                 if (result.id && result.id !== "NOT_FOUND") {
                     plantIdInput.value = result.id;
@@ -181,6 +192,7 @@
                 }
             } catch (error) {
                 console.error("解析エラー:", error);
+                debugDiv.textContent = "❌ エラー詳細:\n" + error.toString();
                 statusDiv.textContent = "❌ 解析に失敗しました";
                 statusDiv.className = "status-error";
             }
