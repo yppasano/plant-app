@@ -110,19 +110,36 @@ context.putImageData(imageData, 0, 0);
                         }
                     }
                 }
-            ).then(({ data: { text } }) => {
-                statusDiv.textContent = "✅ 解析完了";
+                ).then(async ({ data: { text } }) => {
+                statusDiv.textContent = "🤖 AIが解析中...";
+                console.log("生データ:", text);
 
-// 【デバッグ用】どんな結果でも強制的にアラートで出す！
-if (!text || text.trim() === "") {
-                    alert("【結果】空っぽでした。\nしきい値(threshold)を調整する必要がありそうです。");
-                } else {
-                    alert(`【結果】読み取れました！\n----------------\n${text}\n----------------`);
+                // さっき作ったAPIに投げる
+                try {
+                    const response = await fetch('/api/correct-text', {
+                        method: 'POST',
+                        body: JSON.stringify({ text: text }) // 読み取った汚い文字を送る
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.id && result.id !== "NOT_FOUND") {
+                        // 成功！
+                        plantIdInput.value = result.id;
+                        statusDiv.textContent = `✨ 解析成功: ${result.id}`;
+                        alert(`読み取り成功！\nID: ${result.id}`);
+                    } else {
+                        // 失敗（IDが見つからなかった）
+                        statusDiv.textContent = "⚠️ IDが見つかりませんでした";
+                        alert("IDらしき文字が見つかりませんでした。\nもう一度撮影してください。");
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                    statusDiv.textContent = "❌ AI通信エラー";
+                    alert("AIの呼び出しに失敗しました。");
                 }
 
-
-                outputDiv.textContent = text; // 結果を表示
-                console.log(text);
             }).catch(err => {
                 statusDiv.textContent = "❌ エラーが発生しました";
                 console.error(err);
