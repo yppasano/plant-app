@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>簡易OCRプロトタイプ</title>
-    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <title>植物IDスキャナー</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; }
-        video, canvas, img { max-width: 100%; border: 1px solid #ccc; margin-bottom: 10px; }
+        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f5f5f5; }
+        video, canvas { max-width: 100%; border: 2px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
         
-        /* 結果表示エリアのデザイン */
         .result-area {
             margin-top: 20px;
             padding: 15px;
@@ -17,54 +15,104 @@
             border-radius: 8px;
             border: 1px solid #91d5ff;
         }
+        
         input[type="text"] {
-            font-size: 20px;
-            padding: 8px;
+            font-size: 24px;
+            padding: 12px;
             width: 80%;
             text-align: center;
             font-weight: bold;
-            border: 2px solid #ccc;
-            border-radius: 4px;
+            border: 2px solid #1890ff;
+            border-radius: 8px;
+            background: white;
         }
 
-        #output { 
-            background: #f0f0f0; 
-            padding: 10px; 
-            white-space: pre-wrap; 
-            text-align: left; 
-            min-height: 50px;
-            font-size: 12px;
-            border-radius: 5px;
-            margin-top: 10px;
-            color: #666;
+        button { 
+            padding: 12px 24px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            margin: 5px; 
+            background: #1890ff; 
+            color: white; 
+            border: none; 
+            border-radius: 8px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; }
-        button#retry { background: #6c757d; }
+        button:active { transform: scale(0.98); }
+        button#retry { background: #52c41a; }
+        button:disabled { background: #d9d9d9; cursor: not-allowed; }
+        
         .hidden { display: none; }
+        
+        #status { 
+            margin-top: 15px; 
+            font-weight: bold; 
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .status-loading { background: #fff7e6; color: #fa8c16; }
+        .status-success { background: #f6ffed; color: #52c41a; }
+        .status-error { background: #fff1f0; color: #ff4d4f; }
+        
+        .guide-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 200px;
+            border: 3px dashed #1890ff;
+            border-radius: 8px;
+            pointer-events: none;
+            background: rgba(24, 144, 255, 0.1);
+        }
+        
+        .guide-text {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1890ff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        .video-container {
+            position: relative;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
 
     <h2>📷 植物IDスキャナー</h2>
+    <p style="color: #666;">タグをガイド枠内に収めて撮影してください</p>
 
-    <video id="video" autoplay playsinline></video>
+    <div class="video-container">
+        <video id="video" autoplay playsinline></video>
+        <div class="guide-frame">
+            <div class="guide-text">タグをここに収めてください</div>
+        </div>
+    </div>
     <canvas id="canvas" class="hidden"></canvas>
     
     <div>
-        <button id="snap">撮影して解析</button>
-        <button id="retry" class="hidden">もう一度</button>
+        <button id="snap">📸 撮影して解析</button>
+        <button id="retry" class="hidden">🔄 もう一度</button>
     </div>
 
     <div class="result-area">
-        <h3>読み取り結果 (ID)</h3>
-        <input type="text" id="plantIdInput" placeholder="ここにIDが入ります">
+        <h3>🌿 読み取り結果 (植物ID)</h3>
+        <input type="text" id="plantIdInput" placeholder="ここにIDが表示されます" readonly>
     </div>
-    <div id="status" style="margin-top:10px; font-weight:bold;">カメラを起動中...</div>
     
-    <details>
-        <summary>詳細ログを表示</summary>
-        <div id="output"></div>
-    </details>
+    <div id="status">カメラを起動中...</div>
 
     <script>
         const video = document.getElementById('video');
@@ -72,25 +120,32 @@
         const snapBtn = document.getElementById('snap');
         const retryBtn = document.getElementById('retry');
         const statusDiv = document.getElementById('status');
-        const outputDiv = document.getElementById('output');
-        const plantIdInput = document.getElementById('plantIdInput'); // これで取得できるようになります
+        const plantIdInput = document.getElementById('plantIdInput');
 
-        // 1. カメラの起動
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }) 
-            .then(stream => {
-                video.srcObject = stream;
-                statusDiv.textContent = "準備完了";
-            })
-            .catch(err => {
-                console.error("カメラ起動エラー:", err);
-                statusDiv.textContent = "カメラへのアクセスが許可されていません。";
-            });
+        // カメラの起動
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: "environment",
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            } 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+            statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
+            statusDiv.className = "status-success";
+        })
+        .catch(err => {
+            console.error("カメラ起動エラー:", err);
+            statusDiv.textContent = "❌ カメラへのアクセスが許可されていません";
+            statusDiv.className = "status-error";
+        });
 
-        // 2. 撮影とOCR実行
-        snapBtn.addEventListener('click', () => {
+        // 撮影と解析
+        snapBtn.addEventListener('click', async () => {
             video.classList.add('hidden');
             canvas.classList.remove('hidden');
-            snapBtn.classList.add('hidden');
+            snapBtn.disabled = true;
             retryBtn.classList.remove('hidden');
             
             const context = canvas.getContext('2d');
@@ -98,22 +153,51 @@
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            // 画像処理（白黒化）
-            let imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            let data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                const avg = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114);
-                const threshold = 100; 
-                const color = avg > threshold ? 255 : 0;
-                data[i] = data[i + 1] = data[i + 2] = color;
+            statusDiv.textContent = "⏳ AIで解析中...";
+            statusDiv.className = "status-loading";
+            plantIdInput.value = "";
+
+            try {
+                // 画像をBase64に変換
+                const imageBase64 = canvas.toDataURL('image/jpeg', 0.9);
+                
+                // Gemini Vision APIに送信
+                const response = await fetch('/plant/api/scan-image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ imageBase64 })
+                });
+
+                const result = await response.json();
+                
+                if (result.id && result.id !== "NOT_FOUND") {
+                    plantIdInput.value = result.id;
+                    statusDiv.textContent = "✅ 解析完了！";
+                    statusDiv.className = "status-success";
+                } else {
+                    plantIdInput.value = "";
+                    statusDiv.textContent = "⚠️ IDを認識できませんでした。もう一度撮影してください";
+                    statusDiv.className = "status-error";
+                }
+            } catch (error) {
+                console.error("解析エラー:", error);
+                statusDiv.textContent = "❌ 解析に失敗しました";
+                statusDiv.className = "status-error";
             }
-            context.putImageData(imageData, 0, 0);
+            
+            snapBtn.disabled = false;
+        });
 
-            statusDiv.textContent = "⏳ 解析中...";
-            outputDiv.textContent = "";
-            plantIdInput.value = ""; // 入力欄をクリア
+        // もう一度撮影
+        retryBtn.addEventListener('click', () => {
+            canvas.classList.add('hidden');
+            video.classList.remove('hidden');
+            retryBtn.classList.add('hidden');
+            plantIdInput.value = "";
+            statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
+            statusDiv.className = "status-success";
+        });
+    </script>
 
-            Tesseract.recognize(
-                canvas, 
-                'eng+jpn', 
-                { logger: m => { if(m.status === 'recogn
+</body>
+</html>
