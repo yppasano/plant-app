@@ -33,5 +33,11 @@ git add .
 git commit -m "修正メモ"
 
 # 4. GitHubへ送信（→Vercelが自動更新）
+# 初回プッシュ、または「no upstream branch」エラーが出る場合
+git push --set-upstream origin main
+
+# 2回目以降の場合（upstreamが設定済みの場合）
 git push
 ```
+
+**注意**: 「no upstream branch」エラーが出る場合は、`git push --set-upstream origin main` を実行してください。履歴を書き換えた場合など、upstream設定が失われることがあります。
