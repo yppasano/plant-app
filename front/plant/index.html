@@ -112,6 +112,15 @@ context.putImageData(imageData, 0, 0);
                 }
             ).then(({ data: { text } }) => {
                 statusDiv.textContent = "✅ 解析完了";
+
+// 【デバッグ用】どんな結果でも強制的にアラートで出す！
+if (!text || text.trim() === "") {
+                    alert("【結果】空っぽでした。\nしきい値(threshold)を調整する必要がありそうです。");
+                } else {
+                    alert(`【結果】読み取れました！\n----------------\n${text}\n----------------`);
+                }
+
+
                 outputDiv.textContent = text; // 結果を表示
                 console.log(text);
             }).catch(err => {
