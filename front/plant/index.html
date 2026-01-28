@@ -162,7 +162,7 @@
                 const imageBase64 = canvas.toDataURL('image/jpeg', 0.9);
                 
                 // Gemini Vision APIに送信
-                const response = await fetch('/plant/api/scan-image', {
+                const response = await fetch('/api/scan-image', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ imageBase64 })
