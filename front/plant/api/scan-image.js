@@ -26,23 +26,38 @@ export default async function handler(request, response) {
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
     const prompt = `
-あなたは植物管理用のIDタグ読み取り専門AIです。
-画像に写っているタグから、植物IDを読み取ってください。
+この画像には植物管理用のIDタグが写っています。
 
-【IDの形式】必ず以下のパターンです：
-- 大文字アルファベット1文字 + ハイフン + 2桁の数字
-- 例: A-01, B-12, C-05, Z-99
+【あなたのタスク】
+画像内のタグに書かれている文字を読み取り、植物IDを抽出してください。
 
-【タスク】
-1. 画像をよく観察して、タグに書かれている文字を見つけてください
-2. 文字列が上記のパターンに一致するか確認してください
-3. 一致する場合は、そのIDだけを返してください（余計な説明は不要）
-4. 見つからない場合は "NOT_FOUND" と返してください
+【IDの形式】
+- 形式: [大文字アルファベット1文字]-[2桁の数字]
+- 具体例:
+  * A-01
+  * B-12
+  * C-05
+  * D-23
+  * Z-99
 
-【注意】
-- 誤認識しやすい文字に注意: O→0, I/l→1, b→B
-- 返答は ID のみ（例: A-01）か "NOT_FOUND" のどちらか
-- 余計な説明、記号、改行は不要
+【手順】
+1. 画像全体をスキャンして、文字が書かれている部分を探す
+2. 白いタグ、プレート、ラベルなどに注目
+3. 手書き文字でも印刷文字でも読み取る
+4. "A-01" のようなパターンを見つけたら、それを返す
+5. どうしても見つからない場合のみ "NOT_FOUND" を返す
+
+【重要】
+- 返答は必ず1行のみ
+- IDが見つかった場合: そのIDだけを返す（例: A-01）
+- 見つからない場合: NOT_FOUND
+
+【よくある誤認識の修正】
+- 'O' や 'o' → '0'（ゼロ）
+- 'I' や 'l' → '1'（イチ）
+- 小文字 → 大文字
+
+今すぐ画像を見て、IDを返してください:
 `;
 
     try {
@@ -69,11 +84,20 @@ export default async function handler(request, response) {
         const data = await res.json();
         
         let resultText = "NOT_FOUND";
+        let rawResponse = null;
+        
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-            resultText = data.candidates[0].content.parts[0].text.trim();
+            rawResponse = data.candidates[0].content.parts[0].text;
+            resultText = rawResponse.trim();
         }
 
-        return response.status(200).json({ id: resultText });
+        return response.status(200).json({ 
+            id: resultText,
+            debug: {
+                rawResponse: rawResponse,
+                fullResponse: data
+            }
+        });
 
     } catch (error) {
         console.error(error);
