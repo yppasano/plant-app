@@ -102,8 +102,9 @@
   <!-- ========== メイン画面 ========== -->
   <div id="mainScreen" class="max-w-md mx-auto">
     <!-- ヘッダー -->
-    <header class="bg-teal-600 text-white p-4 sticky top-0 z-30 shadow-md">
-      <h1 class="text-2xl font-bold text-center">🌿 植物サイクル管理</h1>
+    <header class="bg-teal-600 text-white p-4 sticky top-0 z-30 shadow-md flex justify-between items-center">
+      <h1 class="text-2xl font-bold">🌿 植物サイクル管理</h1>
+      <button id="settingsBtn" class="text-2xl hover:opacity-80 transition">⚙️</button>
     </header>
 
     <!-- 検索バー -->
@@ -179,6 +180,38 @@
     </div>
   </div>
 
+  <!-- ========== データ管理モーダル ========== -->
+  <div id="dataManagementModal" class="hidden modal-overlay" onclick="closeDataManagementModal(event)">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">⚙️ データ管理</h3>
+      
+      <div class="space-y-3">
+        <!-- バックアップ保存 -->
+        <button id="exportBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+          📥 バックアップを保存
+        </button>
+
+        <!-- データ復元 -->
+        <button id="importBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+          📤 データを復元
+        </button>
+
+        <!-- 全データ削除 -->
+        <button id="clearAllBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
+          🗑️ 全データを削除
+        </button>
+
+        <div class="pt-3 border-t">
+          <p class="text-xs text-gray-500 mb-2">現在のデータ数: <span id="dataCount" class="font-bold">0</span>件</p>
+        </div>
+      </div>
+
+      <button onclick="closeDataManagementModal()" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-lg">
+        閉じる
+      </button>
+    </div>
+  </div>
+
   <!-- ========== スキャン画面（オーバーレイ） ========== -->
   <div id="scanOverlay" class="overlay hidden">
     <!-- カメラビュー -->
@@ -212,8 +245,9 @@
     </details>
   </div>
 
-  <!-- ========== 隠しファイル入力（画像手動追加用） ========== -->
+  <!-- ========== 隠しファイル入力 ========== -->
   <input type="file" id="imageFileInput" accept="image/*" capture="environment" class="hidden" />
+  <input type="file" id="importFileInput" accept="application/json" class="hidden" />
 
   <script>
     // ========================================
@@ -247,6 +281,13 @@
     const plantListEl = document.getElementById('plantList');
     const emptyState = document.getElementById('emptyState');
     const imageFileInput = document.getElementById('imageFileInput');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const dataManagementModal = document.getElementById('dataManagementModal');
+    const dataCount = document.getElementById('dataCount');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const importFileInput = document.getElementById('importFileInput');
 
     // ========================================
     // 保存・描画
@@ -259,6 +300,83 @@
         alert('データ容量がいっぱいです。古いデータを削除してください。');
       }
     };
+
+    // ========================================
+    // データ管理機能
+    // ========================================
+    settingsBtn.addEventListener('click', () => {
+      dataCount.textContent = plants.length;
+      dataManagementModal.classList.remove('hidden');
+    });
+
+    window.closeDataManagementModal = (event) => {
+      if (event && event.target !== dataManagementModal) return;
+      dataManagementModal.classList.add('hidden');
+    };
+
+    // バックアップ保存（エクスポート）
+    exportBtn.addEventListener('click', () => {
+      const dataStr = JSON.stringify(plants, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`;
+      a.href = url;
+      a.download = `plants_backup_${dateStr}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      alert('✅ バックアップを保存しました');
+    });
+
+    // データ復元（インポート）
+    importBtn.addEventListener('click', () => {
+      importFileInput.click();
+    });
+
+    importFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const importedData = JSON.parse(event.target.result);
+          
+          // データ形式チェック
+          if (!Array.isArray(importedData)) {
+            alert('❌ 無効なデータ形式です');
+            return;
+          }
+
+          // 確認ダイアログ
+          if (confirm(`現在のデータ（${plants.length}件）はすべて上書きされますがよろしいですか？`)) {
+            plants = importedData;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
+            alert(`✅ ${plants.length}件のデータを復元しました`);
+            location.reload();
+          }
+        } catch (error) {
+          console.error('インポートエラー:', error);
+          alert('❌ ファイルの読み込みに失敗しました');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    // 全データ削除
+    clearAllBtn.addEventListener('click', () => {
+      if (confirm('本当にすべてのデータを削除しますか？この操作は取り消せません。')) {
+        if (confirm('最終確認：すべてのデータが削除されます。本当によろしいですか？')) {
+          plants = [];
+          localStorage.removeItem(STORAGE_KEY);
+          alert('✅ すべてのデータを削除しました');
+          closeDataManagementModal();
+          render();
+        }
+      }
+    });
 
     // ========================================
     // 画像圧縮（共通関数）
