@@ -41,9 +41,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-size: 32px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
       z-index: 40;
+      transition: transform 0.2s;
+    }
+    .fab:active {
+      transform: scale(0.9);
     }
     .overlay {
       position: fixed;
@@ -55,6 +59,34 @@
       z-index: 50;
       display: flex;
       flex-direction: column;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .action-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      z-index: 50;
+      animation: slideUp 0.3s ease-out;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
     }
     .highlight-card {
       animation: highlight 1.5s ease-in-out;
@@ -100,14 +132,52 @@
     <!-- リストが空の場合 -->
     <div id="emptyState" class="hidden text-center py-12 text-gray-400">
       <p class="text-lg mb-2">📝 登録された植物がありません</p>
-      <p class="text-sm">右下の 📷 ボタンで植物を追加できます</p>
+      <p class="text-sm">右下の ＋ ボタンで植物を追加できます</p>
     </div>
   </div>
 
-  <!-- ========== Floating Action Button (スキャンボタン) ========== -->
-  <button id="fabBtn" class="fab bg-teal-600 hover:bg-teal-700 text-white active:scale-95 transition">
-    📷
+  <!-- ========== Floating Action Button ========== -->
+  <button id="fabBtn" class="fab bg-teal-600 hover:bg-teal-700 text-white">
+    ＋
   </button>
+
+  <!-- ========== アクションシート（メニュー） ========== -->
+  <div id="actionSheetOverlay" class="hidden fixed inset-0 bg-black/30 z-40" onclick="closeActionSheet()"></div>
+  <div id="actionSheet" class="hidden action-sheet">
+    <div class="p-6 space-y-3">
+      <h3 class="text-lg font-bold text-gray-800 mb-4">追加方法を選択</h3>
+      <button id="cameraOptionBtn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg text-lg flex items-center justify-center gap-2">
+        📷 カメラで追加
+      </button>
+      <button id="manualOptionBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg text-lg flex items-center justify-center gap-2">
+        ⌨️ 手動でID入力
+      </button>
+      <button onclick="closeActionSheet()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-lg">
+        キャンセル
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== 手動入力モーダル ========== -->
+  <div id="manualInputModal" class="hidden modal-overlay" onclick="closeManualModal(event)">
+    <div class="bg-white rounded-xl p-6 max-w-sm w-full" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-bold text-gray-800 mb-4">植物IDを入力</h3>
+      <input 
+        type="text" 
+        id="manualIdInput" 
+        placeholder="例: A-01" 
+        class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-lg focus:outline-none focus:border-teal-500"
+      />
+      <div class="flex gap-3">
+        <button onclick="closeManualModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 rounded-lg">
+          キャンセル
+        </button>
+        <button id="manualSubmitBtn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg">
+          登録
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========== スキャン画面（オーバーレイ） ========== -->
   <div id="scanOverlay" class="overlay hidden">
@@ -142,6 +212,9 @@
     </details>
   </div>
 
+  <!-- ========== 隠しファイル入力（画像手動追加用） ========== -->
+  <input type="file" id="imageFileInput" accept="image/*" capture="environment" class="hidden" />
+
   <script>
     // ========================================
     // グローバル変数・定数
@@ -151,10 +224,17 @@
     let plants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let cameraStream = null;
     let searchQuery = '';
+    let currentImageTargetId = null;
 
     // DOM要素
-    const mainScreen = document.getElementById('mainScreen');
     const fabBtn = document.getElementById('fabBtn');
+    const actionSheetOverlay = document.getElementById('actionSheetOverlay');
+    const actionSheet = document.getElementById('actionSheet');
+    const cameraOptionBtn = document.getElementById('cameraOptionBtn');
+    const manualOptionBtn = document.getElementById('manualOptionBtn');
+    const manualInputModal = document.getElementById('manualInputModal');
+    const manualIdInput = document.getElementById('manualIdInput');
+    const manualSubmitBtn = document.getElementById('manualSubmitBtn');
     const scanOverlay = document.getElementById('scanOverlay');
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
@@ -166,6 +246,7 @@
     const sortSelect = document.getElementById('sortSelect');
     const plantListEl = document.getElementById('plantList');
     const emptyState = document.getElementById('emptyState');
+    const imageFileInput = document.getElementById('imageFileInput');
 
     // ========================================
     // 保存・描画
@@ -178,6 +259,115 @@
         alert('データ容量がいっぱいです。古いデータを削除してください。');
       }
     };
+
+    // ========================================
+    // 画像圧縮（共通関数）
+    // ========================================
+    const compressImage = (file, maxWidth = 300, quality = 0.5) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const scale = maxWidth / img.width;
+            const width = scale < 1 ? maxWidth : img.width;
+            const height = scale < 1 ? img.height * scale : img.height;
+            
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    const resizeAndCompressCanvas = (sourceCanvas, maxWidth = 300, quality = 0.5) => {
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
+      
+      const scale = maxWidth / sourceCanvas.width;
+      const width = scale < 1 ? maxWidth : sourceCanvas.width;
+      const height = scale < 1 ? sourceCanvas.height * scale : sourceCanvas.height;
+      
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      ctx.drawImage(sourceCanvas, 0, 0, width, height);
+      
+      return tempCanvas.toDataURL('image/jpeg', quality);
+    };
+
+    // ========================================
+    // アクションシート（メニュー）
+    // ========================================
+    fabBtn.addEventListener('click', () => {
+      actionSheetOverlay.classList.remove('hidden');
+      actionSheet.classList.remove('hidden');
+    });
+
+    window.closeActionSheet = () => {
+      actionSheetOverlay.classList.add('hidden');
+      actionSheet.classList.add('hidden');
+    };
+
+    cameraOptionBtn.addEventListener('click', () => {
+      closeActionSheet();
+      openScanOverlay();
+    });
+
+    manualOptionBtn.addEventListener('click', () => {
+      closeActionSheet();
+      openManualModal();
+    });
+
+    // ========================================
+    // 手動入力モーダル
+    // ========================================
+    const openManualModal = () => {
+      manualInputModal.classList.remove('hidden');
+      manualIdInput.value = '';
+      manualIdInput.focus();
+    };
+
+    window.closeManualModal = (event) => {
+      if (event && event.target !== manualInputModal) return;
+      manualInputModal.classList.add('hidden');
+    };
+
+    manualSubmitBtn.addEventListener('click', () => {
+      const id = manualIdInput.value.trim();
+      if (!id) {
+        alert('植物IDを入力してください');
+        return;
+      }
+
+      const existing = plants.find(p => p.id === id);
+      if (existing) {
+        alert(`ID: ${id} は既に登録済みです`);
+        closeManualModal();
+        render();
+        setTimeout(() => {
+          const card = document.querySelector(`[data-plant-id="${id}"]`);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('highlight-card');
+            setTimeout(() => card.classList.remove('highlight-card'), 1500);
+          }
+        }, 300);
+      } else {
+        plants.unshift({ id, logs: [], image: null });
+        save();
+        closeManualModal();
+      }
+    });
 
     // ========================================
     // カメラ制御
@@ -208,31 +398,10 @@
       }
     };
 
-    // ========================================
-    // 画像リサイズ・圧縮
-    // ========================================
-    const resizeAndCompressImage = (sourceCanvas, maxWidth = 300, quality = 0.5) => {
-      const tempCanvas = document.createElement('canvas');
-      const ctx = tempCanvas.getContext('2d');
-      
-      const scale = maxWidth / sourceCanvas.width;
-      const width = scale < 1 ? maxWidth : sourceCanvas.width;
-      const height = scale < 1 ? sourceCanvas.height * scale : sourceCanvas.height;
-      
-      tempCanvas.width = width;
-      tempCanvas.height = height;
-      ctx.drawImage(sourceCanvas, 0, 0, width, height);
-      
-      return tempCanvas.toDataURL('image/jpeg', quality);
-    };
-
-    // ========================================
-    // スキャン画面の開閉
-    // ========================================
-    fabBtn.addEventListener('click', () => {
+    const openScanOverlay = () => {
       scanOverlay.classList.remove('hidden');
       startCamera();
-    });
+    };
 
     closeScanBtn.addEventListener('click', () => {
       scanOverlay.classList.add('hidden');
@@ -272,16 +441,14 @@
           const existing = plants.find(p => p.id === detectedId);
 
           if (existing) {
-            // パターンA：登録済み
+            // 登録済み：画像は保存しない
             scanStatus.textContent = `✅ 登録済みです: ${detectedId}`;
             scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
             
-            // スキャン画面を閉じる
             setTimeout(() => {
               scanOverlay.classList.add('hidden');
               stopCamera();
               
-              // メイン画面で該当カードまでスクロール・ハイライト
               render();
               setTimeout(() => {
                 const card = document.querySelector(`[data-plant-id="${detectedId}"]`);
@@ -294,13 +461,12 @@
             }, 1500);
             
           } else {
-            // パターンB：新規
+            // 新規：画像を圧縮して保存
             scanStatus.textContent = `🆕 新規ID検出: ${detectedId}`;
             scanStatus.className = "bg-blue-600 text-white text-center py-3 px-4 text-sm font-bold";
             
             if (confirm(`新規登録しますか？\nID: ${detectedId}`)) {
-              // 画像をリサイズ・圧縮して保存
-              const compressedImage = resizeAndCompressImage(canvas, 300, 0.5);
+              const compressedImage = resizeAndCompressCanvas(canvas, 300, 0.5);
               
               plants.unshift({ 
                 id: detectedId, 
@@ -333,6 +499,35 @@
       }
       
       captureBtn.disabled = false;
+    });
+
+    // ========================================
+    // 画像の手動登録/変更
+    // ========================================
+    window.openImageUpload = (id) => {
+      currentImageTargetId = id;
+      imageFileInput.click();
+    };
+
+    imageFileInput.addEventListener('change', async (e) => {
+      if (!e.target.files || !e.target.files[0] || !currentImageTargetId) return;
+      
+      const file = e.target.files[0];
+      const plant = plants.find(p => p.id === currentImageTargetId);
+      
+      if (plant) {
+        try {
+          const compressedImage = await compressImage(file, 300, 0.5);
+          plant.image = compressedImage;
+          save();
+        } catch (error) {
+          console.error('画像圧縮エラー:', error);
+          alert('画像の処理に失敗しました');
+        }
+      }
+      
+      e.target.value = '';
+      currentImageTargetId = null;
     });
 
     // ========================================
@@ -451,10 +646,15 @@
         card.innerHTML = `
           ${alertBadge}
           <div class="flex gap-3 p-3">
-            ${plant.image 
-              ? `<img src="${plant.image}" class="w-20 h-20 object-cover rounded-lg shadow-sm flex-shrink-0" alt="${plant.id}">`
-              : `<div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs flex-shrink-0">画像<br>なし</div>`
-            }
+            <div onclick="openImageUpload('${plant.id}')" class="w-20 h-20 flex-shrink-0 cursor-pointer hover:opacity-80 transition">
+              ${plant.image 
+                ? `<img src="${plant.image}" class="w-full h-full object-cover rounded-lg shadow-sm" alt="${plant.id}">`
+                : `<div class="w-full h-full bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 text-xs border-2 border-dashed border-gray-300">
+                     <span>📷</span>
+                     <span class="mt-1">タップして<br>追加</span>
+                   </div>`
+              }
+            </div>
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-start mb-2">
                 <h2 class="text-lg font-bold text-gray-800">${plant.id}</h2>
