@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>植物サイクル管理 + OCRスキャナー</title>
+  <title>植物サイクル管理</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     .guide-frame {
@@ -12,97 +12,135 @@
       left: 50%;
       transform: translate(-50%, -50%);
       width: 80%;
-      height: 150px;
+      height: 200px;
       border: 3px dashed #14b8a6;
-      border-radius: 8px;
+      border-radius: 12px;
       pointer-events: none;
       background: rgba(20, 184, 166, 0.1);
     }
     .guide-text {
       position: absolute;
-      top: -35px;
+      top: -40px;
       left: 50%;
       transform: translateX(-50%);
       background: #14b8a6;
       color: white;
-      padding: 6px 12px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 14px;
       white-space: nowrap;
     }
-    video, canvas {
-      max-width: 100%;
-      border-radius: 8px;
+    .fab {
+      position: fixed;
+      right: 20px;
+      bottom: 80px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 40;
+    }
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: black;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+    }
+    .highlight-card {
+      animation: highlight 1.5s ease-in-out;
+    }
+    @keyframes highlight {
+      0%, 100% { background-color: white; }
+      50% { background-color: #a7f3d0; }
     }
   </style>
 </head>
-<body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
+<body class="bg-gray-50 text-gray-800 pb-20">
 
-  <!-- ========== カメラOCRセクション ========== -->
-  <div class="mb-6">
-    <header class="mb-4 text-center">
-      <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
-      <p class="text-sm text-gray-600 mt-1">カメラで撮影 → AI解析 → 自動追加</p>
+  <!-- ========== メイン画面 ========== -->
+  <div id="mainScreen" class="max-w-md mx-auto">
+    <!-- ヘッダー -->
+    <header class="bg-teal-600 text-white p-4 sticky top-0 z-30 shadow-md">
+      <h1 class="text-2xl font-bold text-center">🌿 植物サイクル管理</h1>
     </header>
 
-    <!-- カメラビュー -->
-    <div class="relative inline-block w-full mb-3">
-      <video id="video" autoplay playsinline class="w-full border-2 border-teal-300"></video>
-      <div class="guide-frame">
-        <div class="guide-text">タグをここに収めて撮影</div>
-      </div>
-    </div>
-    <canvas id="canvas" class="hidden w-full border-2 border-teal-300"></canvas>
-
-    <!-- 撮影ボタン -->
-    <div class="flex gap-2 mb-3">
-      <button id="snapBtn" class="flex-1 bg-teal-600 text-white font-bold py-3 rounded-lg shadow hover:bg-teal-700 active:scale-95 transition">
-        📸 撮影して解析
-      </button>
-      <button id="retryBtn" class="hidden flex-1 bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 active:scale-95 transition">
-        🔄 もう一度
-      </button>
+    <!-- 検索バー -->
+    <div class="p-4 bg-white border-b">
+      <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="🔍 IDで検索 (例: A-01)" 
+        class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-teal-500"
+      />
     </div>
 
-    <!-- ステータス表示 -->
-    <div id="status" class="text-center py-2 px-3 rounded-lg text-sm font-bold bg-gray-200 text-gray-700">
-      カメラを起動中...
-    </div>
-
-    <!-- デバッグ情報 -->
-    <details class="mt-3">
-      <summary class="cursor-pointer text-xs text-gray-500">🔍 デバッグ情報</summary>
-      <div id="debug" class="mt-2 bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap text-left"></div>
-    </details>
-  </div>
-
-  <!-- ========== 植物リスト管理セクション ========== -->
-  <div class="border-t-2 border-gray-300 pt-4">
-    <!-- 並び替え -->
-    <div class="flex justify-end mb-2">
-      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg p-2">
+    <!-- ソートメニュー -->
+    <div class="px-4 py-2 bg-white border-b flex justify-between items-center">
+      <span class="text-sm text-gray-600 font-semibold">並び替え:</span>
+      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg p-2">
         <option value="created">▼ 登録順 (新しい順)</option>
         <option value="id">A-Z ID順</option>
         <option value="alert">💧 水やり待ち順</option>
       </select>
     </div>
 
-    <!-- 手動追加フォーム -->
-    <div class="flex gap-2 mb-4">
-      <input type="text" id="manualIdInput" placeholder="手動追加 (例: B-02)" 
-        class="flex-1 p-2 border border-gray-300 rounded shadow-sm text-sm focus:outline-none focus:border-teal-500" />
-      <button id="addBtn" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700 font-bold text-sm">
-        追加
+    <!-- 植物リスト -->
+    <div id="plantList" class="p-4 space-y-3"></div>
+
+    <!-- リストが空の場合 -->
+    <div id="emptyState" class="hidden text-center py-12 text-gray-400">
+      <p class="text-lg mb-2">📝 登録された植物がありません</p>
+      <p class="text-sm">右下の 📷 ボタンで植物を追加できます</p>
+    </div>
+  </div>
+
+  <!-- ========== Floating Action Button (スキャンボタン) ========== -->
+  <button id="fabBtn" class="fab bg-teal-600 hover:bg-teal-700 text-white active:scale-95 transition">
+    📷
+  </button>
+
+  <!-- ========== スキャン画面（オーバーレイ） ========== -->
+  <div id="scanOverlay" class="overlay hidden">
+    <!-- カメラビュー -->
+    <div class="flex-1 relative">
+      <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
+      <canvas id="canvas" class="hidden"></canvas>
+      <div class="guide-frame">
+        <div class="guide-text">タグをここに収めて撮影</div>
+      </div>
+    </div>
+
+    <!-- ステータス表示 -->
+    <div id="scanStatus" class="bg-black/80 text-white text-center py-3 px-4 text-sm font-bold">
+      カメラを起動中...
+    </div>
+
+    <!-- ボタンエリア -->
+    <div class="bg-black/90 p-4 flex gap-3">
+      <button id="closeScanBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg text-lg">
+        ✕ 閉じる
+      </button>
+      <button id="captureBtn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg text-lg">
+        📸 撮影
       </button>
     </div>
 
-    <!-- 植物リスト -->
-    <div id="plantList" class="space-y-3"></div>
+    <!-- デバッグ情報 -->
+    <details class="bg-black/90 px-4 pb-4">
+      <summary class="cursor-pointer text-xs text-gray-400">🔍 デバッグ情報</summary>
+      <div id="debugInfo" class="mt-2 bg-gray-800 text-gray-200 p-2 rounded text-xs whitespace-pre-wrap max-h-32 overflow-auto"></div>
+    </details>
   </div>
-
-  <!-- 隠しカメラ入力（写真追加用） -->
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
 
   <script>
     // ========================================
@@ -111,22 +149,23 @@
     const STORAGE_KEY = 'plantCycleData';
     const ALERT_DAYS = 7;
     let plants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    let targetPlantId = null;
+    let cameraStream = null;
+    let searchQuery = '';
 
-    // DOM要素（カメラOCR）
+    // DOM要素
+    const mainScreen = document.getElementById('mainScreen');
+    const fabBtn = document.getElementById('fabBtn');
+    const scanOverlay = document.getElementById('scanOverlay');
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
-    const snapBtn = document.getElementById('snapBtn');
-    const retryBtn = document.getElementById('retryBtn');
-    const statusDiv = document.getElementById('status');
-    const debugDiv = document.getElementById('debug');
-
-    // DOM要素（植物管理）
-    const manualIdInput = document.getElementById('manualIdInput');
-    const addBtn = document.getElementById('addBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    const closeScanBtn = document.getElementById('closeScanBtn');
+    const scanStatus = document.getElementById('scanStatus');
+    const debugInfo = document.getElementById('debugInfo');
+    const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortSelect');
     const plantListEl = document.getElementById('plantList');
-    const cameraInput = document.getElementById('cameraInput');
+    const emptyState = document.getElementById('emptyState');
 
     // ========================================
     // 保存・描画
@@ -136,74 +175,88 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
         render();
       } catch (e) {
-        alert('データ容量がいっぱいです。古い写真を削除してください。');
+        alert('データ容量がいっぱいです。古いデータを削除してください。');
       }
     };
 
     // ========================================
-    // 植物の追加または選択（重要：統合ポイント）
+    // カメラ制御
     // ========================================
-    const addOrSelectPlant = (id) => {
-      if (!id || !id.trim()) return;
-      id = id.trim();
+    const startCamera = async () => {
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          } 
+        });
+        video.srcObject = cameraStream;
+        scanStatus.textContent = "✅ タグを撮影してください";
+        scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
+      } catch (err) {
+        console.error("カメラ起動エラー:", err);
+        scanStatus.textContent = "❌ カメラへのアクセスが拒否されました";
+        scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
+      }
+    };
+
+    const stopCamera = () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream = null;
+      }
+    };
+
+    // ========================================
+    // 画像リサイズ・圧縮
+    // ========================================
+    const resizeAndCompressImage = (sourceCanvas, maxWidth = 300, quality = 0.5) => {
+      const tempCanvas = document.createElement('canvas');
+      const ctx = tempCanvas.getContext('2d');
       
-      const existing = plants.find(p => p.id === id);
-      if (existing) {
-        // 既存の場合：画面をスクロールしてハイライト
-        save(); // 再描画
-        setTimeout(() => {
-          const card = Array.from(plantListEl.children).find(el => el.dataset.plantId === id);
-          if (card) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            card.classList.add('ring-4', 'ring-teal-500');
-            setTimeout(() => card.classList.remove('ring-4', 'ring-teal-500'), 2000);
-          }
-        }, 100);
-      } else {
-        // 新規の場合：先頭に追加
-        plants.unshift({ id, logs: [], image: null });
-        save();
-      }
+      const scale = maxWidth / sourceCanvas.width;
+      const width = scale < 1 ? maxWidth : sourceCanvas.width;
+      const height = scale < 1 ? sourceCanvas.height * scale : sourceCanvas.height;
+      
+      tempCanvas.width = width;
+      tempCanvas.height = height;
+      ctx.drawImage(sourceCanvas, 0, 0, width, height);
+      
+      return tempCanvas.toDataURL('image/jpeg', quality);
     };
 
     // ========================================
-    // カメラOCRロジック
+    // スキャン画面の開閉
     // ========================================
-    navigator.mediaDevices.getUserMedia({ 
-      video: { 
-        facingMode: "environment",
-        width: { ideal: 1920 },
-        height: { ideal: 1080 }
-      } 
-    })
-    .then(stream => {
-      video.srcObject = stream;
-      statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
-      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
-    })
-    .catch(err => {
-      console.error("カメラ起動エラー:", err);
-      statusDiv.textContent = "❌ カメラへのアクセスが許可されていません";
-      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+    fabBtn.addEventListener('click', () => {
+      scanOverlay.classList.remove('hidden');
+      startCamera();
     });
 
-    snapBtn.addEventListener('click', async () => {
-      video.classList.add('hidden');
-      canvas.classList.remove('hidden');
-      snapBtn.disabled = true;
-      retryBtn.classList.remove('hidden');
-      
+    closeScanBtn.addEventListener('click', () => {
+      scanOverlay.classList.add('hidden');
+      stopCamera();
+      scanStatus.textContent = "カメラを起動中...";
+      scanStatus.className = "bg-black/80 text-white text-center py-3 px-4 text-sm font-bold";
+    });
+
+    // ========================================
+    // 撮影・AI解析
+    // ========================================
+    captureBtn.addEventListener('click', async () => {
       const context = canvas.getContext('2d');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      statusDiv.textContent = "⏳ AIで解析中...";
-      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-yellow-100 text-yellow-700";
+      scanStatus.textContent = "⏳ AIで解析中...";
+      scanStatus.className = "bg-yellow-600 text-white text-center py-3 px-4 text-sm font-bold";
+      captureBtn.disabled = true;
 
       try {
         const imageBase64 = canvas.toDataURL('image/jpeg', 0.95);
-        debugDiv.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
+        debugInfo.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
         
         const response = await fetch('/api/scan-image', {
           method: 'POST',
@@ -212,34 +265,74 @@
         });
 
         const result = await response.json();
-        debugDiv.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
+        debugInfo.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
         
         if (result.id && result.id !== "NOT_FOUND") {
-          statusDiv.textContent = `✅ 解析完了！ ID: ${result.id}`;
-          statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
-          
-          // 【重要】AI解析成功時に自動的に植物を追加または選択
-          addOrSelectPlant(result.id);
+          const detectedId = result.id;
+          const existing = plants.find(p => p.id === detectedId);
+
+          if (existing) {
+            // パターンA：登録済み
+            scanStatus.textContent = `✅ 登録済みです: ${detectedId}`;
+            scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
+            
+            // スキャン画面を閉じる
+            setTimeout(() => {
+              scanOverlay.classList.add('hidden');
+              stopCamera();
+              
+              // メイン画面で該当カードまでスクロール・ハイライト
+              render();
+              setTimeout(() => {
+                const card = document.querySelector(`[data-plant-id="${detectedId}"]`);
+                if (card) {
+                  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  card.classList.add('highlight-card');
+                  setTimeout(() => card.classList.remove('highlight-card'), 1500);
+                }
+              }, 300);
+            }, 1500);
+            
+          } else {
+            // パターンB：新規
+            scanStatus.textContent = `🆕 新規ID検出: ${detectedId}`;
+            scanStatus.className = "bg-blue-600 text-white text-center py-3 px-4 text-sm font-bold";
+            
+            if (confirm(`新規登録しますか？\nID: ${detectedId}`)) {
+              // 画像をリサイズ・圧縮して保存
+              const compressedImage = resizeAndCompressImage(canvas, 300, 0.5);
+              
+              plants.unshift({ 
+                id: detectedId, 
+                logs: [], 
+                image: compressedImage 
+              });
+              save();
+              
+              scanStatus.textContent = "✅ 新規登録完了！";
+              scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
+              
+              setTimeout(() => {
+                scanOverlay.classList.add('hidden');
+                stopCamera();
+              }, 1500);
+            } else {
+              scanStatus.textContent = "❌ 登録をキャンセルしました";
+              scanStatus.className = "bg-gray-600 text-white text-center py-3 px-4 text-sm font-bold";
+            }
+          }
         } else {
-          statusDiv.textContent = "⚠️ IDを認識できませんでした。もう一度撮影してください";
-          statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+          scanStatus.textContent = "⚠️ IDを認識できませんでした";
+          scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
         }
       } catch (error) {
         console.error("解析エラー:", error);
-        debugDiv.textContent = "❌ エラー詳細:\n" + error.toString();
-        statusDiv.textContent = "❌ 解析に失敗しました";
-        statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+        debugInfo.textContent = "❌ エラー:\n" + error.toString();
+        scanStatus.textContent = "❌ 解析に失敗しました";
+        scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
       }
       
-      snapBtn.disabled = false;
-    });
-
-    retryBtn.addEventListener('click', () => {
-      canvas.classList.add('hidden');
-      video.classList.remove('hidden');
-      retryBtn.classList.add('hidden');
-      statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
-      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
+      captureBtn.disabled = false;
     });
 
     // ========================================
@@ -261,46 +354,6 @@
       plants = plants.filter(p => p.id !== id);
       save();
     };
-
-    window.openCamera = (id) => {
-      targetPlantId = id;
-      cameraInput.click();
-    };
-
-    const compressImage = (file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const MAX_WIDTH = 600;
-            const scale = MAX_WIDTH / img.width;
-            const width = scale < 1 ? MAX_WIDTH : img.width;
-            const height = scale < 1 ? img.height * scale : img.height;
-            canvas.width = width;
-            canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.7));
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      });
-    };
-
-    cameraInput.addEventListener('change', async (e) => {
-      if (!e.target.files || !e.target.files[0] || !targetPlantId) return;
-      const file = e.target.files[0];
-      const imageBase64 = await compressImage(file);
-      const plant = plants.find(p => p.id === targetPlantId);
-      if (plant) {
-        plant.image = imageBase64;
-        save();
-      }
-      e.target.value = '';
-    });
 
     const calculateDaysAgo = (log) => {
       if (!log) return null;
@@ -358,15 +411,29 @@
       return sorted;
     };
 
+    const filterPlants = (plantsList) => {
+      if (!searchQuery) return plantsList;
+      return plantsList.filter(p => p.id.toLowerCase().includes(searchQuery.toLowerCase()));
+    };
+
     const render = () => {
+      const filteredPlants = filterPlants(plants);
+      const sortedPlants = sortPlants(filteredPlants);
+
       plantListEl.innerHTML = '';
-      const sortedPlants = sortPlants(plants);
+
+      if (sortedPlants.length === 0) {
+        emptyState.classList.remove('hidden');
+        return;
+      } else {
+        emptyState.classList.add('hidden');
+      }
 
       sortedPlants.forEach(plant => {
         const isDanger = isAlertNeeded(plant);
         const cardClass = isDanger 
-          ? 'bg-red-50 p-3 rounded-xl shadow border-2 border-red-400 relative overflow-hidden'
-          : 'bg-white p-3 rounded-xl shadow border border-gray-100';
+          ? 'bg-red-50 rounded-xl shadow-md border-2 border-red-400 overflow-hidden'
+          : 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden';
 
         const alertBadge = isDanger
           ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
@@ -377,63 +444,54 @@
         if (plant.logs[0]) log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgoHtml(plant.logs[0])}`;
         if (plant.logs[1]) log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgoHtml(plant.logs[1])}`;
 
-        const imageHtml = plant.image 
-          ? `<img src="${plant.image}" class="w-full h-32 object-cover rounded-lg mb-2 cursor-pointer hover:opacity-90 shadow-sm" onclick="openCamera('${plant.id}')">`
-          : `<div onclick="openCamera('${plant.id}')" class="w-full h-20 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-200 border-2 border-dashed border-gray-300">
-               <span class="text-xs">📷 写真を追加</span>
-             </div>`;
-
         const card = document.createElement('div');
         card.className = cardClass;
         card.dataset.plantId = plant.id;
         
         card.innerHTML = `
           ${alertBadge}
-          <div class="flex justify-between items-center mb-2">
-            <h2 class="text-lg font-bold text-gray-700">${plant.id}</h2>
-            <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
-          </div>
-          
-          ${imageHtml}
-          
-          <div class="bg-white/50 p-2 rounded-lg mb-3 text-xs">
-            <div class="flex justify-between mb-1 items-center">
-              <span class="font-bold text-gray-500">前回</span> 
-              <span class="flex-1 text-right">${log1Html}</span>
+          <div class="flex gap-3 p-3">
+            ${plant.image 
+              ? `<img src="${plant.image}" class="w-20 h-20 object-cover rounded-lg shadow-sm flex-shrink-0" alt="${plant.id}">`
+              : `<div class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs flex-shrink-0">画像<br>なし</div>`
+            }
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-start mb-2">
+                <h2 class="text-lg font-bold text-gray-800">${plant.id}</h2>
+                <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
+              </div>
+              <div class="bg-gray-50 p-2 rounded text-xs space-y-1">
+                <div class="flex justify-between">
+                  <span class="font-semibold text-gray-600">前回</span>
+                  <span class="text-gray-700">${log1Html}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="font-semibold text-gray-500">前々回</span>
+                  <span class="text-gray-500">${log2Html}</span>
+                </div>
+              </div>
             </div>
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-gray-400">前々回</span> 
-              <span class="flex-1 text-right text-gray-400">${log2Html}</span>
-            </div>
           </div>
-
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">液肥</button>
-            <button onclick="addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">水</button>
-            <button onclick="addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">活力剤</button>
+          <div class="grid grid-cols-3 gap-2 p-3 pt-0">
+            <button onclick="addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">液肥</button>
+            <button onclick="addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">水</button>
+            <button onclick="addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">活力剤</button>
           </div>
         `;
         plantListEl.appendChild(card);
       });
     };
 
-    sortSelect.addEventListener('change', () => {
+    // ========================================
+    // イベントリスナー
+    // ========================================
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
       render();
     });
 
-    addBtn.addEventListener('click', () => {
-      const id = manualIdInput.value.trim();
-      if (!id) {
-        alert('植物IDを入力してください！');
-        return;
-      }
-      if (plants.some(p => p.id === id)) {
-        alert('そのIDは既に存在します');
-        return;
-      }
-      plants.unshift({ id, logs: [], image: null });
-      manualIdInput.value = '';
-      save();
+    sortSelect.addEventListener('change', () => {
+      render();
     });
 
     // 初期描画
