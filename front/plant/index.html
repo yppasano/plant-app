@@ -1,224 +1,444 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>植物IDスキャナー</title>
-    <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f5f5f5; }
-        video, canvas { max-width: 100%; border: 2px solid #ccc; margin-bottom: 10px; border-radius: 8px; }
-        
-        .result-area {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e6f7ff;
-            border-radius: 8px;
-            border: 1px solid #91d5ff;
-        }
-        
-        input[type="text"] {
-            font-size: 24px;
-            padding: 12px;
-            width: 80%;
-            text-align: center;
-            font-weight: bold;
-            border: 2px solid #1890ff;
-            border-radius: 8px;
-            background: white;
-        }
-
-        button { 
-            padding: 12px 24px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            margin: 5px; 
-            background: #1890ff; 
-            color: white; 
-            border: none; 
-            border-radius: 8px;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        button:active { transform: scale(0.98); }
-        button#retry { background: #52c41a; }
-        button:disabled { background: #d9d9d9; cursor: not-allowed; }
-        
-        .hidden { display: none; }
-        
-        #status { 
-            margin-top: 15px; 
-            font-weight: bold; 
-            font-size: 18px;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        
-        .status-loading { background: #fff7e6; color: #fa8c16; }
-        .status-success { background: #f6ffed; color: #52c41a; }
-        .status-error { background: #fff1f0; color: #ff4d4f; }
-        
-        .guide-frame {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%;
-            height: 200px;
-            border: 3px dashed #1890ff;
-            border-radius: 8px;
-            pointer-events: none;
-            background: rgba(24, 144, 255, 0.1);
-        }
-        
-        .guide-text {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1890ff;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        
-        .video-container {
-            position: relative;
-            display: inline-block;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>植物サイクル管理 + OCRスキャナー</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .guide-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 150px;
+      border: 3px dashed #14b8a6;
+      border-radius: 8px;
+      pointer-events: none;
+      background: rgba(20, 184, 166, 0.1);
+    }
+    .guide-text {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #14b8a6;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    video, canvas {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+  </style>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
 
-    <h2>📷 植物IDスキャナー</h2>
-    <p style="color: #666;">タグをガイド枠内に収めて撮影してください</p>
-    <div style="background: #fff7e6; border: 2px solid #ffa940; padding: 10px; margin: 10px auto; max-width: 400px; border-radius: 8px; text-align: left; font-size: 14px;">
-        <strong>📌 撮影のコツ:</strong>
-        <ul style="margin: 5px 0; padding-left: 20px;">
-            <li>タグを画面いっぱいに大きく映す</li>
-            <li>明るい場所で撮影する</li>
-            <li>ピントが合っているか確認</li>
-            <li>タグが正面から見えるように</li>
-        </ul>
+  <!-- ========== カメラOCRセクション ========== -->
+  <div class="mb-6">
+    <header class="mb-4 text-center">
+      <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
+      <p class="text-sm text-gray-600 mt-1">カメラで撮影 → AI解析 → 自動追加</p>
+    </header>
+
+    <!-- カメラビュー -->
+    <div class="relative inline-block w-full mb-3">
+      <video id="video" autoplay playsinline class="w-full border-2 border-teal-300"></video>
+      <div class="guide-frame">
+        <div class="guide-text">タグをここに収めて撮影</div>
+      </div>
+    </div>
+    <canvas id="canvas" class="hidden w-full border-2 border-teal-300"></canvas>
+
+    <!-- 撮影ボタン -->
+    <div class="flex gap-2 mb-3">
+      <button id="snapBtn" class="flex-1 bg-teal-600 text-white font-bold py-3 rounded-lg shadow hover:bg-teal-700 active:scale-95 transition">
+        📸 撮影して解析
+      </button>
+      <button id="retryBtn" class="hidden flex-1 bg-green-500 text-white font-bold py-3 rounded-lg shadow hover:bg-green-600 active:scale-95 transition">
+        🔄 もう一度
+      </button>
     </div>
 
-    <div class="video-container">
-        <video id="video" autoplay playsinline></video>
-        <div class="guide-frame">
-            <div class="guide-text">タグをここに収めてください</div>
-        </div>
-    </div>
-    <canvas id="canvas" class="hidden"></canvas>
-    
-    <div>
-        <button id="snap">📸 撮影して解析</button>
-        <button id="retry" class="hidden">🔄 もう一度</button>
+    <!-- ステータス表示 -->
+    <div id="status" class="text-center py-2 px-3 rounded-lg text-sm font-bold bg-gray-200 text-gray-700">
+      カメラを起動中...
     </div>
 
-    <div class="result-area">
-        <h3>🌿 読み取り結果 (植物ID)</h3>
-        <input type="text" id="plantIdInput" placeholder="ここにIDが表示されます" readonly>
-    </div>
-    
-    <div id="status">カメラを起動中...</div>
-    
-    <details style="margin-top: 20px;">
-        <summary style="cursor: pointer; color: #666;">🔍 デバッグ情報を表示</summary>
-        <div id="debug" style="background: #f0f0f0; padding: 15px; margin-top: 10px; text-align: left; white-space: pre-wrap; font-size: 12px; border-radius: 8px;"></div>
+    <!-- デバッグ情報 -->
+    <details class="mt-3">
+      <summary class="cursor-pointer text-xs text-gray-500">🔍 デバッグ情報</summary>
+      <div id="debug" class="mt-2 bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap text-left"></div>
     </details>
+  </div>
 
-    <script>
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const snapBtn = document.getElementById('snap');
-        const retryBtn = document.getElementById('retry');
-        const statusDiv = document.getElementById('status');
-        const plantIdInput = document.getElementById('plantIdInput');
-        const debugDiv = document.getElementById('debug');
+  <!-- ========== 植物リスト管理セクション ========== -->
+  <div class="border-t-2 border-gray-300 pt-4">
+    <!-- 並び替え -->
+    <div class="flex justify-end mb-2">
+      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg p-2">
+        <option value="created">▼ 登録順 (新しい順)</option>
+        <option value="id">A-Z ID順</option>
+        <option value="alert">💧 水やり待ち順</option>
+      </select>
+    </div>
 
-        // カメラの起動
-        navigator.mediaDevices.getUserMedia({ 
-            video: { 
-                facingMode: "environment",
-                width: { ideal: 1920 },
-                height: { ideal: 1080 }
-            } 
-        })
-        .then(stream => {
-            video.srcObject = stream;
-            statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
-            statusDiv.className = "status-success";
-        })
-        .catch(err => {
-            console.error("カメラ起動エラー:", err);
-            statusDiv.textContent = "❌ カメラへのアクセスが許可されていません";
-            statusDiv.className = "status-error";
+    <!-- 手動追加フォーム -->
+    <div class="flex gap-2 mb-4">
+      <input type="text" id="manualIdInput" placeholder="手動追加 (例: B-02)" 
+        class="flex-1 p-2 border border-gray-300 rounded shadow-sm text-sm focus:outline-none focus:border-teal-500" />
+      <button id="addBtn" class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700 font-bold text-sm">
+        追加
+      </button>
+    </div>
+
+    <!-- 植物リスト -->
+    <div id="plantList" class="space-y-3"></div>
+  </div>
+
+  <!-- 隠しカメラ入力（写真追加用） -->
+  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+
+  <script>
+    // ========================================
+    // グローバル変数・定数
+    // ========================================
+    const STORAGE_KEY = 'plantCycleData';
+    const ALERT_DAYS = 7;
+    let plants = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let targetPlantId = null;
+
+    // DOM要素（カメラOCR）
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const snapBtn = document.getElementById('snapBtn');
+    const retryBtn = document.getElementById('retryBtn');
+    const statusDiv = document.getElementById('status');
+    const debugDiv = document.getElementById('debug');
+
+    // DOM要素（植物管理）
+    const manualIdInput = document.getElementById('manualIdInput');
+    const addBtn = document.getElementById('addBtn');
+    const sortSelect = document.getElementById('sortSelect');
+    const plantListEl = document.getElementById('plantList');
+    const cameraInput = document.getElementById('cameraInput');
+
+    // ========================================
+    // 保存・描画
+    // ========================================
+    const save = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
+        render();
+      } catch (e) {
+        alert('データ容量がいっぱいです。古い写真を削除してください。');
+      }
+    };
+
+    // ========================================
+    // 植物の追加または選択（重要：統合ポイント）
+    // ========================================
+    const addOrSelectPlant = (id) => {
+      if (!id || !id.trim()) return;
+      id = id.trim();
+      
+      const existing = plants.find(p => p.id === id);
+      if (existing) {
+        // 既存の場合：画面をスクロールしてハイライト
+        save(); // 再描画
+        setTimeout(() => {
+          const card = Array.from(plantListEl.children).find(el => el.dataset.plantId === id);
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            card.classList.add('ring-4', 'ring-teal-500');
+            setTimeout(() => card.classList.remove('ring-4', 'ring-teal-500'), 2000);
+          }
+        }, 100);
+      } else {
+        // 新規の場合：先頭に追加
+        plants.unshift({ id, logs: [], image: null });
+        save();
+      }
+    };
+
+    // ========================================
+    // カメラOCRロジック
+    // ========================================
+    navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      } 
+    })
+    .then(stream => {
+      video.srcObject = stream;
+      statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
+      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
+    })
+    .catch(err => {
+      console.error("カメラ起動エラー:", err);
+      statusDiv.textContent = "❌ カメラへのアクセスが許可されていません";
+      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+    });
+
+    snapBtn.addEventListener('click', async () => {
+      video.classList.add('hidden');
+      canvas.classList.remove('hidden');
+      snapBtn.disabled = true;
+      retryBtn.classList.remove('hidden');
+      
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      statusDiv.textContent = "⏳ AIで解析中...";
+      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-yellow-100 text-yellow-700";
+
+      try {
+        const imageBase64 = canvas.toDataURL('image/jpeg', 0.95);
+        debugDiv.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
+        
+        const response = await fetch('/api/scan-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64 })
         });
 
-        // 撮影と解析
-        snapBtn.addEventListener('click', async () => {
-            video.classList.add('hidden');
-            canvas.classList.remove('hidden');
-            snapBtn.disabled = true;
-            retryBtn.classList.remove('hidden');
-            
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const result = await response.json();
+        debugDiv.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
+        
+        if (result.id && result.id !== "NOT_FOUND") {
+          statusDiv.textContent = `✅ 解析完了！ ID: ${result.id}`;
+          statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
+          
+          // 【重要】AI解析成功時に自動的に植物を追加または選択
+          addOrSelectPlant(result.id);
+        } else {
+          statusDiv.textContent = "⚠️ IDを認識できませんでした。もう一度撮影してください";
+          statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+        }
+      } catch (error) {
+        console.error("解析エラー:", error);
+        debugDiv.textContent = "❌ エラー詳細:\n" + error.toString();
+        statusDiv.textContent = "❌ 解析に失敗しました";
+        statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-red-100 text-red-700";
+      }
+      
+      snapBtn.disabled = false;
+    });
 
-            statusDiv.textContent = "⏳ AIで解析中...";
-            statusDiv.className = "status-loading";
-            plantIdInput.value = "";
+    retryBtn.addEventListener('click', () => {
+      canvas.classList.add('hidden');
+      video.classList.remove('hidden');
+      retryBtn.classList.add('hidden');
+      statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
+      statusDiv.className = "text-center py-2 px-3 rounded-lg text-sm font-bold bg-green-100 text-green-700";
+    });
 
-            try {
-                // 画像をBase64に変換（圧縮率を上げて高品質に）
-                const imageBase64 = canvas.toDataURL('image/jpeg', 0.95);
-                
-                debugDiv.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
-                
-                // Gemini Vision APIに送信
-                const response = await fetch('/api/scan-image', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ imageBase64 })
-                });
+    // ========================================
+    // 植物管理ロジック
+    // ========================================
+    window.addLog = (id, type) => {
+      const plant = plants.find(p => p.id === id);
+      if (!plant) return;
+      const today = new Date();
+      const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
+      const timestamp = today.getTime();
+      plant.logs.unshift({ type, date: dateStr, ts: timestamp });
+      if (plant.logs.length > 50) plant.logs.pop();
+      save();
+    };
 
-                const result = await response.json();
-                
-                // デバッグ情報を表示
-                debugDiv.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
-                
-                if (result.id && result.id !== "NOT_FOUND") {
-                    plantIdInput.value = result.id;
-                    statusDiv.textContent = "✅ 解析完了！";
-                    statusDiv.className = "status-success";
-                } else {
-                    plantIdInput.value = "";
-                    statusDiv.textContent = "⚠️ IDを認識できませんでした。もう一度撮影してください";
-                    statusDiv.className = "status-error";
-                }
-            } catch (error) {
-                console.error("解析エラー:", error);
-                debugDiv.textContent = "❌ エラー詳細:\n" + error.toString();
-                statusDiv.textContent = "❌ 解析に失敗しました";
-                statusDiv.className = "status-error";
-            }
-            
-            snapBtn.disabled = false;
+    window.deletePlant = (id) => {
+      if (!confirm(`ID: ${id} を削除しますか？`)) return;
+      plants = plants.filter(p => p.id !== id);
+      save();
+    };
+
+    window.openCamera = (id) => {
+      targetPlantId = id;
+      cameraInput.click();
+    };
+
+    const compressImage = (file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const MAX_WIDTH = 600;
+            const scale = MAX_WIDTH / img.width;
+            const width = scale < 1 ? MAX_WIDTH : img.width;
+            const height = scale < 1 ? img.height * scale : img.height;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    cameraInput.addEventListener('change', async (e) => {
+      if (!e.target.files || !e.target.files[0] || !targetPlantId) return;
+      const file = e.target.files[0];
+      const imageBase64 = await compressImage(file);
+      const plant = plants.find(p => p.id === targetPlantId);
+      if (plant) {
+        plant.image = imageBase64;
+        save();
+      }
+      e.target.value = '';
+    });
+
+    const calculateDaysAgo = (log) => {
+      if (!log) return null;
+      if (log.ts) {
+        const diff = Date.now() - log.ts;
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+      }
+      try {
+        const now = new Date();
+        const [m, d] = log.date.split('/').map(Number);
+        const logDate = new Date(now.getFullYear(), m - 1, d);
+        if (logDate > now) logDate.setFullYear(now.getFullYear() - 1);
+        const diff = now - logDate;
+        return Math.floor(diff / (1000 * 60 * 60 * 24));
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const getDaysAgoHtml = (log) => {
+      const days = calculateDaysAgo(log);
+      if (days === null) return '';
+      if (days === 0) return '<span class="text-teal-600 font-bold ml-1">(今日)</span>';
+      return `<span class="text-gray-500 font-bold ml-1">(${days}日前)</span>`;
+    };
+
+    const isAlertNeeded = (plant) => {
+      const lastWaterLog = plant.logs.find(l => l.type === '水');
+      if (!lastWaterLog) return false;
+      const days = calculateDaysAgo(lastWaterLog);
+      return days !== null && days >= ALERT_DAYS;
+    };
+
+    const sortPlants = (plantsList) => {
+      const sortType = sortSelect.value;
+      const sorted = [...plantsList];
+
+      if (sortType === 'created') {
+        return sorted;
+      } else if (sortType === 'id') {
+        return sorted.sort((a, b) => a.id.localeCompare(b.id));
+      } else if (sortType === 'alert') {
+        return sorted.sort((a, b) => {
+          const aDanger = isAlertNeeded(a);
+          const bDanger = isAlertNeeded(b);
+          if (aDanger && !bDanger) return -1;
+          if (!aDanger && bDanger) return 1;
+          const aLog = a.logs.find(l => l.type === '水');
+          const bLog = b.logs.find(l => l.type === '水');
+          const aTime = aLog ? (aLog.ts || 0) : 0;
+          const bTime = bLog ? (bLog.ts || 0) : 0;
+          return aTime - bTime;
         });
+      }
+      return sorted;
+    };
 
-        // もう一度撮影
-        retryBtn.addEventListener('click', () => {
-            canvas.classList.add('hidden');
-            video.classList.remove('hidden');
-            retryBtn.classList.add('hidden');
-            plantIdInput.value = "";
-            statusDiv.textContent = "✅ 準備完了！タグを撮影してください";
-            statusDiv.className = "status-success";
-        });
-    </script>
+    const render = () => {
+      plantListEl.innerHTML = '';
+      const sortedPlants = sortPlants(plants);
+
+      sortedPlants.forEach(plant => {
+        const isDanger = isAlertNeeded(plant);
+        const cardClass = isDanger 
+          ? 'bg-red-50 p-3 rounded-xl shadow border-2 border-red-400 relative overflow-hidden'
+          : 'bg-white p-3 rounded-xl shadow border border-gray-100';
+
+        const alertBadge = isDanger
+          ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
+          : '';
+
+        let log1Html = 'ー';
+        let log2Html = 'ー';
+        if (plant.logs[0]) log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgoHtml(plant.logs[0])}`;
+        if (plant.logs[1]) log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgoHtml(plant.logs[1])}`;
+
+        const imageHtml = plant.image 
+          ? `<img src="${plant.image}" class="w-full h-32 object-cover rounded-lg mb-2 cursor-pointer hover:opacity-90 shadow-sm" onclick="openCamera('${plant.id}')">`
+          : `<div onclick="openCamera('${plant.id}')" class="w-full h-20 bg-gray-100 rounded-lg mb-2 flex items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-200 border-2 border-dashed border-gray-300">
+               <span class="text-xs">📷 写真を追加</span>
+             </div>`;
+
+        const card = document.createElement('div');
+        card.className = cardClass;
+        card.dataset.plantId = plant.id;
+        
+        card.innerHTML = `
+          ${alertBadge}
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="text-lg font-bold text-gray-700">${plant.id}</h2>
+            <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
+          </div>
+          
+          ${imageHtml}
+          
+          <div class="bg-white/50 p-2 rounded-lg mb-3 text-xs">
+            <div class="flex justify-between mb-1 items-center">
+              <span class="font-bold text-gray-500">前回</span> 
+              <span class="flex-1 text-right">${log1Html}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="font-bold text-gray-400">前々回</span> 
+              <span class="flex-1 text-right text-gray-400">${log2Html}</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">液肥</button>
+            <button onclick="addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">水</button>
+            <button onclick="addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 text-sm rounded-lg shadow-sm active:scale-95 transition">活力剤</button>
+          </div>
+        `;
+        plantListEl.appendChild(card);
+      });
+    };
+
+    sortSelect.addEventListener('change', () => {
+      render();
+    });
+
+    addBtn.addEventListener('click', () => {
+      const id = manualIdInput.value.trim();
+      if (!id) {
+        alert('植物IDを入力してください！');
+        return;
+      }
+      if (plants.some(p => p.id === id)) {
+        alert('そのIDは既に存在します');
+        return;
+      }
+      plants.unshift({ id, logs: [], image: null });
+      manualIdInput.value = '';
+      save();
+    });
+
+    // 初期描画
+    render();
+  </script>
 
 </body>
 </html>
