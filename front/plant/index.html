@@ -95,6 +95,28 @@
       0%, 100% { background-color: white; }
       50% { background-color: #a7f3d0; }
     }
+    .accordion-header {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .accordion-header:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+    .accordion-content.expanded {
+      max-height: 500px;
+      transition: max-height 0.3s ease-in;
+    }
+    .arrow-icon {
+      transition: transform 0.3s ease;
+    }
+    .arrow-icon.rotated {
+      transform: rotate(180deg);
+    }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800 pb-20">
@@ -729,6 +751,39 @@
       return plantsList.filter(p => p.id.toLowerCase().includes(searchQuery.toLowerCase()));
     };
 
+    // ========================================
+    // アコーディオン開閉
+    // ========================================
+    window.toggleAccordion = (id) => {
+      const content = document.getElementById(`accordion-${id}`);
+      const arrow = document.getElementById(`arrow-${id}`);
+      
+      content.classList.toggle('expanded');
+      arrow.classList.toggle('rotated');
+    };
+
+    // ========================================
+    // 平均水やり間隔の計算
+    // ========================================
+    const calculateAverageInterval = (plant) => {
+      const waterLogs = plant.logs.filter(l => l.type === '水');
+      if (waterLogs.length < 2) return null;
+      
+      let totalDays = 0;
+      let count = 0;
+      
+      for (let i = 0; i < waterLogs.length - 1; i++) {
+        const days1 = calculateDaysAgo(waterLogs[i]);
+        const days2 = calculateDaysAgo(waterLogs[i + 1]);
+        if (days1 !== null && days2 !== null) {
+          totalDays += Math.abs(days2 - days1);
+          count++;
+        }
+      }
+      
+      return count > 0 ? Math.round(totalDays / count) : null;
+    };
+
     const render = () => {
       const filteredPlants = filterPlants(plants);
       const sortedPlants = sortPlants(filteredPlants);
@@ -748,52 +803,80 @@
           ? 'bg-red-50 rounded-xl shadow-md border-2 border-red-400 overflow-hidden'
           : 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden';
 
-        const alertBadge = isDanger
-          ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
-          : '';
+        // 前回水やり日の取得
+        const lastWaterLog = plant.logs.find(l => l.type === '水');
+        const lastWaterText = lastWaterLog 
+          ? `${calculateDaysAgo(lastWaterLog)}日前`
+          : '未記録';
 
-        let log1Html = 'ー';
-        let log2Html = 'ー';
-        if (plant.logs[0]) log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgoHtml(plant.logs[0])}`;
-        if (plant.logs[1]) log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgoHtml(plant.logs[1])}`;
+        // 平均水やり間隔の取得
+        const avgInterval = calculateAverageInterval(plant);
+        const avgIntervalText = avgInterval 
+          ? `約${avgInterval}日間隔`
+          : 'データ不足';
 
         const card = document.createElement('div');
         card.className = cardClass;
         card.dataset.plantId = plant.id;
         
         card.innerHTML = `
-          ${alertBadge}
-          <div class="flex gap-3 p-3">
-            <div onclick="openImageUpload('${plant.id}')" class="w-20 h-20 flex-shrink-0 cursor-pointer hover:opacity-80 transition">
-              ${plant.image 
-                ? `<img src="${plant.image}" class="w-full h-full object-cover rounded-lg shadow-sm" alt="${plant.id}">`
-                : `<div class="w-full h-full bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 text-xs border-2 border-dashed border-gray-300">
-                     <span>📷</span>
-                     <span class="mt-1">タップして<br>追加</span>
-                   </div>`
-              }
+          <!-- ヘッダー部分（常に表示・クリック可能） -->
+          <div class="accordion-header p-3 flex items-center gap-3" onclick="toggleAccordion('${plant.id}')">
+            <!-- アラートアイコン -->
+            <div class="flex-shrink-0 w-8 text-center text-xl">
+              ${isDanger ? '⚠️' : '🌿'}
             </div>
+            
+            <!-- 植物情報 -->
             <div class="flex-1 min-w-0">
-              <div class="flex justify-between items-start mb-2">
-                <h2 class="text-lg font-bold text-gray-800">${plant.id}</h2>
-                <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
-              </div>
-              <div class="bg-gray-50 p-2 rounded text-xs space-y-1">
-                <div class="flex justify-between">
-                  <span class="font-semibold text-gray-600">前回</span>
-                  <span class="text-gray-700">${log1Html}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="font-semibold text-gray-500">前々回</span>
-                  <span class="text-gray-500">${log2Html}</span>
-                </div>
-              </div>
+              <div class="font-bold text-gray-800 text-lg">${plant.id}</div>
+              <div class="text-xs text-gray-600">前回: ${lastWaterText}</div>
+            </div>
+            
+            <!-- 矢印アイコン -->
+            <div id="arrow-${plant.id}" class="arrow-icon text-gray-400 text-xl flex-shrink-0">
+              ▼
             </div>
           </div>
-          <div class="grid grid-cols-3 gap-2 p-3 pt-0">
-            <button onclick="addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">液肥</button>
-            <button onclick="addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">水</button>
-            <button onclick="addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 text-sm rounded-lg active:scale-95 transition">活力剤</button>
+
+          <!-- 詳細エリア（初期状態は非表示） -->
+          <div id="accordion-${plant.id}" class="accordion-content">
+            <div class="p-3 pt-0 border-t border-gray-200">
+              <!-- 画像エリア -->
+              <div onclick="event.stopPropagation(); openImageUpload('${plant.id}')" class="w-full h-32 mb-3 cursor-pointer hover:opacity-80 transition rounded-lg overflow-hidden">
+                ${plant.image 
+                  ? `<img src="${plant.image}" class="w-full h-full object-cover" alt="${plant.id}">`
+                  : `<div class="w-full h-full bg-gray-200 rounded-lg flex flex-col items-center justify-center text-gray-400 text-sm border-2 border-dashed border-gray-300">
+                       <span class="text-2xl mb-1">📷</span>
+                       <span>タップして画像を追加</span>
+                     </div>`
+                }
+              </div>
+
+              <!-- 平均水やり間隔 -->
+              <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                <div class="text-xs text-gray-600 mb-1">平均水やり間隔</div>
+                <div class="text-lg font-bold text-blue-700">${avgIntervalText}</div>
+              </div>
+
+              <!-- 操作ボタン -->
+              <div class="grid grid-cols-3 gap-2 mb-2">
+                <button onclick="event.stopPropagation(); addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 text-sm rounded-lg active:scale-95 transition">
+                  液肥
+                </button>
+                <button onclick="event.stopPropagation(); addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 text-sm rounded-lg active:scale-95 transition">
+                  💧 水
+                </button>
+                <button onclick="event.stopPropagation(); addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 text-sm rounded-lg active:scale-95 transition">
+                  活力剤
+                </button>
+              </div>
+
+              <!-- 削除ボタン -->
+              <button onclick="event.stopPropagation(); deletePlant('${plant.id}')" class="w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-2 text-sm rounded-lg active:scale-95 transition">
+                🗑️ 削除
+              </button>
+            </div>
           </div>
         `;
         plantListEl.appendChild(card);
