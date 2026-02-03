@@ -319,6 +319,29 @@
     let searchQuery = '';
     let currentImageTargetId = null;
 
+// ========================================
+    // 簡易セキュリティ（自分専用ロック）
+    // ========================================
+    const MY_PASSWORD = "yp_asano_test1202"; // ★ここに好きなパスワードを設定
+    const LOCK_KEY = "app_unlocked";
+
+    const checkLock = () => {
+      const isUnlocked = sessionStorage.getItem(LOCK_KEY);
+      if (isUnlocked !== "true") {
+        const input = prompt("パスワードを入力してください:");
+        if (input === MY_PASSWORD) {
+          sessionStorage.setItem(LOCK_KEY, "true");
+          alert("認証成功！");
+        } else {
+          alert("パスワードが違います。");
+          document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-weight:bold;">⛔ ACCESS DENIED</div>';
+          throw new Error("Access Denied"); // 処理を強制停止
+        }
+      }
+    };
+    // 起動時にチェック実行
+    checkLock();
+    
     // DOM要素
     const fabBtn = document.getElementById('fabBtn');
     const actionSheetOverlay = document.getElementById('actionSheetOverlay');
