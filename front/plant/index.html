@@ -843,6 +843,35 @@
       return count > 0 ? Math.round(totalDays / count) : null;
     };
 
+
+// ========================================
+    // ログ表示用のフォーマット関数（ここが抜けていました）
+    // ========================================
+    const formatLogDisplay = (log) => {
+      if (!log) return '---';
+      
+      const date = formatDate(log.ts);
+      let icon = '';
+      let typeText = log.type;
+
+      // タイプに応じたアイコンとテキスト設定
+      switch (log.type) {
+        case '水':
+          icon = '💧';
+          break;
+        case '液肥':
+          icon = '💊';
+          break;
+        case '活力剤':
+          icon = '⚡';
+          break;
+        default:
+          icon = '📝';
+      }
+
+      return `<span class="mr-1">${date}</span><span class="text-xs bg-gray-100 px-1 py-0.5 rounded border border-gray-200">${icon}${typeText}</span>`;
+    };
+
 // ========================================
     // 描画関数 (render) の修正版
     // ========================================
