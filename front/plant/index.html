@@ -811,19 +811,29 @@
       arrow.classList.toggle('rotated');
     };
 
-    // ========================================
-    // 平均水やり間隔の計算
+// ========================================
+    // 平均ペースの計算（修正版）
+    // 水・液肥・活力剤すべてを対象に間隔を計算
     // ========================================
     const calculateAverageInterval = (plant) => {
-      const waterLogs = plant.logs.filter(l => l.type === '水');
-      if (waterLogs.length < 2) return null;
+      // 計算対象にするログの種類
+      const targetTypes = ['水', '液肥', '活力剤'];
+      
+      // 対象のログだけを抽出
+      const validLogs = plant.logs.filter(l => targetTypes.includes(l.type));
+      
+      if (validLogs.length < 2) return null;
+      
+      // 日付順（新しい順）にソート
+      const sortedLogs = [...validLogs].sort((a, b) => b.ts - a.ts);
       
       let totalDays = 0;
       let count = 0;
       
-      for (let i = 0; i < waterLogs.length - 1; i++) {
-        const days1 = calculateDaysAgo(waterLogs[i]);
-        const days2 = calculateDaysAgo(waterLogs[i + 1]);
+      for (let i = 0; i < sortedLogs.length - 1; i++) {
+        const days1 = calculateDaysAgo(sortedLogs[i]);
+        const days2 = calculateDaysAgo(sortedLogs[i + 1]);
+        
         if (days1 !== null && days2 !== null) {
           totalDays += Math.abs(days2 - days1);
           count++;
@@ -833,6 +843,9 @@
       return count > 0 ? Math.round(totalDays / count) : null;
     };
 
+// ========================================
+    // 描画関数 (render) の修正版
+    // ========================================
     const render = () => {
       const filteredPlants = filterPlants(plants);
       const sortedPlants = sortPlants(filteredPlants);
@@ -853,23 +866,22 @@
           : 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden';
 
         // --- データ加工ロジック ---
-        // ログを新しい順（tsの降順）にソート
+        
+        // すべてのログを新しい順にソート
         const sortedLogs = plant.logs ? [...plant.logs].sort((a, b) => b.ts - a.ts) : [];
-        // 「水」のログだけ抽出
-        const waterLogs = sortedLogs.filter(l => l.type === '水');
 
-        // 表示用データの準備
-        const lastWaterLog = waterLogs[0];
-        const secondLastWaterLog = waterLogs[1];
+        // 表示用データの準備（全種類のログから最新を取得）
+        const lastLog = sortedLogs[0];
+        const secondLastLog = sortedLogs[1];
 
-        // ヘッダー用日付 (例: 2026/01/29)
-        const headerDateText = lastWaterLog ? formatDate(lastWaterLog.ts) : '未記録';
+        // ヘッダー用 (最新のアクションを表示)
+        const headerInfoHtml = lastLog ? formatLogDisplay(lastLog) : '未記録';
         
         // 詳細リスト用データ
-        const lastDateFull = lastWaterLog ? formatDate(lastWaterLog.ts) : '---';
-        const secondDateFull = secondLastWaterLog ? formatDate(secondLastWaterLog.ts) : '---';
+        const lastLogHtml = formatLogDisplay(lastLog);
+        const secondLogHtml = formatLogDisplay(secondLastLog);
         
-        // 平均ペース
+        // 平均ペース（修正した関数を使用）
         const avgInterval = calculateAverageInterval(plant);
         const avgText = avgInterval ? `${avgInterval}日` : '---';
 
@@ -886,7 +898,9 @@
               </div>
               <div class="flex flex-col">
                 <span class="font-bold text-gray-800 text-lg leading-tight">${plant.id}</span>
-                <span class="text-xs text-gray-500 mt-1">前回: ${headerDateText}</span>
+                <div class="text-xs text-gray-500 mt-1 flex items-center">
+                  <span class="mr-1">前回:</span> ${headerInfoHtml}
+                </div>
               </div>
             </div>
             <div id="arrow-${plant.id}" class="arrow-icon text-gray-400 text-xl">▼</div>
@@ -909,11 +923,11 @@
               <div class="bg-white rounded-lg border border-gray-200 px-4 py-1 mb-5 shadow-sm">
                 <div class="stats-row">
                   <span class="stats-label">前回</span>
-                  <span class="stats-value text-teal-700">${lastDateFull}</span>
+                  <span class="stats-value flex items-center">${lastLogHtml}</span>
                 </div>
                 <div class="stats-row">
                   <span class="stats-label">前々回</span>
-                  <span class="stats-value">${secondDateFull}</span>
+                  <span class="stats-value flex items-center">${secondLogHtml}</span>
                 </div>
                 <div class="stats-row">
                   <span class="stats-label">平均ペース</span>
