@@ -273,36 +273,39 @@
   </div>
 
   <!-- ========== スキャン画面（オーバーレイ） ========== -->
-  <div id="scanOverlay" class="overlay hidden">
-    <!-- カメラビュー -->
-    <div class="flex-1 relative">
+  <div id="scanOverlay" class="fixed inset-0 bg-black z-50 hidden">
+    
+    <div class="absolute inset-0 z-0">
       <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
       <canvas id="canvas" class="hidden"></canvas>
+      
       <div class="guide-frame">
         <div class="guide-text">タグをここに収めて撮影</div>
       </div>
     </div>
 
-    <!-- ステータス表示 -->
-    <div id="scanStatus" class="bg-black/80 text-white text-center py-3 px-4 text-sm font-bold">
-      カメラを起動中...
-    </div>
+    <div class="absolute bottom-0 left-0 right-0 z-10 flex flex-col px-4 pb-6 pt-12 bg-gradient-to-t from-black via-black/90 to-transparent">
+      
+      <div id="scanStatus" class="mb-4 bg-black/60 backdrop-blur-md text-white text-center py-2 px-4 rounded-full text-sm font-bold border border-white/20 shadow-lg mx-auto">
+        カメラを起動中...
+      </div>
 
-    <!-- ボタンエリア -->
-    <div class="bg-black/90 p-4 flex gap-3">
-      <button id="closeScanBtn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg text-lg">
-        ✕ 閉じる
-      </button>
-      <button id="captureBtn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg text-lg">
-        📸 撮影
-      </button>
-    </div>
+      <div class="flex gap-3 mb-2">
+        <button id="closeScanBtn" class="flex-1 bg-gray-600/90 hover:bg-gray-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg backdrop-blur-sm border border-white/10 active:scale-95 transition">
+          ✕ 閉じる
+        </button>
+        <button id="captureBtn" class="flex-1 bg-teal-600/90 hover:bg-teal-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg backdrop-blur-sm border border-white/10 active:scale-95 transition">
+          📸 撮影
+        </button>
+      </div>
 
-    <!-- デバッグ情報 -->
-    <details class="bg-black/90 px-4 pb-4">
-      <summary class="cursor-pointer text-xs text-gray-400">🔍 デバッグ情報</summary>
-      <div id="debugInfo" class="mt-2 bg-gray-800 text-gray-200 p-2 rounded text-xs whitespace-pre-wrap max-h-32 overflow-auto"></div>
-    </details>
+      <details class="mt-2">
+        <summary class="cursor-pointer text-xs text-gray-400 text-center py-2 opacity-70">🔍 デバッグ情報を表示</summary>
+        <div id="debugInfo" class="mt-1 bg-gray-900/90 text-gray-200 p-3 rounded-lg text-xs whitespace-pre-wrap max-h-24 overflow-auto border border-gray-700 shadow-inner"></div>
+      </details>
+      
+      <div class="h-[env(safe-area-inset-bottom)]"></div>
+    </div>
   </div>
 
   <!-- ========== 隠しファイル入力 ========== -->
@@ -323,7 +326,7 @@
 // ========================================
     // 簡易セキュリティ（自分専用ロック）
     // ========================================
-    const MY_PASSWORD = "yp_asano_test1202"; // ★ここに好きなパスワードを設定
+    const MY_PASSWORD = "1202"; // ★ここに好きなパスワードを設定
     const LOCK_KEY = "app_unlocked";
 
     const checkLock = () => {
