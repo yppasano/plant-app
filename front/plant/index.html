@@ -7,6 +7,7 @@
   <title>Cycle Monitor</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* ガイドフレーム */
     .guide-frame {
       position: absolute;
       top: 50%;
@@ -14,24 +15,26 @@
       transform: translate(-50%, -50%);
       width: 80%;
       height: 200px;
-      border: 3px dashed #14b8a6;
+      border: 3px dashed #2dd4bf; /* teal-400 */
       border-radius: 12px;
       pointer-events: none;
-      background: rgba(20, 184, 166, 0.1);
+      background: rgba(45, 212, 191, 0.1);
     }
     .guide-text {
       position: absolute;
       top: -40px;
       left: 50%;
       transform: translateX(-50%);
-      background: #14b8a6;
+      background: #0f766e; /* teal-700 */
       color: white;
       padding: 8px 16px;
       border-radius: 8px;
       font-weight: bold;
       font-size: 14px;
       white-space: nowrap;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
+    /* FAB */
     .fab {
       position: fixed;
       right: 20px;
@@ -43,31 +46,22 @@
       align-items: center;
       justify-content: center;
       font-size: 32px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
       z-index: 40;
       transition: transform 0.2s;
     }
     .fab:active {
-      transform: scale(0.9);
+      transform: scale(0.95);
     }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: black;
-      z-index: 50;
-      display: flex;
-      flex-direction: column;
-    }
+    /* モーダル類 */
     .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0,0,0,0.5);
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(2px);
       z-index: 50;
       display: flex;
       align-items: center;
@@ -79,11 +73,12 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: white;
+      background: #1f2937; /* gray-800 */
       border-radius: 20px 20px 0 0;
       z-index: 50;
       animation: slideUp 0.3s ease-out;
-      box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      border-top: 1px solid #374151;
     }
     @keyframes slideUp {
       from { transform: translateY(100%); }
@@ -93,15 +88,8 @@
       animation: highlight 1.5s ease-in-out;
     }
     @keyframes highlight {
-      0%, 100% { background-color: white; }
-      50% { background-color: #a7f3d0; }
-    }
-    .accordion-header {
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    .accordion-header:hover {
-      background-color: rgba(0, 0, 0, 0.02);
+      0%, 100% { background-color: #1f2937; } /* gray-800 */
+      50% { background-color: #115e59; } /* teal-800 */
     }
     .accordion-content {
       max-height: 0;
@@ -109,8 +97,8 @@
       transition: max-height 0.3s ease-out;
     }
     .accordion-content.expanded {
-      max-height: 500px;
-      transition: max-height 0.3s ease-in;
+      max-height: 800px;
+      transition: max-height 0.4s ease-in;
     }
     .arrow-icon {
       transition: transform 0.3s ease;
@@ -118,50 +106,16 @@
     .arrow-icon.rotated {
       transform: rotate(180deg);
     }
-/* === 追加: 詳細リストのデザイン === */
-.stats-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 0;
-      border-bottom: 1px solid #f3f4f6;
-      font-size: 0.95rem;
-      color: #4b5563;
-    }
-    .stats-row:last-child {
-      border-bottom: none;
-    }
-    .stats-label {
-      font-size: 0.85rem;
-      color: #9ca3af;
-    }
-    .stats-value {
-      font-weight: 600;
-      color: #374151;
-    }
-    
-    /* === 追加: 控えめな削除ボタン === */
-    .delete-link {
-      display: inline-block;
-      margin-top: 15px;
-      font-size: 0.8rem;
-      color: #9ca3af; /* 薄いグレー */
-      text-decoration: underline;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 5px;
-    }
     .delete-link:hover {
-      color: #ef4444; /* ホバー時だけ赤く */
+      color: #f87171; /* red-400 */
     }
   </style>
 </head>
-<body class="bg-gray-900 text-gray-100 pb-20 antialiased selection:bg-teal-500 selection:text-white">
+<body class="bg-gray-900 text-gray-100 pb-28 antialiased selection:bg-teal-500 selection:text-white">
 
   <div id="mainScreen" class="max-w-md mx-auto min-h-screen bg-gray-900 relative">
     
-    <header class="bg-gray-900/90 backdrop-blur-md border-b border-gray-800 p-4 sticky top-0 z-30 flex justify-between items-center">
+    <header class="bg-gray-900 border-b border-gray-800 p-4 flex justify-between items-center">
       <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
         <span class="text-2xl">🌿</span>
         <span class="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-emerald-400">Cycle Monitor</span>
@@ -199,106 +153,95 @@
 
     <div id="plantList" class="p-4 space-y-4"></div>
 
-    <!-- リストが空の場合 -->
-    <div id="emptyState" class="hidden text-center py-12 text-gray-400">
-      <p class="text-lg mb-2">📝 登録された植物がありません</p>
-      <p class="text-sm">右下の ＋ ボタンで植物を追加できます</p>
+    <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-gray-600">
+      <div class="text-6xl mb-4 opacity-20">🌱</div>
+      <p class="text-lg font-medium text-gray-500">No Plants Registered</p>
+      <p class="text-sm mt-2">Tap + to add one</p>
     </div>
   </div>
 
-  <!-- ========== Floating Action Button ========== -->
-  <button id="fabBtn" class="fab bg-teal-600 hover:bg-teal-700 text-white">
+  <button id="fabBtn" class="fab bg-teal-600 hover:bg-teal-500 text-white shadow-lg shadow-teal-900/50 transition transform hover:scale-110">
     ＋
   </button>
 
-  <!-- ========== アクションシート（メニュー） ========== -->
-  <div id="actionSheetOverlay" class="hidden fixed inset-0 bg-black/30 z-40" onclick="closeActionSheet()"></div>
+  <div id="actionSheetOverlay" class="hidden fixed inset-0 bg-black/50 z-40" onclick="closeActionSheet()"></div>
   <div id="actionSheet" class="hidden action-sheet">
-    <div class="p-6 space-y-3">
-      <h3 class="text-lg font-bold text-gray-800 mb-4">追加方法を選択</h3>
-      <button id="cameraOptionBtn" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 rounded-lg text-lg flex items-center justify-center gap-2">
-        📷 カメラで追加
+    <div class="p-6 space-y-4">
+      <h3 class="text-lg font-bold text-gray-300 mb-2 text-center">Add New Plant</h3>
+      <button id="cameraOptionBtn" class="w-full bg-teal-700 hover:bg-teal-600 text-white font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-2 shadow-lg transition">
+        📷 Camera Scan
       </button>
-      <button id="manualOptionBtn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 rounded-lg text-lg flex items-center justify-center gap-2">
-        ⌨️ 手動でID入力
+      <button id="manualOptionBtn" class="w-full bg-gray-700 hover:bg-gray-600 text-gray-200 font-bold py-4 rounded-xl text-lg flex items-center justify-center gap-2 border border-gray-600 transition">
+        ⌨️ Manual Input
       </button>
-      <button onclick="closeActionSheet()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-lg">
-        キャンセル
+      <button onclick="closeActionSheet()" class="w-full bg-gray-800 text-gray-500 font-bold py-3 rounded-xl mt-2 border border-gray-700">
+        Cancel
       </button>
     </div>
   </div>
 
-  <!-- ========== 手動入力モーダル ========== -->
   <div id="manualInputModal" class="hidden modal-overlay" onclick="closeManualModal(event)">
-    <div class="bg-white rounded-xl p-6 max-w-sm w-full" onclick="event.stopPropagation()">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">植物IDを入力</h3>
+    <div class="bg-gray-800 rounded-2xl p-6 max-w-sm w-full border border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-bold text-gray-100 mb-4">Enter Plant ID</h3>
       <input 
         type="text" 
         id="manualIdInput" 
-        placeholder="例: A-01" 
-        class="w-full p-3 border border-gray-300 rounded-lg mb-4 text-lg focus:outline-none focus:border-teal-500"
+        placeholder="e.g. A-01" 
+        class="w-full p-4 bg-gray-900 border border-gray-600 rounded-xl mb-6 text-lg text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 placeholder-gray-600"
       />
       <div class="flex gap-3">
-        <button onclick="closeManualModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-3 rounded-lg">
-          キャンセル
+        <button onclick="closeManualModal()" class="flex-1 bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-3 rounded-xl border border-gray-600">
+          Cancel
         </button>
-        <button id="manualSubmitBtn" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 rounded-lg">
-          登録
+        <button id="manualSubmitBtn" class="flex-1 bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-xl shadow-lg">
+          Add
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ========== データ管理モーダル ========== -->
   <div id="dataManagementModal" class="hidden modal-overlay" onclick="closeDataManagementModal(event)">
-    <div class="bg-white rounded-xl p-6 max-w-sm w-full" onclick="event.stopPropagation()">
-      <h3 class="text-xl font-bold text-gray-800 mb-4">⚙️ データ管理</h3>
+    <div class="bg-gray-800 rounded-2xl p-6 max-w-sm w-full border border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
+        <span>⚙️</span> Settings
+      </h3>
       
       <div class="space-y-3">
-        <!-- バックアップ保存 -->
-        <button id="exportBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-          📥 バックアップを保存
+        <button id="exportBtn" class="w-full bg-blue-900/40 hover:bg-blue-800/60 text-blue-200 border border-blue-800 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition">
+          📥 Backup Data
         </button>
 
-        <!-- データ復元 -->
-        <button id="importBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-          📤 データを復元
+        <button id="importBtn" class="w-full bg-green-900/40 hover:bg-green-800/60 text-green-200 border border-green-800 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition">
+          📤 Restore Data
         </button>
 
-        <!-- 全データ削除 -->
-        <button id="clearAllBtn" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2">
-          🗑️ 全データを削除
+        <button id="clearAllBtn" class="w-full bg-red-900/40 hover:bg-red-800/60 text-red-200 border border-red-800 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition mt-4">
+          🗑️ Delete All Data
         </button>
 
-        <div class="pt-3 border-t">
-          <p class="text-xs text-gray-500 mb-2">現在のデータ数: <span id="dataCount" class="font-bold">0</span>件</p>
+        <div class="pt-4 border-t border-gray-700 mt-2">
+          <p class="text-xs text-gray-500 text-center">Total Plants: <span id="dataCount" class="font-bold text-teal-400 text-base">0</span></p>
         </div>
       </div>
 
-      <button onclick="closeDataManagementModal()" class="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 rounded-lg">
-        閉じる
+      <button onclick="closeDataManagementModal()" class="w-full mt-6 bg-gray-900 text-gray-500 font-bold py-3 rounded-xl border border-gray-700">
+        Close
       </button>
     </div>
   </div>
 
-  <!-- ========== スキャン画面（オーバーレイ） ========== -->
   <div id="scanOverlay" class="fixed inset-0 bg-black z-50 hidden">
-    
     <div class="absolute inset-0 z-0">
       <video id="video" autoplay playsinline class="w-full h-full object-cover"></video>
       <canvas id="canvas" class="hidden"></canvas>
-      
       <div class="guide-frame">
         <div class="guide-text">タグをここに収めて撮影</div>
       </div>
     </div>
-
     <div class="absolute bottom-0 left-0 right-0 z-10 flex flex-col px-4 pb-6 pt-12 bg-gradient-to-t from-black via-black/90 to-transparent">
-      
       <div id="scanStatus" class="mb-4 bg-black/60 backdrop-blur-md text-white text-center py-2 px-4 rounded-full text-sm font-bold border border-white/20 shadow-lg mx-auto">
         カメラを起動中...
       </div>
-
       <div class="flex gap-3 mb-2">
         <button id="closeScanBtn" class="flex-1 bg-gray-600/90 hover:bg-gray-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg backdrop-blur-sm border border-white/10 active:scale-95 transition">
           ✕ 閉じる
@@ -307,17 +250,14 @@
           📸 撮影
         </button>
       </div>
-
       <details class="mt-2">
         <summary class="cursor-pointer text-xs text-gray-400 text-center py-2 opacity-70">🔍 デバッグ情報を表示</summary>
         <div id="debugInfo" class="mt-1 bg-gray-900/90 text-gray-200 p-3 rounded-lg text-xs whitespace-pre-wrap max-h-24 overflow-auto border border-gray-700 shadow-inner"></div>
       </details>
-      
       <div class="h-[env(safe-area-inset-bottom)]"></div>
     </div>
   </div>
 
-  <!-- ========== 隠しファイル入力 ========== -->
   <input type="file" id="imageFileInput" accept="image/*" class="hidden" />
   <input type="file" id="importFileInput" accept="application/json" class="hidden" />
 
@@ -332,27 +272,22 @@
     let searchQuery = '';
     let currentImageTargetId = null;
 
-// ========================================
-    // 簡易セキュリティ（自分専用ロック）
-    // ========================================
-    const MY_PASSWORD = "1202"; // ★ここに好きなパスワードを設定
+    // セキュリティチェック (自分専用ロック)
+    const MY_PASSWORD = "1202"; 
     const LOCK_KEY = "app_unlocked";
-
     const checkLock = () => {
       const isUnlocked = sessionStorage.getItem(LOCK_KEY);
       if (isUnlocked !== "true") {
-        const input = prompt("パスワードを入力してください:");
+        // パスワード入力プロンプトもダークモードにはできないため、ブラウザ標準のものを使用
+        const input = prompt("Password Required:");
         if (input === MY_PASSWORD) {
           sessionStorage.setItem(LOCK_KEY, "true");
-          alert("認証成功！");
         } else {
-          alert("パスワードが違います。");
-          document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-weight:bold;">⛔ ACCESS DENIED</div>';
-          throw new Error("Access Denied"); // 処理を強制停止
+          document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#111;color:#f00;font-weight:bold;">⛔ ACCESS DENIED</div>';
+          throw new Error("Access Denied");
         }
       }
     };
-    // 起動時にチェック実行
     checkLock();
     
     // DOM要素
@@ -384,44 +319,52 @@
     const clearAllBtn = document.getElementById('clearAllBtn');
     const importFileInput = document.getElementById('importFileInput');
 
-// ========================================
-    // 日付フォーマット (YYYY/MM/DD)
-    // ========================================
+    // 日付フォーマット
     const formatDate = (ts) => {
       if (!ts) return '---';
       const d = new Date(ts);
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}/${month}/${day}`;
+      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
     };
 
-    // ========================================
-    // 保存・描画
-    // ========================================
+    // 保存
     const save = () => {
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
         render();
       } catch (e) {
-        alert('データ容量がいっぱいです。古いデータを削除してください。');
+        alert('Storage Full');
       }
     };
 
+    // ログ表示用フォーマット（ダークモード対応）
+    const formatLogDisplay = (log) => {
+      if (!log) return '---';
+      
+      const date = formatDate(log.ts);
+      let icon = '';
+      
+      switch (log.type) {
+        case '水': icon = '💧'; break;
+        case '液肥': icon = '💊'; break;
+        case '活力剤': icon = '⚡'; break;
+        default: icon = '📝';
+      }
+
+      // ダークモード用のタグスタイル
+      return `<span class="mr-2 font-mono text-gray-400">${date}</span><span class="text-xs bg-gray-700 text-gray-200 px-2 py-0.5 rounded border border-gray-600">${icon} ${log.type}</span>`;
+    };
+
     // ========================================
-    // データ管理機能
+    // データ管理
     // ========================================
     settingsBtn.addEventListener('click', () => {
       dataCount.textContent = plants.length;
       dataManagementModal.classList.remove('hidden');
     });
-
     window.closeDataManagementModal = (event) => {
       if (event && event.target !== dataManagementModal) return;
       dataManagementModal.classList.add('hidden');
     };
-
-    // バックアップ保存（エクスポート）
     exportBtn.addEventListener('click', () => {
       const dataStr = JSON.stringify(plants, null, 2);
       const blob = new Blob([dataStr], { type: 'application/json' });
@@ -433,60 +376,38 @@
       a.download = `plants_backup_${dateStr}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      alert('✅ バックアップを保存しました');
     });
-
-    // データ復元（インポート）
-    importBtn.addEventListener('click', () => {
-      importFileInput.click();
-    });
-
+    importBtn.addEventListener('click', () => importFileInput.click());
     importFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = (event) => {
         try {
           const importedData = JSON.parse(event.target.result);
-          
-          // データ形式チェック
-          if (!Array.isArray(importedData)) {
-            alert('❌ 無効なデータ形式です');
-            return;
-          }
-
-          // 確認ダイアログ
-          if (confirm(`現在のデータ（${plants.length}件）はすべて上書きされますがよろしいですか？`)) {
+          if (confirm(`Overwrite current data with ${importedData.length} records?`)) {
             plants = importedData;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(plants));
-            alert(`✅ ${plants.length}件のデータを復元しました`);
             location.reload();
           }
         } catch (error) {
-          console.error('インポートエラー:', error);
-          alert('❌ ファイルの読み込みに失敗しました');
+          alert('Import Failed');
         }
       };
       reader.readAsText(file);
       e.target.value = '';
     });
-
-    // 全データ削除
     clearAllBtn.addEventListener('click', () => {
-      if (confirm('本当にすべてのデータを削除しますか？この操作は取り消せません。')) {
-        if (confirm('最終確認：すべてのデータが削除されます。本当によろしいですか？')) {
-          plants = [];
-          localStorage.removeItem(STORAGE_KEY);
-          alert('✅ すべてのデータを削除しました');
-          closeDataManagementModal();
-          render();
-        }
+      if (confirm('Delete ALL data? This cannot be undone.')) {
+        plants = [];
+        localStorage.removeItem(STORAGE_KEY);
+        closeDataManagementModal();
+        render();
       }
     });
 
     // ========================================
-    // 画像圧縮（共通関数）
+    // 画像圧縮
     // ========================================
     const compressImage = (file, maxWidth = 300, quality = 0.5) => {
       return new Promise((resolve, reject) => {
@@ -496,97 +417,67 @@
           img.onload = () => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
             const scale = maxWidth / img.width;
             const width = scale < 1 ? maxWidth : img.width;
             const height = scale < 1 ? img.height * scale : img.height;
-            
             canvas.width = width;
             canvas.height = height;
             ctx.drawImage(img, 0, 0, width, height);
-            
             resolve(canvas.toDataURL('image/jpeg', quality));
           };
-          img.onerror = reject;
           img.src = e.target.result;
         };
-        reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     };
-
     const resizeAndCompressCanvas = (sourceCanvas, maxWidth = 300, quality = 0.5) => {
       const tempCanvas = document.createElement('canvas');
       const ctx = tempCanvas.getContext('2d');
-      
       const scale = maxWidth / sourceCanvas.width;
       const width = scale < 1 ? maxWidth : sourceCanvas.width;
       const height = scale < 1 ? sourceCanvas.height * scale : sourceCanvas.height;
-      
       tempCanvas.width = width;
       tempCanvas.height = height;
       ctx.drawImage(sourceCanvas, 0, 0, width, height);
-      
       return tempCanvas.toDataURL('image/jpeg', quality);
     };
 
     // ========================================
-    // アクションシート（メニュー）
+    // UI操作 (FAB, Modal)
     // ========================================
     fabBtn.addEventListener('click', () => {
       actionSheetOverlay.classList.remove('hidden');
       actionSheet.classList.remove('hidden');
     });
-
     window.closeActionSheet = () => {
       actionSheetOverlay.classList.add('hidden');
       actionSheet.classList.add('hidden');
     };
-
     cameraOptionBtn.addEventListener('click', () => {
       closeActionSheet();
       openScanOverlay();
     });
-
     manualOptionBtn.addEventListener('click', () => {
       closeActionSheet();
       openManualModal();
     });
-
-    // ========================================
-    // 手動入力モーダル
-    // ========================================
     const openManualModal = () => {
       manualInputModal.classList.remove('hidden');
       manualIdInput.value = '';
       manualIdInput.focus();
     };
-
     window.closeManualModal = (event) => {
       if (event && event.target !== manualInputModal) return;
       manualInputModal.classList.add('hidden');
     };
-
     manualSubmitBtn.addEventListener('click', () => {
       const id = manualIdInput.value.trim();
-      if (!id) {
-        alert('植物IDを入力してください');
-        return;
-      }
-
+      if (!id) return;
       const existing = plants.find(p => p.id === id);
       if (existing) {
-        alert(`ID: ${id} は既に登録済みです`);
+        alert(`ID: ${id} already exists`);
         closeManualModal();
         render();
-        setTimeout(() => {
-          const card = document.querySelector(`[data-plant-id="${id}"]`);
-          if (card) {
-            card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            card.classList.add('highlight-card');
-            setTimeout(() => card.classList.remove('highlight-card'), 1500);
-          }
-        }, 300);
       } else {
         plants.unshift({ id, logs: [], image: null });
         save();
@@ -595,361 +486,204 @@
     });
 
     // ========================================
-    // カメラ制御
+    // カメラ・AI
     // ========================================
     const startCamera = async () => {
       try {
         cameraStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-            facingMode: "environment",
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          } 
+          video: { facingMode: "environment", width: { ideal: 1920 }, height: { ideal: 1080 } } 
         });
         video.srcObject = cameraStream;
-        scanStatus.textContent = "✅ タグを撮影してください";
+        scanStatus.textContent = "✅ Ready to scan";
         scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
       } catch (err) {
-        console.error("カメラ起動エラー:", err);
-        scanStatus.textContent = "❌ カメラへのアクセスが拒否されました";
-        scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
+        scanStatus.textContent = "❌ Camera Error";
       }
     };
-
     const stopCamera = () => {
       if (cameraStream) {
         cameraStream.getTracks().forEach(track => track.stop());
         cameraStream = null;
       }
     };
-
     const openScanOverlay = () => {
       scanOverlay.classList.remove('hidden');
       startCamera();
     };
-
     closeScanBtn.addEventListener('click', () => {
       scanOverlay.classList.add('hidden');
       stopCamera();
-      scanStatus.textContent = "カメラを起動中...";
-      scanStatus.className = "bg-black/80 text-white text-center py-3 px-4 text-sm font-bold";
     });
-
-    // ========================================
-    // 撮影・AI解析
-    // ========================================
     captureBtn.addEventListener('click', async () => {
       const context = canvas.getContext('2d');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      scanStatus.textContent = "⏳ AIで解析中...";
+      scanStatus.textContent = "⏳ Analyzing...";
       scanStatus.className = "bg-yellow-600 text-white text-center py-3 px-4 text-sm font-bold";
       captureBtn.disabled = true;
 
       try {
         const imageBase64 = canvas.toDataURL('image/jpeg', 0.95);
-        debugInfo.textContent = "📤 画像を送信中...\n画像サイズ: " + Math.round(imageBase64.length / 1024) + " KB";
-        
+        debugInfo.textContent = "Sending image...";
         const response = await fetch('/api/scan-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ imageBase64 })
         });
-
         const result = await response.json();
-        debugInfo.textContent = "📥 Geminiからの返答:\n" + JSON.stringify(result, null, 2);
+        debugInfo.textContent = "Result: " + JSON.stringify(result);
         
         if (result.id && result.id !== "NOT_FOUND") {
           const detectedId = result.id;
           const existing = plants.find(p => p.id === detectedId);
-
           if (existing) {
-            // 登録済み：画像は保存しない
-            scanStatus.textContent = `✅ 登録済みです: ${detectedId}`;
+            scanStatus.textContent = `✅ Found: ${detectedId}`;
             scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
-            
             setTimeout(() => {
               scanOverlay.classList.add('hidden');
               stopCamera();
-              
               render();
-              setTimeout(() => {
-                const card = document.querySelector(`[data-plant-id="${detectedId}"]`);
-                if (card) {
-                  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  card.classList.add('highlight-card');
-                  setTimeout(() => card.classList.remove('highlight-card'), 1500);
-                }
-              }, 300);
-            }, 1500);
-            
+            }, 1000);
           } else {
-            // 新規：画像を圧縮して保存
-            scanStatus.textContent = `🆕 新規ID検出: ${detectedId}`;
+            scanStatus.textContent = `🆕 New: ${detectedId}`;
             scanStatus.className = "bg-blue-600 text-white text-center py-3 px-4 text-sm font-bold";
-            
-            if (confirm(`新規登録しますか？\nID: ${detectedId}`)) {
+            if (confirm(`Register new plant?\nID: ${detectedId}`)) {
               const compressedImage = resizeAndCompressCanvas(canvas, 300, 0.5);
-              
-              plants.unshift({ 
-                id: detectedId, 
-                logs: [], 
-                image: compressedImage 
-              });
+              plants.unshift({ id: detectedId, logs: [], image: compressedImage });
               save();
-              
-              scanStatus.textContent = "✅ 新規登録完了！";
-              scanStatus.className = "bg-green-600 text-white text-center py-3 px-4 text-sm font-bold";
-              
               setTimeout(() => {
                 scanOverlay.classList.add('hidden');
                 stopCamera();
-              }, 1500);
-            } else {
-              scanStatus.textContent = "❌ 登録をキャンセルしました";
-              scanStatus.className = "bg-gray-600 text-white text-center py-3 px-4 text-sm font-bold";
+              }, 1000);
             }
           }
         } else {
-          scanStatus.textContent = "⚠️ IDを認識できませんでした";
+          scanStatus.textContent = "⚠️ Not recognized";
           scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
         }
       } catch (error) {
-        console.error("解析エラー:", error);
-        debugInfo.textContent = "❌ エラー:\n" + error.toString();
-        scanStatus.textContent = "❌ 解析に失敗しました";
-        scanStatus.className = "bg-red-600 text-white text-center py-3 px-4 text-sm font-bold";
+        scanStatus.textContent = "❌ Error";
       }
-      
       captureBtn.disabled = false;
     });
 
     // ========================================
-    // 画像の手動登録/変更
+    // ロジック (画像登録・追加・削除)
     // ========================================
     window.openImageUpload = (id) => {
       currentImageTargetId = id;
       imageFileInput.click();
     };
-
     imageFileInput.addEventListener('change', async (e) => {
       if (!e.target.files || !e.target.files[0] || !currentImageTargetId) return;
-      
-      const file = e.target.files[0];
-      const plant = plants.find(p => p.id === currentImageTargetId);
-      
-      if (plant) {
-        try {
-          const compressedImage = await compressImage(file, 300, 0.5);
-          plant.image = compressedImage;
-          save();
-        } catch (error) {
-          console.error('画像圧縮エラー:', error);
-          alert('画像の処理に失敗しました');
-        }
-      }
-      
+      try {
+        const compressedImage = await compressImage(e.target.files[0], 300, 0.5);
+        const plant = plants.find(p => p.id === currentImageTargetId);
+        if (plant) { plant.image = compressedImage; save(); }
+      } catch (e) {}
       e.target.value = '';
-      currentImageTargetId = null;
     });
-
-    // ========================================
-    // 植物管理ロジック
-    // ========================================
     window.addLog = (id, type) => {
       const plant = plants.find(p => p.id === id);
       if (!plant) return;
       const today = new Date();
-      const dateStr = `${today.getMonth() + 1}/${today.getDate()}`;
-      const timestamp = today.getTime();
-      plant.logs.unshift({ type, date: dateStr, ts: timestamp });
+      plant.logs.unshift({ type, date: `${today.getMonth()+1}/${today.getDate()}`, ts: today.getTime() });
       if (plant.logs.length > 50) plant.logs.pop();
       save();
     };
-
     window.deletePlant = (id) => {
-      if (!confirm(`ID: ${id} を削除しますか？`)) return;
-      plants = plants.filter(p => p.id !== id);
-      save();
+      if (confirm(`Delete ${id}?`)) {
+        plants = plants.filter(p => p.id !== id);
+        save();
+      }
     };
 
+    // ========================================
+    // 分析ロジック (日数・平均)
+    // ========================================
     const calculateDaysAgo = (log) => {
-      if (!log) return null;
-      if (log.ts) {
-        const diff = Date.now() - log.ts;
-        return Math.floor(diff / (1000 * 60 * 60 * 24));
-      }
-      try {
-        const now = new Date();
-        const [m, d] = log.date.split('/').map(Number);
-        const logDate = new Date(now.getFullYear(), m - 1, d);
-        if (logDate > now) logDate.setFullYear(now.getFullYear() - 1);
-        const diff = now - logDate;
-        return Math.floor(diff / (1000 * 60 * 60 * 24));
-      } catch (e) {
-        return null;
-      }
+      if (!log || !log.ts) return null;
+      const diff = Date.now() - log.ts;
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
     };
-
-    const getDaysAgoHtml = (log) => {
-      const days = calculateDaysAgo(log);
-      if (days === null) return '';
-      if (days === 0) return '<span class="text-teal-600 font-bold ml-1">(今日)</span>';
-      return `<span class="text-gray-500 font-bold ml-1">(${days}日前)</span>`;
-    };
-
     const isAlertNeeded = (plant) => {
       const lastWaterLog = plant.logs.find(l => l.type === '水');
       if (!lastWaterLog) return false;
       const days = calculateDaysAgo(lastWaterLog);
       return days !== null && days >= ALERT_DAYS;
     };
+    const calculateAverageInterval = (plant) => {
+      const targetTypes = ['水', '液肥', '活力剤'];
+      const validLogs = plant.logs.filter(l => targetTypes.includes(l.type));
+      if (validLogs.length < 2) return null;
+      const sortedLogs = [...validLogs].sort((a, b) => b.ts - a.ts);
+      let totalDays = 0;
+      let count = 0;
+      for (let i = 0; i < sortedLogs.length - 1; i++) {
+        const days1 = calculateDaysAgo(sortedLogs[i]);
+        const days2 = calculateDaysAgo(sortedLogs[i + 1]);
+        if (days1 !== null && days2 !== null) {
+          const diff = Math.abs(days2 - days1);
+          if (diff >= 1) { // 24時間未満は除外
+            totalDays += diff;
+            count++;
+          }
+        }
+      }
+      return count > 0 ? Math.round(totalDays / count) : null;
+    };
 
-// ========================================
-    // ソート機能（高度な並び替え対応版）
+    // ========================================
+    // ソート & フィルタ
     // ========================================
     const sortPlants = (plantsList) => {
       const sortType = sortSelect.value;
       const sorted = [...plantsList];
-
-      if (sortType === 'created') {
-        // そのまま（新しい順）
-        return sorted;
-      } 
-      else if (sortType === 'id') {
-        // ID順 (A-Z)
-        return sorted.sort((a, b) => a.id.localeCompare(b.id));
-      } 
-      else if (sortType === 'alert') {
-        // アラート優先
+      if (sortType === 'created') return sorted;
+      if (sortType === 'id') return sorted.sort((a, b) => a.id.localeCompare(b.id));
+      if (sortType === 'alert') {
         return sorted.sort((a, b) => {
           const aDanger = isAlertNeeded(a);
           const bDanger = isAlertNeeded(b);
-          // 危険な方を上に
           if (aDanger && !bDanger) return -1;
           if (!aDanger && bDanger) return 1;
-          
-          // 同じなら最終水やりが古い順
           const aLog = a.logs.find(l => l.type === '水');
           const bLog = b.logs.find(l => l.type === '水');
-          const aTime = aLog ? (aLog.ts || 0) : 0;
-          const bTime = bLog ? (bLog.ts || 0) : 0;
-          return aTime - bTime;
+          return (aLog ? aLog.ts : 0) - (bLog ? bLog.ts : 0);
         });
       }
-      else if (sortType === 'dry_slow') {
-        // 🐢 乾きが遅い順（平均日数が長い順）
-        return sorted.sort((a, b) => {
-          const aAvg = calculateAverageInterval(a) || -1; // nullなら一番下へ
-          const bAvg = calculateAverageInterval(b) || -1;
-          return bAvg - aAvg; // 降順
-        });
+      if (sortType === 'dry_slow') {
+        return sorted.sort((a, b) => (calculateAverageInterval(b) || -1) - (calculateAverageInterval(a) || -1));
       }
-      else if (sortType === 'dry_fast') {
-        // 🐇 乾きが速い順（平均日数が短い順）
-        return sorted.sort((a, b) => {
-          // null(データ不足)は一番下に送るため、非常に大きな値として扱う
-          const aAvg = calculateAverageInterval(a) || 9999; 
-          const bAvg = calculateAverageInterval(b) || 9999;
-          return aAvg - bAvg; // 昇順
-        });
+      if (sortType === 'dry_fast') {
+        return sorted.sort((a, b) => (calculateAverageInterval(a) || 9999) - (calculateAverageInterval(b) || 9999));
       }
-      
       return sorted;
     };
-
     const filterPlants = (plantsList) => {
       if (!searchQuery) return plantsList;
       return plantsList.filter(p => p.id.toLowerCase().includes(searchQuery.toLowerCase()));
     };
 
     // ========================================
-    // アコーディオン開閉
+    // 描画 (render) - Dark Mode
     // ========================================
     window.toggleAccordion = (id) => {
       const content = document.getElementById(`accordion-${id}`);
       const arrow = document.getElementById(`arrow-${id}`);
-      
       content.classList.toggle('expanded');
       arrow.classList.toggle('rotated');
     };
 
-// ========================================
-    // 平均ペースの計算（修正版）
-    // 水・液肥・活力剤すべてを対象に間隔を計算
-    // ========================================
-    const calculateAverageInterval = (plant) => {
-      // 計算対象にするログの種類
-      const targetTypes = ['水', '液肥', '活力剤'];
-      
-      // 対象のログだけを抽出
-      const validLogs = plant.logs.filter(l => targetTypes.includes(l.type));
-      
-      if (validLogs.length < 2) return null;
-      
-      // 日付順（新しい順）にソート
-      const sortedLogs = [...validLogs].sort((a, b) => b.ts - a.ts);
-      
-      let totalDays = 0;
-      let count = 0;
-      
-      for (let i = 0; i < sortedLogs.length - 1; i++) {
-        const days1 = calculateDaysAgo(sortedLogs[i]);
-        const days2 = calculateDaysAgo(sortedLogs[i + 1]);
-        
-        if (days1 !== null && days2 !== null) {
-          totalDays += Math.abs(days2 - days1);
-          count++;
-        }
-      }
-      
-      return count > 0 ? Math.round(totalDays / count) : null;
-    };
-
-
-// ========================================
-    // ログ表示用のフォーマット関数（ここが抜けていました）
-    // ========================================
-    const formatLogDisplay = (log) => {
-      if (!log) return '---';
-      
-      const date = formatDate(log.ts);
-      let icon = '';
-      let typeText = log.type;
-
-      // タイプに応じたアイコンとテキスト設定
-      switch (log.type) {
-        case '水':
-          icon = '💧';
-          break;
-        case '液肥':
-          icon = '💊';
-          break;
-        case '活力剤':
-          icon = '⚡';
-          break;
-        default:
-          icon = '📝';
-      }
-
-      return `<span class="mr-1">${date}</span><span class="text-xs bg-gray-100 px-1 py-0.5 rounded border border-gray-200">${icon}${typeText}</span>`;
-    };
-
-    // ========================================
-    // 描画関数 (Pattern 1: Dark Mode)
-    // ========================================
     const render = () => {
       const filteredPlants = filterPlants(plants);
       const sortedPlants = sortPlants(filteredPlants);
       const currentSort = sortSelect.value;
-
       plantListEl.innerHTML = '';
 
       if (sortedPlants.length === 0) {
         emptyState.classList.remove('hidden');
-        return;
       } else {
         emptyState.classList.add('hidden');
       }
@@ -957,7 +691,7 @@
       sortedPlants.forEach(plant => {
         const isDanger = isAlertNeeded(plant);
         
-        // ダークモード用のカードスタイル
+        // ダークモードカードスタイル
         const baseClass = "rounded-xl overflow-hidden relative transition-all duration-300 border shadow-lg";
         const cardClass = isDanger 
           ? `${baseClass} bg-red-900/10 border-red-500/50` 
@@ -967,9 +701,8 @@
         const recentLogs = sortedLogs.slice(0, 5);
         const lastLog = sortedLogs[0];
         
-        // テキスト色調整
         const headerInfoHtml = lastLog 
-          ? formatLogDisplay(lastLog).replace('text-gray-800', 'text-gray-200').replace('bg-gray-100', 'bg-gray-700 border-gray-600 text-gray-200')
+          ? formatLogDisplay(lastLog)
           : '<span class="text-gray-600 text-xs">No Record</span>';
         
         const avgInterval = calculateAverageInterval(plant);
@@ -983,7 +716,7 @@
           badgeHtml = `<span class="absolute top-4 right-12 bg-orange-900/50 text-orange-200 text-[10px] font-bold px-2 py-1 rounded border border-orange-700/50">AVG ${avgInterval}d</span>`;
         }
 
-        // 履歴リスト (ダーク用)
+        // 履歴リスト
         let historyListHtml = '';
         if (recentLogs.length > 0) {
           historyListHtml = recentLogs.map(log => {
@@ -1004,7 +737,7 @@
             `;
           }).join('');
         } else {
-          historyListHtml = `<div class="p-3 text-center text-gray-600 text-xs italic">履歴なし</div>`;
+          historyListHtml = `<div class="p-3 text-center text-gray-600 text-xs italic">No History</div>`;
         }
 
         const card = document.createElement('div');
@@ -1040,7 +773,7 @@
                      </div>`
                 }
                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                  <span class="text-xs font-bold text-white border border-white/30 px-3 py-1 rounded-full backdrop-blur-sm">変更</span>
+                  <span class="text-xs font-bold text-white border border-white/30 px-3 py-1 rounded-full backdrop-blur-sm">Change</span>
                 </div>
               </div>
 
@@ -1067,7 +800,7 @@
 
               <div class="text-right">
                 <button onclick="event.stopPropagation(); deletePlant('${plant.id}')" class="text-gray-600 hover:text-red-400 text-xs underline transition">
-                  🗑️ データを削除
+                  🗑️ Delete
                 </button>
               </div>
 
@@ -1078,21 +811,13 @@
       });
     };
 
-    // ========================================
-    // イベントリスナー
-    // ========================================
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
       render();
     });
+    sortSelect.addEventListener('change', render);
 
-    sortSelect.addEventListener('change', () => {
-      render();
-    });
-
-    // 初期描画
     render();
   </script>
-
 </body>
 </html>
