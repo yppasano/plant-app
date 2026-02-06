@@ -180,10 +180,12 @@
     <!-- ソートメニュー -->
     <div class="px-4 py-2 bg-white border-b flex justify-between items-center">
       <span class="text-sm text-gray-600 font-semibold">並び替え:</span>
-      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg p-2">
+      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg p-2 focus:border-teal-500 outline-none">
         <option value="created">▼ 登録順 (新しい順)</option>
-        <option value="id">A-Z ID順</option>
-        <option value="alert">💧 水やり待ち順</option>
+        <option value="id">🔤 ID順 (A-Z)</option>
+        <option value="alert">⚠️ アラート優先</option>
+        <option value="dry_slow">🐢 乾きが遅い順 (要環境チェック)</option>
+        <option value="dry_fast">🐇 乾きが速い順 (水切れ注意)</option>
       </select>
     </div>
 
@@ -798,20 +800,31 @@
       return days !== null && days >= ALERT_DAYS;
     };
 
+// ========================================
+    // ソート機能（高度な並び替え対応版）
+    // ========================================
     const sortPlants = (plantsList) => {
       const sortType = sortSelect.value;
       const sorted = [...plantsList];
 
       if (sortType === 'created') {
+        // そのまま（新しい順）
         return sorted;
-      } else if (sortType === 'id') {
+      } 
+      else if (sortType === 'id') {
+        // ID順 (A-Z)
         return sorted.sort((a, b) => a.id.localeCompare(b.id));
-      } else if (sortType === 'alert') {
+      } 
+      else if (sortType === 'alert') {
+        // アラート優先
         return sorted.sort((a, b) => {
           const aDanger = isAlertNeeded(a);
           const bDanger = isAlertNeeded(b);
+          // 危険な方を上に
           if (aDanger && !bDanger) return -1;
           if (!aDanger && bDanger) return 1;
+          
+          // 同じなら最終水やりが古い順
           const aLog = a.logs.find(l => l.type === '水');
           const bLog = b.logs.find(l => l.type === '水');
           const aTime = aLog ? (aLog.ts || 0) : 0;
@@ -819,6 +832,24 @@
           return aTime - bTime;
         });
       }
+      else if (sortType === 'dry_slow') {
+        // 🐢 乾きが遅い順（平均日数が長い順）
+        return sorted.sort((a, b) => {
+          const aAvg = calculateAverageInterval(a) || -1; // nullなら一番下へ
+          const bAvg = calculateAverageInterval(b) || -1;
+          return bAvg - aAvg; // 降順
+        });
+      }
+      else if (sortType === 'dry_fast') {
+        // 🐇 乾きが速い順（平均日数が短い順）
+        return sorted.sort((a, b) => {
+          // null(データ不足)は一番下に送るため、非常に大きな値として扱う
+          const aAvg = calculateAverageInterval(a) || 9999; 
+          const bAvg = calculateAverageInterval(b) || 9999;
+          return aAvg - bAvg; // 昇順
+        });
+      }
+      
       return sorted;
     };
 
@@ -900,11 +931,13 @@
     };
 
     // ========================================
-    // 描画関数 (render) の修正版：ログ5件表示対応
+    // 描画関数 (render) 修正版
+    // ソート時にバッジを表示するデザイン
     // ========================================
     const render = () => {
       const filteredPlants = filterPlants(plants);
       const sortedPlants = sortPlants(filteredPlants);
+      const currentSort = sortSelect.value; // 現在のソートモード
 
       plantListEl.innerHTML = '';
 
@@ -917,31 +950,35 @@
 
       sortedPlants.forEach(plant => {
         const isDanger = isAlertNeeded(plant);
+        // カードの基本デザイン
         const cardClass = isDanger 
-          ? 'bg-red-50 rounded-xl shadow-md border-2 border-red-400 overflow-hidden'
-          : 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden';
+          ? 'bg-red-50 rounded-xl shadow-md border-2 border-red-400 overflow-hidden relative mb-4'
+          : 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden relative mb-4';
 
-        // --- データ加工 ---
-        
-        // 全ログを新しい順にソート
+        // --- データ準備 ---
         const sortedLogs = plant.logs ? [...plant.logs].sort((a, b) => b.ts - a.ts) : [];
-
-        // 最新5件を取得
         const recentLogs = sortedLogs.slice(0, 5);
-
-        // ヘッダー用 (最新のアクション)
         const lastLog = sortedLogs[0];
         const headerInfoHtml = lastLog ? formatLogDisplay(lastLog) : '未記録';
         
         // 平均ペース
         const avgInterval = calculateAverageInterval(plant);
-        const avgText = avgInterval ? `${avgInterval}日` : '---';
+        const avgText = (avgInterval !== null) ? `${avgInterval}日` : '---';
 
-        // --- 5件分の履歴HTMLを生成 ---
+        // --- バッジ（チップ）生成 ---
+        let badgeHtml = '';
+        if (currentSort === 'dry_slow' && avgInterval !== null) {
+          // 遅い順 = グレーのバッジ
+          badgeHtml = `<span class="absolute top-4 right-12 bg-gray-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10">平均 ${avgInterval}日</span>`;
+        } else if (currentSort === 'dry_fast' && avgInterval !== null) {
+          // 速い順 = オレンジのバッジ
+          badgeHtml = `<span class="absolute top-4 right-12 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm z-10">平均 ${avgInterval}日</span>`;
+        }
+
+        // --- 履歴リスト ---
         let historyListHtml = '';
         if (recentLogs.length > 0) {
           historyListHtml = recentLogs.map(log => {
-            // アイコン決定
             let icon = '📝';
             if (log.type === '水') icon = '💧';
             else if (log.type === '液肥') icon = '💊';
@@ -966,11 +1003,11 @@
         card.className = cardClass;
         card.dataset.plantId = plant.id;
         
-        // --- HTML生成 ---
+        // --- HTML組み立て ---
         card.innerHTML = `
-          <div class="accordion-header p-4 flex items-center justify-between bg-white" onclick="toggleAccordion('${plant.id}')">
+          ${badgeHtml} <div class="accordion-header p-4 flex items-center justify-between bg-white cursor-pointer hover:bg-gray-50 transition" onclick="toggleAccordion('${plant.id}')">
             <div class="flex items-center gap-3">
-              <div class="flex-shrink-0 text-xl">
+              <div class="flex-shrink-0 text-2xl">
                 ${isDanger ? '⚠️' : '🌿'}
               </div>
               <div class="flex flex-col">
@@ -980,10 +1017,10 @@
                 </div>
               </div>
             </div>
-            <div id="arrow-${plant.id}" class="arrow-icon text-gray-400 text-xl">▼</div>
+            <div id="arrow-${plant.id}" class="arrow-icon text-gray-400 text-xl transform transition-transform duration-300">▼</div>
           </div>
 
-          <div id="accordion-${plant.id}" class="accordion-content bg-gray-50">
+          <div id="accordion-${plant.id}" class="accordion-content bg-gray-50 max-h-0 overflow-hidden transition-all duration-300">
             <div class="p-4 border-t border-gray-200">
               
               <div onclick="event.stopPropagation(); openImageUpload('${plant.id}')" class="w-full h-56 mb-4 cursor-pointer hover:opacity-90 transition rounded-lg overflow-hidden border border-gray-200 bg-white relative group">
@@ -998,7 +1035,7 @@
               </div>
 
               <div class="mb-2 px-1 flex justify-between items-end">
-                <span class="text-xs font-bold text-gray-500">📝 活動履歴 (直近5件)</span>
+                <span class="text-xs font-bold text-gray-500">📝 直近の履歴</span>
                 <span class="text-xs text-teal-600 font-bold">平均ペース: ${avgText}</span>
               </div>
 
@@ -1007,15 +1044,13 @@
               </div>
 
               <div class="grid grid-cols-3 gap-3 mb-4">
-                <button onclick="event.stopPropagation(); addLog('${plant.id}', '液肥')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 text-sm rounded-lg shadow-md active:scale-95 transition flex flex-col items-center gap-1 transform scale-105">
+                <button onclick="event.stopPropagation(); addLog('${plant.id}', '液肥')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 text-sm rounded-lg shadow-md active:scale-95 transition flex flex-col items-center gap-1">
                   <span>💊</span>液肥
                 </button>
-                
                 <button onclick="event.stopPropagation(); addLog('${plant.id}', '水')" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 text-sm rounded-lg shadow-md active:scale-95 transition flex flex-col items-center gap-1 transform scale-105">
                   <span>💧</span>水
                 </button>
-                
-                <button onclick="event.stopPropagation(); addLog('${plant.id}', '活力剤')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm rounded-lg shadow-md active:scale-95 transition flex flex-col items-center gap-1 transform scale-105">
+                <button onclick="event.stopPropagation(); addLog('${plant.id}', '活力剤')" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 text-sm rounded-lg shadow-md active:scale-95 transition flex flex-col items-center gap-1">
                   <span>⚡</span>活力剤
                 </button>
               </div>
