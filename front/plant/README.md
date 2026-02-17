@@ -26,6 +26,25 @@ Vercel にデプロイする場合は、Vercel のダッシュボードで環境
 - **front/plant をルートにする場合**: Vercel の Root Directory を `front/plant` に設定し、`front/plant/vercel.json` が使用されます
 - **401 Unauthorized が出る場合**: Vercel の Deployment Protection が有効な可能性があります。Settings > Deployment Protection でプレビューデプロイの保護を無効化するか、本番（main ブランチ）にデプロイしてください
 
+## バックアップ・復元
+
+### 携帯のデータをクラウドに移行する
+
+1. クラウド版アプリにログイン
+2. ⚙️ 設定 → **「バックアップから取り込み (Import)」**
+3. 携帯に保存した JSON ファイルを選択
+4. 確認ダイアログで OK を押す
+
+**対応フォーマット:**
+- `[{ id, logs: [{ type, ts }], image? }]` の配列
+- `{ plants: [...] }` や `{ data: [...] }` でラップされた形式
+- ログの `date`（例: "1/15"）形式にも対応
+- 写真（Base64）付きの場合は自動で Supabase にアップロード
+
+### クラウドのデータをバックアップする
+
+設定 → **「バックアップを保存 (Export)」** で JSON ファイルをダウンロードできます。
+
 ## 開発サーバーの起動手順
 
 ### Dockerコンテナ内で起動する場合

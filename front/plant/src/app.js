@@ -252,55 +252,104 @@ elsImageInput.addEventListener('change', async (e) => {
 });
 
 // ========================================
-// データ移行 (JSON Import)
+// データ移行 (JSON Import / Export)
 // ========================================
 document.getElementById('importBtn').addEventListener('click', () => els.importFileInput.click());
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const backup = plants.map(p => ({
+    id: p.id,
+    logs: [...p.logs].sort((a, b) => b.ts - a.ts).map(l => ({ type: l.type, ts: l.ts })),
+    image: p.image || null
+  }));
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `plant-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
 
 els.importFileInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (!confirm("手元のバックアップファイルをクラウドにアップロードしますか？\n(重複するIDはスキップされます)")) return;
+  if (!confirm("手元のバックアップファイルをクラウドにアップロードしますか？\n(重複するIDはスキップされます)\n※ 写真付きの場合はアップロードに時間がかかります")) return;
 
   updateSyncStatus('loading');
   const reader = new FileReader();
   reader.onload = async (ev) => {
     try {
-      const localData = JSON.parse(ev.target.result);
-      if (!Array.isArray(localData)) throw new Error("Invalid Format");
+      const raw = String(ev.target.result).replace(/^\uFEFF/, '');
+      let parsed = JSON.parse(raw);
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+      const localData = Array.isArray(parsed)
+        ? parsed
+        : (parsed.plants || parsed.data || (parsed.plantCycleData ? (typeof parsed.plantCycleData === 'string' ? JSON.parse(parsed.plantCycleData) : parsed.plantCycleData) : []));
+      if (!Array.isArray(localData) || localData.length === 0) {
+        throw new Error("有効なデータが見つかりません。JSON形式を確認してください。\n例: [{\"id\":\"A-01\",\"logs\":[{\"type\":\"水\",\"ts\":1234567890000}]}]");
+      }
 
       let count = 0;
+      const errors = [];
       for (const item of localData) {
-        const exists = plants.find(p => p.id === item.id);
+        const plantId = item.id ?? item.plant_id;
+        if (!plantId) continue;
+        const exists = plants.find(p => p.id === plantId);
         if (!exists) {
+          let imageUrl = null;
+          if (item.image && String(item.image).startsWith('data:image')) {
+            try {
+              const blob = await fetch(item.image).then(r => r.blob());
+              imageUrl = await uploadImage(blob);
+            } catch (imgErr) {
+              console.warn('Image upload skip:', plantId, imgErr);
+            }
+          }
+
           const { data: newPlant, error } = await supabase
             .from('plants')
-            .insert({ user_id: currentUser.id, plant_id: item.id })
+            .insert({ user_id: currentUser.id, plant_id: plantId, image_url: imageUrl })
             .select()
             .single();
 
-          if (!error && newPlant && item.logs) {
-            const logsToInsert = item.logs.map(l => ({
-              user_id: currentUser.id,
-              plant_db_id: newPlant.id,
-              type: l.type,
-              logged_at: new Date(l.ts).toISOString()
-            }));
+          if (error) {
+            errors.push(`${plantId}: ${error.message}`);
+            continue;
+          }
+          count++;
+
+          if (newPlant && item.logs && Array.isArray(item.logs) && item.logs.length > 0) {
+            const logsToInsert = item.logs
+              .map(l => {
+                let ts = l.ts;
+                if (ts == null && l.date) {
+                  const parts = String(l.date).split('/').map(Number);
+                  const now = new Date();
+                  const d2 = new Date(now.getFullYear(), (parts[0] || 1) - 1, parts[1] || 1);
+                  if (d2 > now) d2.setFullYear(now.getFullYear() - 1);
+                  ts = d2.getTime();
+                }
+                return ts != null && l.type ? { user_id: currentUser.id, plant_db_id: newPlant.id, type: l.type, logged_at: new Date(ts).toISOString() } : null;
+              })
+              .filter(Boolean);
             if (logsToInsert.length > 0) {
-              await supabase.from('logs').insert(logsToInsert);
+              const { error: logErr } = await supabase.from('logs').insert(logsToInsert);
+              if (logErr) console.warn('Log insert warning:', plantId, logErr);
             }
-            count++;
           }
         }
       }
-      alert(`Import complete! Added ${count} plants.`);
+      const msg = errors.length > 0
+        ? `取り込み完了: ${count}件追加\n※ ${errors.length}件でエラー:\n${errors.slice(0, 3).join('\n')}${errors.length > 3 ? '\n...' : ''}`
+        : `取り込み完了: ${count}件追加しました`;
+      alert(msg);
       await fetchPlants();
       closeSettingsModal();
     } catch (err) {
       alert("Import Failed: " + err.message);
     }
   };
-  reader.readAsText(file);
+  reader.readAsText(file, 'UTF-8');
   e.target.value = '';
 });
 
