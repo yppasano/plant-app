@@ -327,12 +327,24 @@ els.importFileInput.addEventListener('change', async (e) => {
 
   if (!confirm("手元のバックアップファイルをクラウドにアップロードしますか？\n(重複するIDはスキップされます)\n※ 写真付きの場合はアップロードに時間がかかります")) return;
 
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) {
+  let user = currentUser;
+  if (!user) {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) user = session.user;
+  }
+  if (!user) {
+    const { data: { session } } = await supabase.auth.refreshSession();
+    if (session?.user) user = session.user;
+  }
+  if (!user) {
+    const recovered = await tryRecoverSessionFromStorage();
+    if (recovered) user = recovered;
+  }
+  if (!user) {
     alert("セッションが切れています。再度ログインしてください。");
     return;
   }
-  currentUser = session.user;
+  currentUser = user;
 
   updateSyncStatus('loading');
   const reader = new FileReader();
