@@ -1,5 +1,17 @@
 # 植物サイクル管理アプリ
 
+## 初回セットアップ（環境変数）
+
+Supabase を使用するには、環境変数の設定が必要です。
+
+```bash
+cd front/plant
+cp .env.example .env
+# .env を編集し、VITE_SUPABASE_URL と VITE_SUPABASE_KEY を設定
+```
+
+Vercel にデプロイする場合は、Vercel のダッシュボードで環境変数 `VITE_SUPABASE_URL` と `VITE_SUPABASE_KEY` を設定してください。
+
 ## 開発サーバーの起動手順
 
 ### Dockerコンテナ内で起動する場合

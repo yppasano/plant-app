@@ -85,13 +85,11 @@ export default async function handler(request, response) {
             resultText = rawResponse.trim();
         }
 
-        return response.status(200).json({ 
-            id: resultText,
-            debug: {
-                rawResponse: rawResponse,
-                fullResponse: data
-            }
-        });
+        const payload = { id: resultText };
+        if (process.env.NODE_ENV !== 'production') {
+            payload.debug = { rawResponse: rawResponse, fullResponse: data };
+        }
+        return response.status(200).json(payload);
 
     } catch (error) {
         console.error(error);
