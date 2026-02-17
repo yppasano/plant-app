@@ -1,0 +1,11 @@
+{
+  "buildCommand": "cd front/plant && npm install && npm run build",
+  "outputDirectory": "front/plant/dist",
+  "rewrites": [
+    { "source": "/plant", "destination": "/index.html" },
+    { "source": "/plant/", "destination": "/index.html" },
+    { "source": "/plant/index.html", "destination": "/index.html" },
+    { "source": "/plant/assets/:path*", "destination": "/assets/:path*" },
+    { "source": "/plant/manifest.json", "destination": "/manifest.json" }
+  ]
+}

@@ -12,6 +12,12 @@ cp .env.example .env
 
 Vercel にデプロイする場合は、Vercel のダッシュボードで環境変数 `VITE_SUPABASE_URL` と `VITE_SUPABASE_KEY` を設定してください。
 
+### Vercel デプロイ設定
+
+- **リポジトリルートからデプロイする場合**: ルートの `vercel.json` が使用されます（Root Directory は未設定）
+- **front/plant をルートにする場合**: Vercel の Root Directory を `front/plant` に設定し、`front/plant/vercel.json` が使用されます
+- **401 Unauthorized が出る場合**: Vercel の Deployment Protection が有効な可能性があります。Settings > Deployment Protection でプレビューデプロイの保護を無効化するか、本番（main ブランチ）にデプロイしてください
+
 ## 開発サーバーの起動手順
 
 ### Dockerコンテナ内で起動する場合
