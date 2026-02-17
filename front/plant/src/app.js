@@ -77,19 +77,48 @@ const escapeHtml = (str) => {
 // ========================================
 // 認証フロー
 // ========================================
+const tryRecoverSessionFromStorage = async () => {
+  const keysToTry = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && (k.startsWith('sb-') && k.endsWith('-auth-token'))) keysToTry.push(k);
+  }
+  try {
+    for (const key of [...new Set(keysToTry)]) {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const data = JSON.parse(raw);
+        const sess = data?.currentSession ?? data?.session ?? data;
+        if (sess?.access_token && sess?.refresh_token) {
+          const { data: d, error } = await supabase.auth.setSession({
+            access_token: sess.access_token,
+            refresh_token: sess.refresh_token
+          });
+          if (!error && d?.user) return d.user;
+        }
+      }
+    }
+  } catch (e) { console.warn('Session recovery:', e); }
+  return null;
+};
+
 const checkUser = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (session) {
+  let { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+    session = refreshed;
+  }
+  if (!session) {
+    const user = await tryRecoverSessionFromStorage();
+    if (user) {
+      currentUser = user;
+      showApp();
+      return;
+    }
+    showAuth();
+  } else {
     currentUser = session.user;
     showApp();
-  } else {
-    const { data: { session: refreshed } } = await supabase.auth.refreshSession();
-    if (refreshed?.user) {
-      currentUser = refreshed.user;
-      showApp();
-    } else {
-      showAuth();
-    }
   }
 };
 
@@ -297,6 +326,13 @@ els.importFileInput.addEventListener('change', async (e) => {
   if (!file) return;
 
   if (!confirm("手元のバックアップファイルをクラウドにアップロードしますか？\n(重複するIDはスキップされます)\n※ 写真付きの場合はアップロードに時間がかかります")) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.user) {
+    alert("セッションが切れています。再度ログインしてください。");
+    return;
+  }
+  currentUser = session.user;
 
   updateSyncStatus('loading');
   const reader = new FileReader();

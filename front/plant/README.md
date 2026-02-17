@@ -28,6 +28,13 @@ Supabase の無料プランではメール送信に制限（約2通/時間）が
 
 - シークレット/プライベートモードではセッションが保持されません。通常モードで開いてください
 - ブラウザの「サイトデータを削除」を行うとログアウトされます
+- PWA（ホーム画面に追加）で開いている場合、OSがストレージをクリアすることがあります。ブラウザで直接開いてみてください
+
+### RLS エラー（row-level security policy）が出る場合
+
+1. **supabase-rls-policies.sql** を Supabase の SQL Editor で実行
+2. **plants.user_id の型**を確認: Table Editor > plants > user_id が `uuid` 型であること（`text` の場合は `auth.uid()` と型が合わず失敗します）
+3. **Anon Key を使用**: VITE_SUPABASE_KEY には「Anon public」キーを設定（Service role は使わない）
 
 ### Vercel デプロイ設定
 
