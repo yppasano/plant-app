@@ -1,6 +1,7 @@
 /**
  * Cycle Monitor Cloud - メインアプリケーション
  */
+import './style.css';
 import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
 
 // ========================================

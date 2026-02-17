@@ -12,6 +12,14 @@ cp .env.example .env
 
 Vercel にデプロイする場合は、Vercel のダッシュボードで環境変数 `VITE_SUPABASE_URL` と `VITE_SUPABASE_KEY` を設定してください。
 
+### Vercel 環境変数でエラーが出る場合
+
+1. **変数名を確認**: 必ず `VITE_SUPABASE_URL` と `VITE_SUPABASE_KEY`（大文字小文字含め完全一致）
+2. **適用環境**: Production にチェックを入れる（Preview / Development も必要に応じて）
+3. **値の形式**: 前後にスペースを入れない。URL は `https://` から始まること
+4. **再デプロイ**: 環境変数を追加・変更したら、Deployments から「Redeploy」で再ビルドが必要です
+5. **設定エラー画面が出る場合**: 上記を確認し、再デプロイ後にブラウザのキャッシュを削除して再読み込み
+
 ### Vercel デプロイ設定
 
 - **リポジトリルートからデプロイする場合**: ルートの `vercel.json` が使用されます（Root Directory は未設定）
