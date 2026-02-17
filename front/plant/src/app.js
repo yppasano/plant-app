@@ -21,7 +21,13 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error('Supabase config missing');
 }
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false
+  }
+});
 
 // 状態管理
 let plants = [];
@@ -72,12 +78,18 @@ const escapeHtml = (str) => {
 // 認証フロー
 // ========================================
 const checkUser = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session }, error } = await supabase.auth.getSession();
   if (session) {
     currentUser = session.user;
     showApp();
   } else {
-    showAuth();
+    const { data: { session: refreshed } } = await supabase.auth.refreshSession();
+    if (refreshed?.user) {
+      currentUser = refreshed.user;
+      showApp();
+    } else {
+      showAuth();
+    }
   }
 };
 
@@ -91,9 +103,20 @@ els.signInBtn.addEventListener('click', async () => {
   let { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    const isRateLimit = error.message?.toLowerCase().includes('rate limit') || error.message?.toLowerCase().includes('429');
+    if (isRateLimit) {
+      els.authError.textContent = 'メール送信の制限に達しました。約1時間お待ちください。';
+      els.authError.classList.remove('hidden');
+      els.signInBtn.disabled = false;
+      els.signInBtn.textContent = "Sign In / Sign Up";
+      return;
+    }
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
     if (signUpError) {
-      els.authError.textContent = "Error: " + signUpError.message;
+      const errMsg = signUpError.message?.toLowerCase().includes('rate limit') || signUpError.message?.toLowerCase().includes('429')
+        ? 'メール送信の制限に達しました。約1時間お待ちください。'
+        : signUpError.message;
+      els.authError.textContent = errMsg;
       els.authError.classList.remove('hidden');
       els.signInBtn.disabled = false;
       els.signInBtn.textContent = "Sign In / Sign Up";
