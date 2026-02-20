@@ -116,18 +116,26 @@ const getLogTimestamp = (log) => {
   return 0
 }
 
-// 最新の水やりログを取得
+// 最新の水やりログを取得（ソート用）
 const getLastWaterLog = (plant) => {
-  const waterLogs = (plant.logs || []).filter(l => l.type === '水')
+  const waterLogs = (plant.logs || []).filter(l => l.type === '水' || l.type === '水やり')
   if (waterLogs.length === 0) return null
   return waterLogs.reduce((a, b) => (getLogTimestamp(a) > getLogTimestamp(b) ? a : b))
 }
 
-// 警告判定（7日以上水やりなし）
+// 最新のお世話ログを取得（水・液肥・活力剤のいずれか）
+const getLastCareLog = (plant) => {
+  const careTypes = ['水', '水やり', '液肥', '活力剤']
+  const careLogs = (plant.logs || []).filter(l => careTypes.includes(l.type))
+  if (careLogs.length === 0) return null
+  return careLogs.reduce((a, b) => (getLogTimestamp(a) > getLogTimestamp(b) ? a : b))
+}
+
+// 警告判定（7日以上、水・液肥・活力剤のいずれもしていない場合）
 const isAlertNeeded = (plant) => {
-  const lastWaterLog = getLastWaterLog(plant)
-  if (!lastWaterLog) return false
-  const days = calculateDaysAgo(lastWaterLog)
+  const lastCare = getLastCareLog(plant)
+  if (!lastCare) return false
+  const days = calculateDaysAgo(lastCare)
   return days !== null && days >= ALERT_DAYS
 }
 
@@ -151,9 +159,9 @@ const sortPlants = (plantsList) => {
       if (aDanger && !bDanger) return -1 // aを上に
       if (!aDanger && bDanger) return 1  // bを上に
       
-      // 両方警告、または両方平気なら、最後の水やりが古い順に並べる
-      const aLog = getLastWaterLog(a)
-      const bLog = getLastWaterLog(b)
+      // 両方警告、または両方平気なら、最後のお世話が古い順に並べる
+      const aLog = getLastCareLog(a)
+      const bLog = getLastCareLog(b)
       const aTime = aLog ? getLogTimestamp(aLog) : 0
       const bTime = bLog ? getLogTimestamp(bLog) : 0
       return aTime - bTime // 古い（数値が小さい）ほうが上

@@ -472,18 +472,26 @@ const calculateAverageInterval = (plant) => {
   return count > 0 ? Math.round(total / count) : null;
 };
 
-// 最新の水やりログを取得
+// 最新の水やりログを取得（ソート用）
 const getLastWaterLog = (plant) => {
-  const waterLogs = (plant.logs || []).filter(l => l.type === '水');
+  const waterLogs = (plant.logs || []).filter(l => l.type === '水' || l.type === '水やり');
   if (waterLogs.length === 0) return null;
   return waterLogs.reduce((a, b) => (a.ts > b.ts ? a : b));
 };
 
-// 警告判定（7日以上水やりなし）
+// 最新のお世話ログを取得（水・液肥・活力剤のいずれか）
+const getLastCareLog = (plant) => {
+  const careTypes = ['水', '水やり', '液肥', '活力剤'];
+  const careLogs = (plant.logs || []).filter(l => careTypes.includes(l.type));
+  if (careLogs.length === 0) return null;
+  return careLogs.reduce((a, b) => (a.ts > b.ts ? a : b));
+};
+
+// 警告判定（7日以上、水・液肥・活力剤のいずれもしていない場合）
 const isAlertNeeded = (plant) => {
-  const lastWaterLog = getLastWaterLog(plant);
-  if (!lastWaterLog) return false;
-  const daysAgo = Math.floor((Date.now() - lastWaterLog.ts) / (1000 * 60 * 60 * 24));
+  const lastCare = getLastCareLog(plant);
+  if (!lastCare) return false;
+  const daysAgo = Math.floor((Date.now() - lastCare.ts) / (1000 * 60 * 60 * 24));
   return daysAgo >= ALERT_DAYS;
 };
 
@@ -576,8 +584,8 @@ const render = () => {
       const bDanger = isAlertNeeded(b);
       if (aDanger && !bDanger) return -1;
       if (!aDanger && bDanger) return 1;
-      const aLog = getLastWaterLog(a);
-      const bLog = getLastWaterLog(b);
+      const aLog = getLastCareLog(a);
+      const bLog = getLastCareLog(b);
       const aTime = aLog ? aLog.ts : 0;
       const bTime = bLog ? bLog.ts : 0;
       return aTime - bTime;
