@@ -457,6 +457,8 @@ const formatDate = (ts) => {
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
 };
 
+const ALERT_DAYS = 7;
+
 const calculateAverageInterval = (plant) => {
   const targetTypes = ['水', '液肥', '活力剤'];
   const validLogs = plant.logs.filter(l => targetTypes.includes(l.type));
@@ -468,6 +470,21 @@ const calculateAverageInterval = (plant) => {
     if (diff >= 0.5) { total += diff; count++; }
   }
   return count > 0 ? Math.round(total / count) : null;
+};
+
+// 最新の水やりログを取得
+const getLastWaterLog = (plant) => {
+  const waterLogs = (plant.logs || []).filter(l => l.type === '水');
+  if (waterLogs.length === 0) return null;
+  return waterLogs.reduce((a, b) => (a.ts > b.ts ? a : b));
+};
+
+// 警告判定（7日以上水やりなし）
+const isAlertNeeded = (plant) => {
+  const lastWaterLog = getLastWaterLog(plant);
+  if (!lastWaterLog) return false;
+  const daysAgo = Math.floor((Date.now() - lastWaterLog.ts) / (1000 * 60 * 60 * 24));
+  return daysAgo >= ALERT_DAYS;
 };
 
 // ========================================
@@ -553,8 +570,19 @@ const render = () => {
 
   const sortType = els.sortSelect.value;
   if (sortType === 'id') data = [...data].sort((a, b) => a.id.localeCompare(b.id));
-  else if (sortType === 'alert') data = [...data].sort((a, b) => 0);
-  else if (sortType === 'dry_slow') data = [...data].sort((a, b) => (calculateAverageInterval(b) || 0) - (calculateAverageInterval(a) || 0));
+  else if (sortType === 'alert') {
+    data = [...data].sort((a, b) => {
+      const aDanger = isAlertNeeded(a);
+      const bDanger = isAlertNeeded(b);
+      if (aDanger && !bDanger) return -1;
+      if (!aDanger && bDanger) return 1;
+      const aLog = getLastWaterLog(a);
+      const bLog = getLastWaterLog(b);
+      const aTime = aLog ? aLog.ts : 0;
+      const bTime = bLog ? bLog.ts : 0;
+      return aTime - bTime;
+    });
+  } else if (sortType === 'dry_slow') data = [...data].sort((a, b) => (calculateAverageInterval(b) || 0) - (calculateAverageInterval(a) || 0));
   else if (sortType === 'dry_fast') data = [...data].sort((a, b) => (calculateAverageInterval(a) || 999) - (calculateAverageInterval(b) || 999));
 
   els.plantList.innerHTML = '';
@@ -570,7 +598,7 @@ const render = () => {
     const lastLog = sortedLogs[0];
     const lastDate = lastLog ? formatDate(lastLog.ts) : '---';
     const lastType = lastLog ? lastLog.type : '';
-    const isAlert = false;
+    const isAlert = isAlertNeeded(p);
 
     const card = document.createElement('div');
     card.className = `bg-gray-800 border ${isAlert ? 'border-red-900 bg-red-900/10' : 'border-gray-700'} rounded-xl overflow-hidden shadow-lg relative`;

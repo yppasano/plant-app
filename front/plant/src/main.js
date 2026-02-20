@@ -101,10 +101,32 @@ const getDaysAgoHtml = (log) => {
   return `<span class="text-gray-500 font-bold ml-1">(${days}日前)</span>`
 }
 
-// 警告判定
+// ログのタイムスタンプ取得（ts または date から算出）
+const getLogTimestamp = (log) => {
+  if (log?.ts) return log.ts
+  if (log?.date) {
+    try {
+      const [m, d] = String(log.date).split('/').map(Number)
+      const d2 = new Date()
+      d2.setMonth((m || 1) - 1)
+      d2.setDate(d || 1)
+      return d2.getTime()
+    } catch (e) { return 0 }
+  }
+  return 0
+}
+
+// 最新の水やりログを取得
+const getLastWaterLog = (plant) => {
+  const waterLogs = (plant.logs || []).filter(l => l.type === '水')
+  if (waterLogs.length === 0) return null
+  return waterLogs.reduce((a, b) => (getLogTimestamp(a) > getLogTimestamp(b) ? a : b))
+}
+
+// 警告判定（7日以上水やりなし）
 const isAlertNeeded = (plant) => {
-  const lastWaterLog = plant.logs.find(l => l.type === '水')
-  if (!lastWaterLog) return false // 未記録は一旦スルー（必要ならtrueへ）
+  const lastWaterLog = getLastWaterLog(plant)
+  if (!lastWaterLog) return false
   const days = calculateDaysAgo(lastWaterLog)
   return days !== null && days >= ALERT_DAYS
 }
@@ -130,10 +152,10 @@ const sortPlants = (plantsList) => {
       if (!aDanger && bDanger) return 1  // bを上に
       
       // 両方警告、または両方平気なら、最後の水やりが古い順に並べる
-      const aLog = a.logs.find(l => l.type === '水')
-      const bLog = b.logs.find(l => l.type === '水')
-      const aTime = aLog ? (aLog.ts || 0) : 0
-      const bTime = bLog ? (bLog.ts || 0) : 0
+      const aLog = getLastWaterLog(a)
+      const bLog = getLastWaterLog(b)
+      const aTime = aLog ? getLogTimestamp(aLog) : 0
+      const bTime = bLog ? getLogTimestamp(bLog) : 0
       return aTime - bTime // 古い（数値が小さい）ほうが上
     })
   }
@@ -150,7 +172,8 @@ const render = () => {
 
   sortedPlants.forEach(plant => {
     const isDanger = isAlertNeeded(plant)
-    
+    const plantIcon = isDanger ? '⚠️' : '🌿'
+
     const cardClass = isDanger 
       ? 'bg-red-50 p-4 rounded-xl shadow border-2 border-red-400 relative overflow-hidden'
       : 'bg-white p-4 rounded-xl shadow border border-gray-100'
@@ -159,10 +182,11 @@ const render = () => {
       ? `<div class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">水やり注意！</div>`
       : ''
 
+    const sortedLogs = [...(plant.logs || [])].sort((x, y) => (getLogTimestamp(y) - getLogTimestamp(x)))
     let log1Html = 'ー'
     let log2Html = 'ー'
-    if (plant.logs[0]) log1Html = `${plant.logs[0].type} (${plant.logs[0].date}) ${getDaysAgoHtml(plant.logs[0])}`
-    if (plant.logs[1]) log2Html = `${plant.logs[1].type} (${plant.logs[1].date}) ${getDaysAgoHtml(plant.logs[1])}`
+    if (sortedLogs[0]) log1Html = `${sortedLogs[0].type} (${sortedLogs[0].date || '-'}) ${getDaysAgoHtml(sortedLogs[0])}`
+    if (sortedLogs[1]) log2Html = `${sortedLogs[1].type} (${sortedLogs[1].date || '-'}) ${getDaysAgoHtml(sortedLogs[1])}`
 
     const imageHtml = plant.image 
       ? `<img src="${plant.image}" class="w-full h-48 object-cover rounded-lg mb-3 cursor-pointer hover:opacity-90 shadow-sm" onclick="openCamera('${plant.id}')">`
@@ -176,7 +200,7 @@ const render = () => {
     card.innerHTML = `
       ${alertBadge}
       <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xl font-bold text-gray-700">${plant.id}</h2>
+        <h2 class="text-xl font-bold text-gray-700 flex items-center gap-2"><span class="text-2xl">${plantIcon}</span>${plant.id}</h2>
         <button onclick="deletePlant('${plant.id}')" class="text-xs text-red-400 hover:text-red-600">削除</button>
       </div>
       
