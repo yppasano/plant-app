@@ -21,6 +21,19 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
   throw new Error('Supabase config missing');
 }
 
+if (typeof window.supabase?.createClient !== 'function') {
+  document.body.innerHTML = `
+    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
+      <div class="text-6xl mb-4">⚠️</div>
+      <h2 class="text-xl font-bold mb-2">読み込みエラー</h2>
+      <p class="text-gray-400 text-sm text-center max-w-sm">
+        Supabase ライブラリの読み込みに失敗しました。ネットワーク接続を確認してください。
+      </p>
+    </div>
+  `;
+  throw new Error('Supabase library not loaded');
+}
+
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: true,
@@ -81,7 +94,7 @@ const tryRecoverSessionFromStorage = async () => {
   const keysToTry = [];
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && (k.startsWith('sb-') && k.endsWith('-auth-token'))) keysToTry.push(k);
+    if (k && k.startsWith('sb-') && k.includes('auth')) keysToTry.push(k);
   }
   try {
     for (const key of [...new Set(keysToTry)]) {
@@ -122,41 +135,70 @@ const checkUser = async () => {
   }
 };
 
-els.signInBtn.addEventListener('click', async () => {
-  const email = els.emailInput.value;
-  const password = els.passwordInput.value;
-  els.authError.classList.add('hidden');
+els.signInBtn?.addEventListener('click', async () => {
+  const email = (els.emailInput?.value || '').trim();
+  const password = els.passwordInput?.value || '';
+  els.authError?.classList.add('hidden');
   els.signInBtn.disabled = true;
   els.signInBtn.textContent = "Processing...";
 
-  let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  const resetBtn = () => {
+    els.signInBtn.disabled = false;
+    els.signInBtn.textContent = "Sign In / Sign Up";
+  };
 
-  if (error) {
-    const isRateLimit = error.message?.toLowerCase().includes('rate limit') || error.message?.toLowerCase().includes('429');
-    if (isRateLimit) {
-      els.authError.textContent = 'メール送信の制限に達しました。約1時間お待ちください。';
-      els.authError.classList.remove('hidden');
-      els.signInBtn.disabled = false;
-      els.signInBtn.textContent = "Sign In / Sign Up";
+  try {
+    if (!email || !password) {
+      els.authError.textContent = 'Email と Password を入力してください';
+      els.authError?.classList.remove('hidden');
+      resetBtn();
       return;
     }
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
-    if (signUpError) {
-      const errMsg = signUpError.message?.toLowerCase().includes('rate limit') || signUpError.message?.toLowerCase().includes('429')
-        ? 'メール送信の制限に達しました。約1時間お待ちください。'
-        : signUpError.message;
-      els.authError.textContent = errMsg;
-      els.authError.classList.remove('hidden');
-      els.signInBtn.disabled = false;
-      els.signInBtn.textContent = "Sign In / Sign Up";
-    } else {
-      alert("アカウントを作成しました！ログインされました。");
-      currentUser = signUpData.user;
-      showApp();
+
+    let { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      const isRateLimit = error.message?.toLowerCase().includes('rate limit') || error.message?.toLowerCase().includes('429');
+      if (isRateLimit) {
+        els.authError.textContent = 'メール送信の制限に達しました。約1時間お待ちください。';
+        els.authError?.classList.remove('hidden');
+        resetBtn();
+        return;
+      }
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({ email, password });
+      if (signUpError) {
+        const errMsg = signUpError.message?.toLowerCase().includes('rate limit') || signUpError.message?.toLowerCase().includes('429')
+          ? 'メール送信の制限に達しました。約1時間お待ちください。'
+          : signUpError.message;
+        els.authError.textContent = errMsg;
+        els.authError?.classList.remove('hidden');
+        resetBtn();
+        return;
+      }
+      currentUser = signUpData?.user;
+      if (currentUser) {
+        alert("アカウントを作成しました！ログインされました。");
+        showApp();
+      } else {
+        els.authError.textContent = 'サインアップに失敗しました。メール確認が必要な場合は確認リンクをチェックしてください。';
+        els.authError?.classList.remove('hidden');
+        resetBtn();
+      }
+      return;
     }
-  } else {
-    currentUser = data.user;
-    showApp();
+    currentUser = data?.user;
+    if (currentUser) {
+      showApp();
+    } else {
+      els.authError.textContent = 'ログインに失敗しました。';
+      els.authError?.classList.remove('hidden');
+      resetBtn();
+    }
+  } catch (err) {
+    console.error('Auth error:', err);
+    els.authError.textContent = err?.message || '接続エラー。ネットワークとSupabase設定を確認してください。';
+    els.authError?.classList.remove('hidden');
+    resetBtn();
   }
 });
 
