@@ -48,6 +48,7 @@ let currentUser = null;
 let cameraStream = null;
 let searchQuery = '';
 let currentImageTargetPlantId = null;
+let currentRenamePlantId = null;
 
 // DOM要素
 const els = {
@@ -69,6 +70,8 @@ const els = {
   searchSheetOverlay: document.getElementById('searchSheetOverlay'),
   manualInputModal: document.getElementById('manualInputModal'),
   manualIdInput: document.getElementById('manualIdInput'),
+  renameModal: document.getElementById('renameModal'),
+  renameInput: document.getElementById('renameInput'),
   settingsModal: document.getElementById('settingsModal'),
   searchInput: document.getElementById('searchInput'),
   sortSelect: document.getElementById('sortSelect'),
@@ -315,6 +318,20 @@ window.deletePlant = async (plantId) => {
   const { error } = await supabase.from('plants').delete().eq('id', plant.db_id);
   if (error) alert("Delete failed");
   else await fetchPlants();
+};
+
+window.openRenameModal = (plantId) => {
+  currentRenamePlantId = plantId;
+  els.renameInput.value = plantId;
+  els.renameModal.classList.remove('hidden');
+  els.renameInput.focus();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+window.closeRenameModal = (e) => {
+  if (!e || e.target === els.renameModal) {
+    els.renameModal.classList.add('hidden');
+    currentRenamePlantId = null;
+  }
 };
 
 const uploadImage = async (blob) => {
@@ -575,6 +592,41 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async () =>
   await addPlantToDB(id);
 });
 
+document.getElementById('renameSubmitBtn').addEventListener('click', async () => {
+  const newName = els.renameInput.value.trim();
+  if (!newName) {
+    alert('名前を入力してください');
+    return;
+  }
+  if (!currentRenamePlantId) return;
+  const plant = plants.find(p => p.id === currentRenamePlantId);
+  if (!plant) return;
+
+  if (newName === currentRenamePlantId) {
+    closeRenameModal();
+    return;
+  }
+  const exists = plants.find(p => p.id === newName);
+  if (exists) {
+    alert(`「${newName}」は既に存在します。別の名前を入力してください。`);
+    return;
+  }
+
+  updateSyncStatus('loading');
+  const { error } = await supabase
+    .from('plants')
+    .update({ plant_id: newName })
+    .eq('id', plant.db_id)
+    .eq('user_id', currentUser.id);
+
+  if (error) {
+    alert('名前の変更に失敗しました: ' + (error.message || error));
+  } else {
+    closeRenameModal();
+    await fetchPlants();
+  }
+});
+
 // ========================================
 // カメラ・スキャン
 // ========================================
@@ -732,8 +784,11 @@ const render = () => {
               <i data-lucide="sparkles" class="w-5 h-5"></i> 活力剤
             </button>
           </div>
-          <div class="text-right pt-2 mt-6 border-t border-white/5">
-            <button onclick="deletePlant('${safeId}')" class="text-xs text-gray-500 hover:text-red-400 transition flex items-center justify-end gap-1 ml-auto">
+          <div class="flex justify-end gap-4 pt-2 mt-6 border-t border-white/5">
+            <button onclick="openRenameModal('${safeId}')" class="text-xs text-gray-500 hover:text-emerald-400 transition flex items-center gap-1">
+              <i data-lucide="edit-3" class="w-3 h-3"></i> Rename Plant
+            </button>
+            <button onclick="deletePlant('${safeId}')" class="text-xs text-gray-500 hover:text-red-400 transition flex items-center gap-1">
               <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
             </button>
           </div>
