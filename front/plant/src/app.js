@@ -671,8 +671,7 @@ const render = () => {
     card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert ? 'hover:border-emerald-500/30' : ''}`;
 
     const badgeAvgClass = isAlert ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
-    let badge = '';
-    if (sortType.includes('dry') && avg) badge = `<div class="absolute top-4 right-14 ${badgeAvgClass} text-[10px] px-2.5 py-1 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</div>`;
+    const avgBadgeInline = (sortType.includes('dry') && avg) ? `<span class="${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm shrink-0">AVG ${escapeHtml(String(avg))}d</span>` : '';
 
     const avgTextColor = isAlert ? 'text-rose-400/80' : 'text-emerald-400/80';
     const iconBg = isAlert ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' : 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
@@ -692,34 +691,24 @@ const render = () => {
     const safeImage = p.image ? escapeHtml(p.image) : '';
 
     card.innerHTML = `
-      <div class="absolute top-4 right-14 flex gap-2 z-10">${badge}</div>
       <div class="p-5 flex items-center justify-between cursor-pointer group" onclick="toggleAccordion('${safeId}')">
-        <div class="flex items-center gap-4">
-          <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner">${listIconSvg}${alertPing}</div>
-          <div>
-            <div class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors">${safeId}</div>
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
+          <div class="min-w-0 flex-1">
+            <div class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors flex items-center gap-2 flex-nowrap">
+              <span class="truncate">${safeId}</span>${avgBadgeInline}
+            </div>
             <div class="text-xs ${isAlert ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1">
-              <i data-lucide="clock" class="w-3 h-3"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
+              <i data-lucide="clock" class="w-3 h-3 shrink-0"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
             </div>
           </div>
         </div>
-        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition">
+        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition shrink-0">
           <i data-lucide="chevron-down" id="acc-arrow-${safeId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
         </div>
       </div>
       <div id="acc-content-${safeId}" class="accordion-content bg-black/40 shadow-inner">
         <div class="p-5 border-t border-white/5 space-y-5">
-          <div class="grid grid-cols-3 gap-3">
-            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
-              <i data-lucide="flask-conical" class="w-5 h-5"></i> 液肥
-            </button>
-            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
-              <i data-lucide="droplets" class="w-5 h-5"></i> 水
-            </button>
-            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gradient-to-b from-amber-500/20 to-amber-600/5 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold hover:from-amber-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
-              <i data-lucide="sparkles" class="w-5 h-5"></i> 活力剤
-            </button>
-          </div>
           <div class="flex gap-4 items-stretch">
             <div class="w-3/5 flex flex-col min-w-0">
               <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-white/10 pb-2">
@@ -733,7 +722,18 @@ const render = () => {
               <div class="absolute inset-0 bg-emerald-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity backdrop-blur-sm"><i data-lucide="camera" class="w-4 h-4 mr-1"></i></div>
             </div>
           </div>
-          <div class="text-right pt-2 border-t border-white/5">
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+              <i data-lucide="flask-conical" class="w-5 h-5"></i> 液肥
+            </button>
+            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+              <i data-lucide="droplets" class="w-5 h-5"></i> 水
+            </button>
+            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gradient-to-b from-amber-500/20 to-amber-600/5 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold hover:from-amber-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+              <i data-lucide="sparkles" class="w-5 h-5"></i> 活力剤
+            </button>
+          </div>
+          <div class="text-right pt-2 mt-6 border-t border-white/5">
             <button onclick="deletePlant('${safeId}')" class="text-xs text-gray-500 hover:text-red-400 transition flex items-center justify-end gap-1 ml-auto">
               <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
             </button>
