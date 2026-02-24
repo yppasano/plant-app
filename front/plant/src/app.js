@@ -697,20 +697,29 @@ const render = () => {
       </div>
       <div id="acc-content-${safeId}" class="accordion-content bg-gray-900/50 shadow-inner">
         <div class="p-4 border-t border-gray-700 space-y-4">
-          <div onclick="openImageUpload('${safeId}')" class="w-full h-48 bg-gray-800 rounded-lg overflow-hidden border border-gray-700 relative group cursor-pointer">
-            ${p.image ? `<img src="${safeImage}" class="w-full h-full object-cover" alt="">` : `<div class="flex items-center justify-center h-full text-gray-600 text-xs">No Photo</div>`}
-            <div class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center text-white text-xs font-bold">Change</div>
-          </div>
-          <div class="space-y-1">
-            <div class="flex justify-between text-xs text-gray-500"><span>History</span><span>Avg: ${avg ? escapeHtml(String(avg)) + 'd' : '---'}</span></div>
-            <div class="bg-gray-800/50 rounded px-2">${logsHtml || '<div class="p-2 text-center text-xs text-gray-600">No logs</div>'}</div>
-          </div>
+          <!-- 水・液肥・活力剤ボタン（写真の上） -->
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gray-800 border border-green-900 text-green-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">🧪 液肥</button>
-            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-teal-600 text-white py-2 rounded text-xs font-bold shadow hover:bg-teal-500 flex items-center justify-center gap-1">💧 水</button>
-            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gray-800 border border-yellow-900 text-yellow-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">⚡ 活力剤</button>
+            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gray-800 border border-green-900 text-green-400 py-3 rounded-xl text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">🧪 液肥</button>
+            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-teal-600 text-white py-3 rounded-xl text-xs font-bold shadow hover:bg-teal-500 flex items-center justify-center gap-1">💧 水</button>
+            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gray-800 border border-yellow-900 text-yellow-400 py-3 rounded-xl text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">⚡ 活力剤</button>
           </div>
-          <div class="text-right"><button onclick="deletePlant('${safeId}')" class="text-xs text-gray-600 underline hover:text-red-400">Delete</button></div>
+          <!-- 写真とHistory・AVGの2カラム -->
+          <div class="flex gap-4 items-stretch">
+            <div class="w-3/5 flex flex-col min-w-0">
+              <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-gray-700 pb-2">
+                <span>History</span>
+                <span class="text-teal-400">Avg: ${avg ? escapeHtml(String(avg)) + 'd' : '---'}</span>
+              </div>
+              <div class="flex-1 overflow-y-auto px-1 bg-gray-800/50 rounded">
+                ${logsHtml || '<div class="p-2 text-center text-xs text-gray-600">No logs</div>'}
+              </div>
+            </div>
+            <div onclick="openImageUpload('${safeId}')" class="w-2/5 aspect-[3/4] bg-gray-800 rounded-xl overflow-hidden border border-gray-700 relative group cursor-pointer shrink-0">
+              ${p.image ? `<img src="${safeImage}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105" alt="">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 text-xs gap-1"><span class="text-2xl opacity-50">📷</span><span>Add photo</span></div>`}
+              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">Change</div>
+            </div>
+          </div>
+          <div class="text-right pt-2 border-t border-gray-700"><button onclick="deletePlant('${safeId}')" class="text-xs text-gray-600 underline hover:text-red-400">Delete</button></div>
         </div>
       </div>
     `;
