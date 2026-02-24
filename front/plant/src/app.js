@@ -634,7 +634,7 @@ const render = () => {
   let data = plants;
   if (searchQuery) data = data.filter(p => p.id.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const sortType = els.sortSelect.value;
+  const sortType = els.sortSelect?.value || 'created';
   if (sortType === 'id') data = [...data].sort((a, b) => a.id.localeCompare(b.id));
   else if (sortType === 'alert') {
     data = [...data].sort((a, b) => {
@@ -718,7 +718,7 @@ const render = () => {
   });
 };
 els.searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
-els.sortSelect.addEventListener('change', render);
+els.sortSelect?.addEventListener('change', render);
 
 // 開始
 checkUser();
