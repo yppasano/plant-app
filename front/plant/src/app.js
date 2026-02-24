@@ -61,9 +61,12 @@ const els = {
   syncDot: document.getElementById('syncDot'),
   syncText: document.getElementById('syncText'),
   userEmailDisplay: document.getElementById('userEmailDisplay'),
-  fabBtn: document.getElementById('fabBtn'),
-  actionSheet: document.getElementById('actionSheet'),
-  actionSheetOverlay: document.getElementById('actionSheetOverlay'),
+  navCameraBtn: document.getElementById('navCameraBtn'),
+  navManualBtn: document.getElementById('navManualBtn'),
+  navSearchBtn: document.getElementById('navSearchBtn'),
+  navSettingsBtn: document.getElementById('navSettingsBtn'),
+  searchSheet: document.getElementById('searchSheet'),
+  searchSheetOverlay: document.getElementById('searchSheetOverlay'),
   manualInputModal: document.getElementById('manualInputModal'),
   manualIdInput: document.getElementById('manualIdInput'),
   settingsModal: document.getElementById('settingsModal'),
@@ -547,13 +550,20 @@ const isAlertNeeded = (plant) => {
 // ========================================
 // UI操作系 (モーダルなど)
 // ========================================
-document.getElementById('settingsBtn').addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
+els.navSettingsBtn?.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
 window.closeSettingsModal = (e) => { if (!e || e.target === els.settingsModal) els.settingsModal.classList.add('hidden'); };
 
-els.fabBtn.addEventListener('click', () => { els.actionSheetOverlay.classList.remove('hidden'); els.actionSheet.classList.remove('hidden'); });
-window.closeActionSheet = () => { els.actionSheetOverlay.classList.add('hidden'); els.actionSheet.classList.add('hidden'); };
-
-document.getElementById('manualOptionBtn').addEventListener('click', () => { closeActionSheet(); els.manualInputModal.classList.remove('hidden'); els.manualIdInput.focus(); });
+els.navCameraBtn?.addEventListener('click', () => { els.scanOverlay.classList.remove('hidden'); startCamera(); });
+els.navManualBtn?.addEventListener('click', () => { els.manualInputModal.classList.remove('hidden'); els.manualIdInput.focus(); });
+els.navSearchBtn?.addEventListener('click', () => {
+  els.searchSheetOverlay.classList.remove('hidden');
+  els.searchSheet.classList.add('open');
+  setTimeout(() => els.searchInput?.focus(), 100);
+});
+window.closeSearchSheet = () => {
+  els.searchSheet.classList.remove('open');
+  setTimeout(() => els.searchSheetOverlay.classList.add('hidden'), 300);
+};
 window.closeManualModal = (e) => { if (!e || e.target === els.manualInputModal) els.manualInputModal.classList.add('hidden'); };
 
 document.getElementById('manualSubmitBtn').addEventListener('click', async () => {
@@ -568,8 +578,7 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async () =>
 // ========================================
 // カメラ・スキャン
 // ========================================
-document.getElementById('cameraOptionBtn').addEventListener('click', () => { closeActionSheet(); els.scanOverlay.classList.remove('hidden'); startCamera(); });
-document.getElementById('closeScanBtn').addEventListener('click', () => { els.scanOverlay.classList.add('hidden'); stopCamera(); });
+document.getElementById('closeScanBtn')?.addEventListener('click', () => { els.scanOverlay.classList.add('hidden'); stopCamera(); });
 document.getElementById('captureBtn').addEventListener('click', async () => {
   const ctx = els.canvas.getContext('2d');
   els.canvas.width = els.video.videoWidth;

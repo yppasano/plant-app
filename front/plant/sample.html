@@ -1,39 +1,423 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>植物サイクル管理</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Plant Tracker - Stylish</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      /* 背景に植物の画像を薄く配置 */
+      background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1080&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+    
+    /* すりガラスエフェクト（グラスモーフィズム） */
+    .glass {
+      background: rgba(20, 30, 25, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card {
+      background: rgba(30, 41, 35, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    }
+    .glass-card-alert {
+      background: rgba(45, 20, 25, 0.75); /* 赤みがかった背景色 */
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(244, 63, 94, 0.25); /* ローズ系のボーダー */
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 15px 0 rgba(244, 63, 94, 0.1);
+    }
+    
+    /* アコーディオンのアニメーション */
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      opacity: 0;
+    }
+    .accordion-content.expanded {
+      max-height: 500px;
+      opacity: 1;
+    }
+    .arrow-icon.rotated {
+      transform: rotate(180deg);
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-800 p-4 max-w-md mx-auto">
-  <div id="app">
-    <header class="mb-4 text-center">
-      <h1 class="text-2xl font-bold text-teal-700">🌿 植物サイクル管理</h1>
-    </header>
+<body class="text-gray-100 antialiased h-screen overflow-hidden relative">
+  <!-- 全体にかかる暗いオーバーレイ -->
+  <div class="absolute inset-0 bg-slate-950/70 z-0 pointer-events-none"></div>
 
-    <div class="flex justify-end mb-2">
-      <select id="sortSelect" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2">
-        <option value="created">▼ 登録順 (新しい順)</option>
-        <option value="id">A-Z ID順</option>
-        <option value="alert">💧 水やり待ち順</option>
-      </select>
-    </div>
-
-    <div class="flex gap-2 mb-6">
-      <input type="text" id="plantIdInput" placeholder="ID (例: A-01)" 
-        class="flex-1 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:border-teal-500" />
-      <button id="addBtn" 
-        class="bg-teal-600 text-white px-4 py-2 rounded shadow hover:bg-teal-700 font-bold">
-        追加
-      </button>
-    </div>
-
-    <div id="plantList" class="space-y-4">
+  <div class="relative z-10 max-w-md mx-auto h-full flex flex-col shadow-2xl bg-black/20">
+    
+    <!-- ==========================================
+         ログイン画面 (スタイリッシュ版)
+         ========================================== -->
+    <div id="authScreen" class="absolute inset-0 glass z-50 flex flex-col justify-center items-center p-8 transition-opacity duration-500">
+      <div class="glass-card p-8 rounded-3xl w-full max-w-sm text-center">
+        <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg border border-emerald-500/30">
+          <!-- オリジナルのジグザグ葉脈ロゴ -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
+            <!-- 葉の輪郭 -->
+            <path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" />
+            <!-- ジグザグの葉脈と茎 -->
+            <polyline points="12 2 12 9 6 12 16 15 12 17 12 23" />
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold mb-2 tracking-tight">Plantify</h1>
+        <p class="text-emerald-400/80 text-sm mb-8">Your botanical companion</p>
+        
+        <div class="space-y-4">
+          <div class="relative">
+            <i data-lucide="mail" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            <input type="email" id="emailInput" placeholder="Email address" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition">
+          </div>
+          <div class="relative">
+            <i data-lucide="lock" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+            <input type="password" id="passwordInput" placeholder="Password" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition">
+          </div>
+          <p id="authError" class="text-red-400 text-xs text-left hidden"></p>
+          <button id="signInBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-emerald-900/50 transition-all active:scale-95">
+            Sign In / Sign Up
+          </button>
+        </div>
       </div>
+    </div>
+
+    <!-- ==========================================
+         メインアプリ画面
+         ========================================== -->
+    <div id="appScreen" class="flex-1 flex flex-col h-full hidden">
+      <!-- ヘッダー (固定解除・タイトルと並び替えの2カラム・メルアド削除) -->
+      <header class="pt-12 pb-2 px-6">
+        <div class="flex justify-between items-end">
+          <div>
+            <h2 class="text-3xl font-bold tracking-tight text-white">My Garden</h2>
+            <div class="flex items-center gap-2 text-xs text-emerald-400/80 mt-1">
+              <span id="syncDot" class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
+              <span id="syncText">Online</span>
+            </div>
+          </div>
+          <!-- 並び替えドロップダウン -->
+          <div class="relative mb-1">
+            <select id="sortSelect" class="bg-white/5 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-xs text-gray-300 focus:outline-none appearance-none backdrop-blur-sm hover:bg-white/10 transition shadow-sm cursor-pointer">
+              <option value="id" class="bg-gray-800">Name</option>
+              <option value="dry_fast" class="bg-gray-800">Dry Fast</option>
+              <option value="dry_slow" class="bg-gray-800">Dry Slow</option>
+            </select>
+            <i data-lucide="chevron-down" class="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- 植物リスト (スクロール領域) -->
+      <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 scroll-smooth" id="plantList">
+        <!-- JSでカードがここに生成されます -->
+      </main>
+
+      <!-- ボトムナビゲーション (固定メニュー) -->
+      <nav class="absolute bottom-0 left-0 right-0 glass pb-4 pt-2 px-2 z-30 border-t border-white/10 flex justify-around items-center rounded-t-3xl">
+        <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
+            <i data-lucide="camera" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-semibold tracking-wide">Camera</span>
+        </button>
+        <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
+            <i data-lucide="edit-3" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-semibold tracking-wide">Manual</span>
+        </button>
+        <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
+            <i data-lucide="search" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-semibold tracking-wide">Search</span>
+        </button>
+        <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
+            <i data-lucide="settings" class="w-6 h-6"></i>
+          </div>
+          <span class="text-[10px] font-semibold tracking-wide">Settings</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- ==========================================
+         モーダル＆アクションシート類 (UIのみ)
+         ========================================== -->
+    <!-- 検索ボトムシート (下からスライドアップ) -->
+    <div id="searchSheetOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="closeSearchSheet()"></div>
+    <div id="searchSheet" class="absolute bottom-0 left-0 w-full glass rounded-t-3xl p-6 pb-10 z-50 transform translate-y-full transition-transform duration-300">
+      <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div>
+      <h3 class="text-lg font-bold mb-4 px-2">Search Plants</h3>
+      <div class="relative">
+        <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+        <input type="text" id="searchInput" placeholder="Search plants..." class="w-full bg-black/30 border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition shadow-inner">
+      </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div id="settingsModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="closeSettingsModal(event)">
+      <div class="glass-card w-full max-w-sm rounded-3xl overflow-hidden" onclick="event.stopPropagation()">
+        <div class="p-6 border-b border-white/10">
+          <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5 text-gray-400"></i> Settings</h3>
+        </div>
+        <div class="p-2">
+          <button id="importBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-gray-300">
+            <i data-lucide="download-cloud" class="w-5 h-5 text-emerald-400"></i> 
+            <div><p class="font-semibold">Restore Data</p><p class="text-xs text-gray-500">Import from JSON backup</p></div>
+          </button>
+          <button id="logoutBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-red-400 mt-2 border-t border-white/5">
+            <i data-lucide="log-out" class="w-5 h-5"></i> 
+            <span class="font-semibold">Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 手動入力モーダル -->
+    <div id="manualInputModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="closeManualModal(event)">
+      <div class="glass-card p-6 rounded-3xl w-full max-w-sm" onclick="event.stopPropagation()">
+        <h3 class="text-xl font-bold mb-4">Plant Name</h3>
+        <input type="text" id="manualIdInput" placeholder="e.g. Monstera" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white mb-6 focus:outline-none focus:border-emerald-500/50">
+        <div class="flex gap-3">
+          <button onclick="closeManualModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold">Cancel</button>
+          <button id="manualSubmitBtn" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition font-semibold text-white shadow-lg shadow-emerald-900/50">Add</button>
+        </div>
+      </div>
+    </div>
+
+    <input type="file" id="importFileInput" accept=".json" class="hidden">
+    <input type="file" id="imageFileInput" accept="image/*" class="hidden">
   </div>
 
-  <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+  <script>
+    // Lucideアイコンの初期化
+    lucide.createIcons();
 
-  <script type="module" src="./src/main.js"></script>
+    // ==========================================
+    // UI制御用モックスクリプト (デザインプレビュー用)
+    // ==========================================
+    const els = {
+      authScreen: document.getElementById('authScreen'),
+      appScreen: document.getElementById('appScreen'),
+      signInBtn: document.getElementById('signInBtn'),
+      plantList: document.getElementById('plantList'),
+      
+      // 新しいナビゲーションとシートの参照
+      navCameraBtn: document.getElementById('navCameraBtn'),
+      navManualBtn: document.getElementById('navManualBtn'),
+      navSearchBtn: document.getElementById('navSearchBtn'),
+      navSettingsBtn: document.getElementById('navSettingsBtn'),
+      searchSheet: document.getElementById('searchSheet'),
+      searchSheetOverlay: document.getElementById('searchSheetOverlay'),
+      
+      settingsModal: document.getElementById('settingsModal'),
+      manualInputModal: document.getElementById('manualInputModal')
+    };
+
+    // 今日を基準にモックデータの日付を生成
+    const getDaysAgo = (days) => {
+      const d = new Date();
+      d.setDate(d.getDate() - days);
+      return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+    };
+
+    // サンプルデータ
+    const mockPlants = [
+      { id: 'Monstera Deliciosa', avg: 5, lastDate: getDaysAgo(4), image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(4)}, {type: '液肥', date: getDaysAgo(14)}] },
+      { id: 'Pothos', avg: 3, lastDate: getDaysAgo(1), image: null, logs: [{type: '水', date: getDaysAgo(1)}] },
+      { id: 'Snake Plant', avg: 14, lastDate: getDaysAgo(10), image: 'https://images.unsplash.com/photo-1599009586118-2029ea97ea70?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(10)}] }
+    ];
+
+    // サインインのモック
+    els.signInBtn.addEventListener('click', () => {
+      els.authScreen.classList.add('opacity-0');
+      setTimeout(() => {
+        els.authScreen.classList.add('hidden');
+        els.appScreen.classList.remove('hidden');
+        renderMockData();
+      }, 500);
+    });
+
+    // --- ボトムナビゲーションの動作制御 ---
+    
+    // 1. Camera
+    els.navCameraBtn.addEventListener('click', () => {
+      // 実際のアプリではここにカメラスキャンの処理が入ります
+      alert('Camera feature activated (Mock)');
+    });
+
+    // 2. Manual Entry
+    els.navManualBtn.addEventListener('click', () => {
+      els.manualInputModal.classList.remove('hidden');
+    });
+
+    // 3. Search & Sort
+    els.navSearchBtn.addEventListener('click', () => {
+      els.searchSheetOverlay.classList.remove('hidden');
+      setTimeout(() => els.searchSheet.classList.remove('translate-y-full'), 10);
+    });
+    
+    // 検索シートを閉じる
+    window.closeSearchSheet = () => {
+      els.searchSheet.classList.add('translate-y-full');
+      setTimeout(() => els.searchSheetOverlay.classList.add('hidden'), 300);
+    };
+
+    // 4. Settings
+    els.navSettingsBtn.addEventListener('click', () => {
+      els.settingsModal.classList.remove('hidden');
+    });
+
+    // 各種モーダルを閉じる処理
+    window.closeSettingsModal = (e) => { if(!e || e.target === els.settingsModal) els.settingsModal.classList.add('hidden'); };
+    window.closeManualModal = (e) => { if(!e || e.target === els.manualInputModal) els.manualInputModal.classList.add('hidden'); };
+
+    // アコーディオンの開閉
+    window.toggleAccordion = (id) => {
+      const content = document.getElementById(`acc-content-${id}`);
+      const arrow = document.getElementById(`acc-arrow-${id}`);
+      content.classList.toggle('expanded');
+      arrow.classList.toggle('rotated');
+    };
+
+    // モックデータの描画 (デザイン確認用)
+    const renderMockData = () => {
+      els.plantList.innerHTML = '';
+      
+      const today = new Date();
+      
+      mockPlants.forEach((p, index) => {
+        const safeId = p.id.replace(/\s+/g, '-');
+        
+        // 7日間水やりをしていないか判定
+        const lastDateObj = new Date(p.lastDate);
+        const diffDays = Math.floor((today - lastDateObj) / (1000 * 60 * 60 * 24));
+        const needsWater = diffDays >= 7;
+        
+        // バッジとテキストのカラー分岐 (注意喚起時は赤系)
+        let badgeAvgClass = needsWater 
+          ? "bg-rose-900/80 text-rose-300 border-rose-500/30"
+          : "bg-emerald-900/80 text-emerald-300 border-emerald-500/30";
+        let badgeAvg = p.avg ? `<div class="${badgeAvgClass} text-[10px] px-2.5 py-1 rounded-lg border font-bold backdrop-blur-sm shadow-sm">AVG ${p.avg}d</div>` : '';
+        
+        let avgTextColor = needsWater ? "text-rose-400/80" : "text-emerald-400/80";
+
+        // 2カラムで幅が狭くなるため、日付の年号を省いて(MM/DD)コンパクトに表示
+        const logsHtml = p.logs.map(l => `
+          <div class="flex justify-between items-center py-2.5 border-b border-white/10 last:border-0">
+            <span class="text-gray-400 font-mono text-[10.5px] flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1.5 opacity-70"></i>${l.date.slice(-5)}</span>
+            <span class="text-gray-200 text-[10.5px] font-medium tracking-wide">${l.type}</span>
+          </div>`).join('');
+
+        const card = document.createElement('div');
+        // アラート時は赤ベースの専用クラスを適用する
+        card.className = `${needsWater ? 'glass-card-alert' : 'glass-card'} rounded-2xl overflow-hidden transition-all duration-300 relative ${!needsWater ? 'hover:border-emerald-500/30' : ''}`;
+        
+        // アイコン背景の色分岐
+        let iconBg = needsWater 
+          ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' 
+          : (index%2===0 ? 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10' : 'from-lime-500/20 to-emerald-500/10 text-lime-400 border-white/10');
+
+        // リスト左側のアイコンSVG（状態によって切り替え）
+        const listIconSvg = needsWater
+          ? `<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`
+          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>`;
+
+        card.innerHTML = `
+          <!-- 右上のバッジコンテナ -->
+          <div class="absolute top-4 right-14 flex gap-2 z-10">
+            ${badgeAvg}
+          </div>
+          
+          <!-- カードヘッダー -->
+          <div class="p-5 flex items-center justify-between cursor-pointer group" onclick="toggleAccordion('${safeId}')">
+            <div class="flex items-center gap-4">
+              <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner">
+                ${listIconSvg}
+                ${needsWater ? `<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>` : ''}
+              </div>
+              <div>
+                <div class="font-bold text-lg ${needsWater ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors">${p.id}</div>
+                <div class="text-xs ${needsWater ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3 h-3"></i> Last: <span class="${needsWater ? 'text-rose-300 font-bold' : 'text-gray-200'}">${p.lastDate} (${diffDays} days)</span>
+                </div>
+              </div>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition">
+              <i data-lucide="chevron-down" id="acc-arrow-${safeId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
+            </div>
+          </div>
+          
+          <!-- アコーディオン中身 -->
+          <div id="acc-content-${safeId}" class="accordion-content bg-black/40 shadow-inner">
+            <div class="p-5 border-t border-white/5 space-y-5">
+              
+              <!-- アクションボタン (より目立たせるデザインに) -->
+              <div class="grid grid-cols-3 gap-3">
+                <button class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+                  <i data-lucide="droplets" class="w-5 h-5 drop-shadow-md"></i> 水やり
+                </button>
+                <button class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+                  <i data-lucide="flask-conical" class="w-5 h-5 drop-shadow-md"></i> 液肥
+                </button>
+                <button class="bg-gradient-to-b from-amber-500/20 to-amber-600/5 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold hover:from-amber-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                  <i data-lucide="sparkles" class="w-5 h-5 drop-shadow-md"></i> 活力剤
+                </button>
+              </div>
+
+              <!-- 履歴と画像の2カラムエリア (写真を右へ) -->
+              <div class="flex gap-4 items-stretch">
+                <!-- 左：履歴エリア (枠や背景をなくし、区切り線のみに) -->
+                <div class="w-3/5 flex flex-col">
+                  <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-white/10 pb-2">
+                    <span>History</span>
+                    <span class="${avgTextColor}">Avg: ${p.avg ? p.avg+'d' : '--'}</span>
+                  </div>
+                  <div class="flex-1 overflow-y-auto px-1">
+                    ${logsHtml}
+                  </div>
+                </div>
+
+                <!-- 右：画像エリア (スマホの縦長写真に合わせた3:4の比率) -->
+                <div class="w-2/5 aspect-[3/4] bg-black/50 rounded-xl overflow-hidden border border-white/10 relative group cursor-pointer shadow-inner shrink-0">
+                  ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-[10px] gap-1.5"><i data-lucide="image" class="w-6 h-6 opacity-50"></i><span class="text-center">Add photo</span></div>`}
+                  <div class="absolute inset-0 bg-emerald-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity backdrop-blur-sm"><i data-lucide="camera" class="w-4 h-4 mr-1"></i></div>
+                </div>
+              </div>
+              
+              <!-- 削除ボタン -->
+              <div class="text-right pt-2 border-t border-white/5">
+                <button class="text-xs text-gray-500 hover:text-red-400 transition flex items-center justify-end gap-1 ml-auto">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+        els.plantList.appendChild(card);
+      });
+      lucide.createIcons();
+    };
+  </script>
 </body>
 </html>
