@@ -15,7 +15,7 @@ const save = () => {
 }
 
 // ログ追加（確認付き）
-const LOG_LABELS = { '液肥': '🧪 液肥', '水': '💧 水やり', '活力剤': '⚡ 活力剤' }
+const LOG_LABELS = { '液肥': '🧪 液肥', '水': '💧 水', '活力剤': '⚡ 活力剤' }
 window.confirmAndAddLog = (id, type) => {
   const label = LOG_LABELS[type] || type
   if (!confirm(`${label} を記録しますか？`)) return
