@@ -218,7 +218,7 @@ const showApp = () => {
   els.authScreen.classList.add('hidden');
   els.authScreen.style.opacity = 0;
   els.appScreen.classList.remove('hidden');
-  setTimeout(() => els.appScreen.style.opacity = 1, 50);
+  setTimeout(() => { els.appScreen.style.opacity = 1; if (typeof lucide !== 'undefined') lucide.createIcons(); }, 50);
 
   els.userEmailDisplay.textContent = currentUser.email;
   updateSyncStatus('online');
@@ -667,64 +667,83 @@ const render = () => {
     const isAlert = isAlertNeeded(p);
 
     const card = document.createElement('div');
-    card.className = `bg-gray-800 border ${isAlert ? 'border-red-900 bg-red-900/10' : 'border-gray-700'} rounded-xl overflow-hidden shadow-lg relative`;
+    const cardClass = isAlert ? 'glass-card-alert' : 'glass-card';
+    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert ? 'hover:border-emerald-500/30' : ''}`;
 
+    const badgeAvgClass = isAlert ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
     let badge = '';
-    if (sortType.includes('dry') && avg) badge = `<div class="absolute top-4 right-12 bg-gray-700 text-teal-400 text-[10px] px-2 py-1 rounded border border-gray-600 font-bold">AVG ${escapeHtml(String(avg))}d</div>`;
+    if (sortType.includes('dry') && avg) badge = `<div class="absolute top-4 right-14 ${badgeAvgClass} text-[10px] px-2.5 py-1 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</div>`;
 
-    // ログをts降順で表示（最新5件）
+    const avgTextColor = isAlert ? 'text-rose-400/80' : 'text-emerald-400/80';
+    const iconBg = isAlert ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' : 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
+    const listIconSvg = isAlert
+      ? '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
+    const alertPing = isAlert ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>' : '';
+
     const displayLogs = sortedLogs.slice(0, 5);
     const logsHtml = displayLogs.map(l => `
-      <div class="flex justify-between py-2 border-b border-gray-700 text-sm">
-        <span class="text-gray-500 font-mono text-xs">${escapeHtml(formatDate(l.ts))}</span>
-        <span class="text-gray-300 bg-gray-700 px-2 rounded text-xs border border-gray-600">${escapeHtml(l.type)}</span>
+      <div class="flex justify-between py-2.5 border-b border-white/10 last:border-0">
+        <span class="text-gray-400 font-mono text-[10.5px] flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1.5 opacity-70"></i>${escapeHtml(formatDate(l.ts).slice(-5))}</span>
+        <span class="text-gray-200 text-[10.5px] font-medium">${escapeHtml(l.type)}</span>
       </div>`).join('');
 
     const safeId = escapeHtml(p.id);
     const safeImage = p.image ? escapeHtml(p.image) : '';
 
     card.innerHTML = `
-      ${badge}
-      <div class="p-4 flex items-center justify-between cursor-pointer hover:bg-white/5 transition" onclick="toggleAccordion('${safeId}')">
+      <div class="absolute top-4 right-14 flex gap-2 z-10">${badge}</div>
+      <div class="p-5 flex items-center justify-between cursor-pointer group" onclick="toggleAccordion('${safeId}')">
         <div class="flex items-center gap-4">
-          <div class="text-2xl">${isAlert ? '⚠️' : '🌿'}</div>
+          <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner">${listIconSvg}${alertPing}</div>
           <div>
-            <div class="font-bold text-lg text-gray-100">${safeId}</div>
-            <div class="text-xs text-gray-500">Last: <span class="text-gray-300">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-teal-400 font-medium">${escapeHtml(lastType)}</span>` : ''}</div>
+            <div class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors">${safeId}</div>
+            <div class="text-xs ${isAlert ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1">
+              <i data-lucide="clock" class="w-3 h-3"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
+            </div>
           </div>
         </div>
-        <div id="acc-arrow-${safeId}" class="arrow-icon text-gray-500 transition-transform">▼</div>
+        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition">
+          <i data-lucide="chevron-down" id="acc-arrow-${safeId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
+        </div>
       </div>
-      <div id="acc-content-${safeId}" class="accordion-content bg-gray-900/50 shadow-inner">
-        <div class="p-4 border-t border-gray-700 space-y-4">
-          <!-- 水・液肥・活力剤ボタン（写真の上） -->
-          <div class="grid grid-cols-3 gap-2">
-            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gray-800 border border-green-900 text-green-400 py-3 rounded-xl text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">🧪 液肥</button>
-            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-teal-600 text-white py-3 rounded-xl text-xs font-bold shadow hover:bg-teal-500 flex items-center justify-center gap-1">💧 水</button>
-            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gray-800 border border-yellow-900 text-yellow-400 py-3 rounded-xl text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">⚡ 活力剤</button>
+      <div id="acc-content-${safeId}" class="accordion-content bg-black/40 shadow-inner">
+        <div class="p-5 border-t border-white/5 space-y-5">
+          <div class="grid grid-cols-3 gap-3">
+            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
+              <i data-lucide="flask-conical" class="w-5 h-5"></i> 液肥
+            </button>
+            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+              <i data-lucide="droplets" class="w-5 h-5"></i> 水
+            </button>
+            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gradient-to-b from-amber-500/20 to-amber-600/5 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold hover:from-amber-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+              <i data-lucide="sparkles" class="w-5 h-5"></i> 活力剤
+            </button>
           </div>
-          <!-- 写真とHistory・AVGの2カラム -->
           <div class="flex gap-4 items-stretch">
             <div class="w-3/5 flex flex-col min-w-0">
-              <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-gray-700 pb-2">
+              <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-white/10 pb-2">
                 <span>History</span>
-                <span class="text-teal-400">Avg: ${avg ? escapeHtml(String(avg)) + 'd' : '---'}</span>
+                <span class="${avgTextColor}">Avg: ${avg ? escapeHtml(String(avg)) + 'd' : '--'}</span>
               </div>
-              <div class="flex-1 overflow-y-auto px-1 bg-gray-800/50 rounded">
-                ${logsHtml || '<div class="p-2 text-center text-xs text-gray-600">No logs</div>'}
-              </div>
+              <div class="flex-1 overflow-y-auto px-1">${logsHtml || '<div class="p-2 text-center text-xs text-gray-600">No logs</div>'}</div>
             </div>
-            <div onclick="openImageUpload('${safeId}')" class="w-2/5 aspect-[3/4] bg-gray-800 rounded-xl overflow-hidden border border-gray-700 relative group cursor-pointer shrink-0">
-              ${p.image ? `<img src="${safeImage}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105" alt="">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-600 text-xs gap-1"><span class="text-2xl opacity-50">📷</span><span>Add photo</span></div>`}
-              <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity">Change</div>
+            <div onclick="openImageUpload('${safeId}')" class="w-2/5 aspect-[3/4] bg-black/50 rounded-xl overflow-hidden border border-white/10 relative group cursor-pointer shrink-0">
+              ${p.image ? `<img src="${safeImage}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105" alt="">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-[10px] gap-1.5"><i data-lucide="image" class="w-6 h-6 opacity-50"></i><span>Add photo</span></div>`}
+              <div class="absolute inset-0 bg-emerald-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity backdrop-blur-sm"><i data-lucide="camera" class="w-4 h-4 mr-1"></i></div>
             </div>
           </div>
-          <div class="text-right pt-2 border-t border-gray-700"><button onclick="deletePlant('${safeId}')" class="text-xs text-gray-600 underline hover:text-red-400">Delete</button></div>
+          <div class="text-right pt-2 border-t border-white/5">
+            <button onclick="deletePlant('${safeId}')" class="text-xs text-gray-500 hover:text-red-400 transition flex items-center justify-end gap-1 ml-auto">
+              <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
+            </button>
+          </div>
         </div>
       </div>
     `;
     els.plantList.appendChild(card);
   });
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 els.searchInput.addEventListener('input', (e) => { searchQuery = e.target.value; render(); });
 els.sortSelect?.addEventListener('change', render);

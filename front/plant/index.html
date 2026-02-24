@@ -14,10 +14,16 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* ダークモード・スタイル調整 */
-    body { background-color: #111827; color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1080&auto=format&fit=crop'); background-size: cover; background-position: center; background-attachment: fixed; color: #f3f4f6; }
+    .bg-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); z-index: 0; pointer-events: none; }
+    .glass { background: rgba(20, 30, 25, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(30, 41, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    .glass-card-alert { background: rgba(45, 20, 25, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(244, 63, 94, 0.25); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
     .guide-frame {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       width: 80%; height: 200px; border: 3px dashed #2dd4bf; border-radius: 12px; pointer-events: none;
@@ -39,36 +45,37 @@
       border-top: 1px solid #374151; padding-bottom: env(safe-area-inset-bottom);
     }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-    .accordion-content.expanded { max-height: 1000px; transition: max-height 0.5s ease-in; }
+    .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; opacity: 0; }
+    .accordion-content.expanded { max-height: 600px; opacity: 1; }
     .arrow-icon.rotated { transform: rotate(180deg); }
     .loader { border: 3px solid #374151; border-top: 3px solid #2dd4bf; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .bottom-nav { background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid #374151; }
+    .bottom-nav { background: rgba(20, 30, 25, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
     .search-sheet { transform: translateY(100%); transition: transform 0.3s ease-out; }
     .search-sheet.open { transform: translateY(0); }
   </style>
 </head>
-<body class="pb-32 antialiased selection:bg-teal-500 selection:text-white">
+<body class="min-h-screen antialiased selection:bg-teal-500 selection:text-white relative">
+  <div class="bg-overlay"></div>
 
-  <div id="authScreen" class="fixed inset-0 z-[100] bg-gray-900 flex flex-col items-center justify-center p-6 transition-opacity duration-500">
-    <div class="w-full max-w-sm space-y-8">
-      <div class="text-center">
-        <span class="text-6xl">🌿</span>
-        <h2 class="mt-4 text-3xl font-bold text-white tracking-tight">Cycle Monitor</h2>
-        <p class="mt-2 text-sm text-gray-400">Cloud Edition</p>
+  <div id="authScreen" class="fixed inset-0 z-[100] glass flex flex-col items-center justify-center p-8 transition-opacity duration-500">
+    <div class="glass-card p-8 rounded-3xl w-full max-w-sm text-center relative z-10">
+      <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg border border-emerald-500/30">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>
       </div>
-      <form id="authForm" class="space-y-4 bg-gray-800 p-8 rounded-2xl border border-gray-700 shadow-xl" onsubmit="event.preventDefault(); document.getElementById('signInBtn').click();">
-        <div>
-          <label class="block text-xs font-medium text-gray-400 uppercase" for="emailInput">Email</label>
-          <input id="emailInput" type="email" class="mt-1 block w-full px-3 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-teal-500 focus:border-teal-500 outline-none" placeholder="you@example.com" autocomplete="email">
+      <h2 class="text-3xl font-bold text-white tracking-tight">Cycle Monitor</h2>
+      <p class="text-emerald-400/80 text-sm mb-8">Cloud Edition</p>
+      <form id="authForm" class="space-y-4 text-left" onsubmit="event.preventDefault(); document.getElementById('signInBtn').click();">
+        <div class="relative">
+          <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+          <input id="emailInput" type="email" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50" placeholder="Email address" autocomplete="email">
         </div>
-        <div>
-          <label class="block text-xs font-medium text-gray-400 uppercase" for="passwordInput">Password</label>
-          <input id="passwordInput" type="password" class="mt-1 block w-full px-3 py-3 bg-gray-900 border border-gray-600 rounded-lg text-white focus:ring-teal-500 focus:border-teal-500 outline-none" placeholder="••••••••" autocomplete="current-password">
+        <div class="relative">
+          <i data-lucide="lock" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+          <input id="passwordInput" type="password" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50" placeholder="Password" autocomplete="current-password">
         </div>
-        <div id="authError" class="text-red-400 text-xs text-center hidden"></div>
-        <button id="signInBtn" type="button" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-bold py-3 rounded-lg shadow-lg transition transform active:scale-95">
+        <div id="authError" class="text-red-400 text-xs hidden"></div>
+        <button id="signInBtn" type="button" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-emerald-900/50 transition-all active:scale-95">
           Sign In / Sign Up
         </button>
         <p class="text-xs text-gray-500 text-center mt-2">※ 初回は自動でアカウント作成を試みます</p>
@@ -76,7 +83,7 @@
     </div>
   </div>
 
-  <div id="appScreen" class="hidden opacity-0 transition-opacity duration-500 flex flex-col min-h-screen relative">
+  <div id="appScreen" class="hidden opacity-0 transition-opacity duration-500 flex flex-col min-h-screen relative z-10 max-w-md mx-auto w-full">
     
     <!-- スクロール領域（タイトル＋リスト） -->
     <div class="flex-1 overflow-y-auto">
@@ -84,18 +91,21 @@
         <div class="flex justify-between items-end">
           <div>
             <h1 class="text-3xl font-bold tracking-tight text-white">Cycle Monitor</h1>
-            <div id="syncStatus" class="flex items-center gap-2 text-xs text-teal-400/80 mt-1">
-              <span class="w-2 h-2 rounded-full bg-teal-500" id="syncDot"></span>
+            <div id="syncStatus" class="flex items-center gap-2 text-xs text-emerald-400/80 mt-1">
+              <span class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]" id="syncDot"></span>
               <span id="syncText">Offline</span>
             </div>
           </div>
-          <select id="sortSelect" class="bg-gray-800 border border-gray-700 text-teal-400 text-xs font-bold rounded-lg py-2 px-3 outline-none mb-1">
+          <div class="relative mb-1">
+            <select id="sortSelect" class="bg-white/5 border border-white/10 text-gray-300 text-xs font-bold rounded-lg py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-emerald-500/50 backdrop-blur-sm cursor-pointer">
             <option value="created">▼ Newest</option>
             <option value="id">🔤 ID (A-Z)</option>
             <option value="alert">⚠️ Alert</option>
             <option value="dry_slow">🐢 Slow Dry</option>
             <option value="dry_fast">🐇 Fast Dry</option>
-          </select>
+            </select>
+            <i data-lucide="chevron-down" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none"></i>
+          </div>
         </div>
       </header>
       <main id="plantList" class="p-4 space-y-4 pb-24">
@@ -104,63 +114,71 @@
     </div>
 
     <!-- 下固定メニュー -->
-    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 bottom-nav pt-2 px-2 z-30 flex justify-around items-center" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-      <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-teal-400 transition active:scale-95">
-        <span class="text-2xl mb-1">📷</span>
-        <span class="text-[10px] font-semibold">Scan Tag</span>
+    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 bottom-nav rounded-t-3xl pt-2 px-2 z-30 flex justify-around items-center" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+      <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="camera" class="w-6 h-6"></i></div>
+        <span class="text-[10px] font-semibold tracking-wide">Scan Tag</span>
       </button>
-      <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-teal-400 transition active:scale-95">
-        <span class="text-2xl mb-1">⌨️</span>
-        <span class="text-[10px] font-semibold">Manual</span>
+      <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="edit-3" class="w-6 h-6"></i></div>
+        <span class="text-[10px] font-semibold tracking-wide">Manual</span>
       </button>
-      <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-teal-400 transition active:scale-95">
-        <span class="text-2xl mb-1">🔍</span>
-        <span class="text-[10px] font-semibold">Search</span>
+      <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="search" class="w-6 h-6"></i></div>
+        <span class="text-[10px] font-semibold tracking-wide">Search</span>
       </button>
-      <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-teal-400 transition active:scale-95">
-        <span class="text-2xl mb-1">⚙️</span>
-        <span class="text-[10px] font-semibold">Settings</span>
+      <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div>
+        <span class="text-[10px] font-semibold tracking-wide">Settings</span>
       </button>
     </nav>
   </div>
 
   <!-- 検索ボトムシート -->
-  <div id="searchSheetOverlay" class="fixed inset-0 bg-black/60 z-40 hidden" onclick="closeSearchSheet()"></div>
-  <div id="searchSheet" class="fixed bottom-0 left-0 right-0 search-sheet bg-gray-800 border-t border-gray-700 rounded-t-2xl p-6 pb-10 z-50">
+  <div id="searchSheetOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="closeSearchSheet()"></div>
+  <div id="searchSheet" class="fixed bottom-0 left-0 right-0 search-sheet glass rounded-t-3xl p-6 pb-10 z-50">
     <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div>
     <h3 class="text-lg font-bold text-gray-100 mb-4 px-2">ID 検索</h3>
     <div class="relative">
-      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">🔍</span>
-      <input type="text" id="searchInput" placeholder="ID search..." class="w-full pl-10 p-3 bg-gray-900 border border-gray-700 rounded-xl text-gray-200 placeholder-gray-600 focus:outline-none focus:border-teal-500 transition" />
+      <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
+      <input type="text" id="searchInput" placeholder="Search plants..." class="w-full pl-12 pr-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition" />
     </div>
   </div>
 
-  <div id="manualInputModal" class="hidden modal-overlay" onclick="closeManualModal(event)">
-    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm border border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
-      <h3 class="text-xl font-bold text-gray-100 mb-4">Enter ID</h3>
-      <input type="text" id="manualIdInput" class="w-full p-4 bg-gray-900 border border-gray-600 rounded-xl mb-6 text-lg text-white focus:outline-none focus:border-teal-500" placeholder="e.g. A-01" />
+  <div id="manualInputModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4" onclick="closeManualModal(event)">
+    <div class="glass-card p-6 rounded-3xl w-full max-w-sm" onclick="event.stopPropagation()">
+      <h3 class="text-xl font-bold text-gray-100 mb-4">Plant Name</h3>
+      <input type="text" id="manualIdInput" placeholder="e.g. Monstera" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white mb-6 focus:outline-none focus:border-emerald-500/50" />
       <div class="flex gap-3">
-        <button onclick="closeManualModal()" class="flex-1 bg-gray-700 text-gray-300 font-bold py-3 rounded-xl">Cancel</button>
-        <button id="manualSubmitBtn" class="flex-1 bg-teal-600 text-white font-bold py-3 rounded-xl shadow-lg">Add</button>
+        <button onclick="closeManualModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold text-gray-300">Cancel</button>
+        <button id="manualSubmitBtn" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition font-semibold text-white shadow-lg shadow-emerald-900/50">Add</button>
       </div>
     </div>
   </div>
 
-  <div id="settingsModal" class="hidden modal-overlay" onclick="closeSettingsModal(event)">
-    <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-sm border border-gray-700 shadow-2xl" onclick="event.stopPropagation()">
-      <h3 class="text-xl font-bold text-gray-100 mb-6">Settings</h3>
-      <div class="space-y-3">
-        <div class="text-xs text-gray-500 text-center mb-2" id="userEmailDisplay"></div>
-        <button id="importBtn" class="w-full bg-blue-900/40 text-blue-200 border border-blue-800 font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-          📤 バックアップから取り込み (Import)
-        </button>
-        <button id="exportBtn" class="w-full bg-gray-700/40 text-gray-200 border border-gray-600 font-bold py-3 rounded-xl flex items-center justify-center gap-2">
-          📥 バックアップを保存 (Export)
-        </button>
-        <p class="text-[10px] text-gray-500 px-2">※ 携帯のLocalStorageバックアップJSONを選択してクラウドに移行できます</p>
-        <button id="logoutBtn" class="w-full bg-gray-700 text-gray-300 border border-gray-600 font-bold py-3 rounded-xl mt-4">Log Out</button>
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4" onclick="closeSettingsModal(event)">
+    <div class="glass-card w-full max-w-sm rounded-3xl overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-6 border-b border-white/10">
+        <h3 class="text-xl font-bold flex items-center gap-2 text-gray-100"><i data-lucide="settings" class="w-5 h-5 text-gray-400"></i> Settings</h3>
+        <div class="text-xs text-gray-500 mt-2" id="userEmailDisplay"></div>
       </div>
-      <button onclick="closeSettingsModal()" class="w-full mt-6 bg-gray-900 text-gray-500 font-bold py-3 rounded-xl border border-gray-700">Close</button>
+      <div class="p-2">
+        <button id="importBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-gray-300 rounded-xl">
+          <i data-lucide="download-cloud" class="w-5 h-5 text-emerald-400"></i>
+          <div><p class="font-semibold">Restore Data</p><p class="text-xs text-gray-500">Import from JSON backup</p></div>
+        </button>
+        <button id="exportBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-gray-300 rounded-xl">
+          <i data-lucide="upload-cloud" class="w-5 h-5 text-emerald-400"></i>
+          <div><p class="font-semibold">Export Backup</p><p class="text-xs text-gray-500">Save to JSON file</p></div>
+        </button>
+        <button id="logoutBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-red-400 mt-2 border-t border-white/5 rounded-xl">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+          <span class="font-semibold">Sign Out</span>
+        </button>
+      </div>
+      <div class="p-4 border-t border-white/5">
+        <button onclick="closeSettingsModal()" class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold text-gray-500">Close</button>
+      </div>
     </div>
   </div>
 
