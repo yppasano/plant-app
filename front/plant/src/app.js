@@ -671,7 +671,7 @@ const render = () => {
     card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert ? 'hover:border-emerald-500/30' : ''}`;
 
     const badgeAvgClass = isAlert ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
-    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<div class="shrink-0 mr-2 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</div>` : '';
+    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</span>` : '';
 
     const avgTextColor = isAlert ? 'text-rose-400/80' : 'text-emerald-400/80';
     const iconBg = isAlert ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' : 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
@@ -691,17 +691,17 @@ const render = () => {
     const safeImage = p.image ? escapeHtml(p.image) : '';
 
     card.innerHTML = `
-      <div class="p-5 flex items-center gap-2 cursor-pointer group" onclick="toggleAccordion('${safeId}')">
-        <div class="flex items-center gap-4 min-w-0 flex-1">
-          <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
-          <div class="min-w-0 flex-1">
-            <div class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors truncate">${safeId}</div>
-            <div class="text-xs ${isAlert ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1">
-              <i data-lucide="clock" class="w-3 h-3 shrink-0"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
-            </div>
+      <div class="p-5 flex items-center gap-3 cursor-pointer group" onclick="toggleAccordion('${safeId}')">
+        <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
+        <div class="min-w-0 flex-1 flex flex-col">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors truncate">${safeId}</span>
+            ${avgBadgeEl}
+          </div>
+          <div class="text-xs ${isAlert ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1 min-w-0 overflow-hidden">
+            <i data-lucide="clock" class="w-3 h-3 shrink-0"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
           </div>
         </div>
-        ${avgBadgeEl}
         <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition shrink-0">
           <i data-lucide="chevron-down" id="acc-arrow-${safeId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
         </div>
