@@ -279,6 +279,13 @@ const addPlantToDB = async (plantId, initialImageBlob = null) => {
   }
 };
 
+const LOG_LABELS = { '液肥': '🧪 液肥', '水': '💧 水やり', '活力剤': '⚡ 活力剤' };
+window.confirmAndAddLog = (plantId, type) => {
+  const label = LOG_LABELS[type] || type;
+  if (!confirm(`${label} を記録しますか？`)) return;
+  addLog(plantId, type);
+};
+
 window.addLog = async (plantId, type) => {
   const plant = plants.find(p => p.id === plantId);
   if (!plant) return;
@@ -690,9 +697,9 @@ const render = () => {
             <div class="bg-gray-800/50 rounded px-2">${logsHtml || '<div class="p-2 text-center text-xs text-gray-600">No logs</div>'}</div>
           </div>
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="addLog('${safeId}','液肥')" class="bg-gray-800 border border-green-900 text-green-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">🧪 液肥</button>
-            <button onclick="addLog('${safeId}','水')" class="bg-teal-600 text-white py-2 rounded text-xs font-bold shadow hover:bg-teal-500 flex items-center justify-center gap-1">💧 水やり</button>
-            <button onclick="addLog('${safeId}','活力剤')" class="bg-gray-800 border border-yellow-900 text-yellow-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">⚡ 活力剤</button>
+            <button onclick="confirmAndAddLog('${safeId}','液肥')" class="bg-gray-800 border border-green-900 text-green-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">🧪 液肥</button>
+            <button onclick="confirmAndAddLog('${safeId}','水')" class="bg-teal-600 text-white py-2 rounded text-xs font-bold shadow hover:bg-teal-500 flex items-center justify-center gap-1">💧 水やり</button>
+            <button onclick="confirmAndAddLog('${safeId}','活力剤')" class="bg-gray-800 border border-yellow-900 text-yellow-400 py-2 rounded text-xs font-bold shadow hover:bg-gray-700 flex items-center justify-center gap-1">⚡ 活力剤</button>
           </div>
           <div class="text-right"><button onclick="deletePlant('${safeId}')" class="text-xs text-gray-600 underline hover:text-red-400">Delete</button></div>
         </div>

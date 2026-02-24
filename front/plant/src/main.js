@@ -14,7 +14,13 @@ const save = () => {
   }
 }
 
-// ログ追加
+// ログ追加（確認付き）
+const LOG_LABELS = { '液肥': '🧪 液肥', '水': '💧 水やり', '活力剤': '⚡ 活力剤' }
+window.confirmAndAddLog = (id, type) => {
+  const label = LOG_LABELS[type] || type
+  if (!confirm(`${label} を記録しますか？`)) return
+  addLog(id, type)
+}
 window.addLog = (id, type) => {
   const plant = plants.find(p => p.id === id)
   if (!plant) return
@@ -226,9 +232,9 @@ const render = () => {
       </div>
 
       <div class="grid grid-cols-3 gap-2">
-        <button onclick="addLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">液肥</button>
-        <button onclick="addLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">水</button>
-        <button onclick="addLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">活力剤</button>
+        <button onclick="confirmAndAddLog('${plant.id}', '液肥')" class="bg-orange-400 hover:bg-orange-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">液肥</button>
+        <button onclick="confirmAndAddLog('${plant.id}', '水')" class="bg-blue-400 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">水</button>
+        <button onclick="confirmAndAddLog('${plant.id}', '活力剤')" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 rounded-lg shadow-sm active:scale-95 transition">活力剤</button>
       </div>
     `
     listEl.appendChild(card)
