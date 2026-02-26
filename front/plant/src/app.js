@@ -888,15 +888,20 @@ const render = () => {
     else if (isAlert) cardClass = 'glass-card-alert';
     card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert && !needsWater ? 'hover:border-emerald-500/30' : ''}`;
 
-    const badgeAvgClass = isAlert ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
+    const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : needsWater ? 'bg-cyan-900/80 text-cyan-300 border-cyan-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
     const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</span>` : '';
 
-    const avgTextColor = isAlert ? 'text-rose-400/80' : 'text-emerald-400/80';
-    const iconBg = isAlert ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' : 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
-    const listIconSvg = isAlert
-      ? '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
-    const alertPing = isAlert ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>' : '';
+    const avgTextColor = isAlert && !needsWater ? 'text-rose-400/80' : needsWater ? 'text-cyan-400/80' : 'text-emerald-400/80';
+    let iconBg = 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
+    let listIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
+    if (needsWater) {
+      iconBg = 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30';
+      listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
+    } else if (isAlert) {
+      iconBg = 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30';
+      listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>';
+    }
+    const alertPing = isAlert && !needsWater ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>' : '';
 
     const displayLogs = sortedLogs.filter(l => l.type !== '状態').slice(0, 5);
     const logsHtml = displayLogs.map(l => `
@@ -913,11 +918,11 @@ const render = () => {
         <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
         <div class="min-w-0 flex-1 flex flex-col">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="font-bold text-lg ${isAlert ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors truncate">${safeId}</span>
+            <span class="font-bold text-lg ${isAlert && !needsWater ? 'text-rose-50' : needsWater ? 'text-cyan-50 group-hover:text-cyan-300' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors truncate">${safeId}</span>
             ${avgBadgeEl}
           </div>
-          <div class="text-xs ${isAlert ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1 min-w-0 overflow-hidden">
-            <i data-lucide="clock" class="w-3 h-3 shrink-0"></i> Last: <span class="${isAlert ? 'text-rose-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="text-emerald-400 font-medium">${escapeHtml(lastType)}</span>` : ''}
+          <div class="text-xs ${isAlert && !needsWater ? 'text-rose-400' : needsWater ? 'text-cyan-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1 min-w-0 overflow-hidden">
+            <i data-lucide="clock" class="w-3 h-3 shrink-0"></i> Last: <span class="${isAlert && !needsWater ? 'text-rose-300 font-bold' : needsWater ? 'text-cyan-300 font-bold' : 'text-gray-200'}">${escapeHtml(lastDate)}</span>${lastType ? ` <span class="${needsWater ? 'text-cyan-400' : 'text-emerald-400'} font-medium">${escapeHtml(lastType)}</span>` : ''}
           </div>
         </div>
         <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition shrink-0">
