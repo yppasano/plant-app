@@ -1,6 +1,6 @@
 {
-    "name": "Cycle Monitor",
-    "short_name": "CycleMonitor",
+    "name": "Ageta",
+    "short_name": "Ageta",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#111827",

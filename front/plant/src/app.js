@@ -1,5 +1,5 @@
 /**
- * Cycle Monitor Cloud - メインアプリケーション
+ * Ageta - メインアプリケーション
  */
 import './style.css';
 import { SUPABASE_URL, SUPABASE_KEY } from './config.js';
@@ -49,6 +49,11 @@ let cameraStream = null;
 let searchQuery = '';
 let currentImageTargetPlantId = null;
 let currentRenamePlantId = null;
+let currentStatusPlantId = null;
+let currentConditionPlantId = null;
+let conditionStep = 1;
+let selectedCondition = null;
+let selectedTags = [];
 
 // DOM要素
 const els = {
@@ -80,7 +85,15 @@ const els = {
   scanOverlay: document.getElementById('scanOverlay'),
   scanStatus: document.getElementById('scanStatus'),
   imageFileInput: document.getElementById('imageFileInput'),
-  importFileInput: document.getElementById('importFileInput')
+  importFileInput: document.getElementById('importFileInput'),
+  statusPopover: document.getElementById('statusPopover'),
+  statusPopoverOverlay: document.getElementById('statusPopoverOverlay'),
+  conditionModal: document.getElementById('conditionModal'),
+  conditionStep1: document.getElementById('conditionStep1'),
+  conditionStep2: document.getElementById('conditionStep2'),
+  conditionTags: document.getElementById('conditionTags'),
+  conditionBackBtn: document.getElementById('conditionBackBtn'),
+  conditionSaveBtn: document.getElementById('conditionSaveBtn')
 };
 
 // ========================================
@@ -254,7 +267,8 @@ const fetchPlants = async () => {
       db_id: p.id,
       id: p.plant_id,
       image: p.image_url,
-      logs: p.logs.map(l => ({
+      needs_water: p.needs_water === true,
+      logs: (p.logs || []).map(l => ({
         type: l.type,
         ts: new Date(l.logged_at).getTime()
       }))
@@ -306,6 +320,12 @@ window.addLog = async (plantId, type) => {
     });
 
   if (error) console.error(error);
+
+  // 水・液肥・活力剤のいずれかを記録したら needs_water を解除
+  const careTypes = ['水', '液肥', '活力剤'];
+  if (careTypes.includes(type) && plant.needs_water) {
+    await supabase.from('plants').update({ needs_water: false }).eq('id', plant.db_id);
+  }
   await fetchPlants();
 };
 
@@ -318,6 +338,42 @@ window.deletePlant = async (plantId) => {
   const { error } = await supabase.from('plants').delete().eq('id', plant.db_id);
   if (error) alert("Delete failed");
   else await fetchPlants();
+};
+
+const setNeedsWater = async (plantId, value) => {
+  const plant = plants.find(p => p.id === plantId);
+  if (!plant) return;
+  updateSyncStatus('loading');
+  const { error } = await supabase.from('plants').update({ needs_water: value }).eq('id', plant.db_id);
+  if (error) console.error(error);
+  await fetchPlants();
+};
+
+window.openStatusPopover = (plantId, ev) => {
+  currentStatusPlantId = plantId;
+  const popover = els.statusPopover;
+  const overlay = els.statusPopoverOverlay;
+  if (!popover || !overlay) return;
+  const plant = plants.find(p => p.id === plantId);
+  const waterBtn = document.getElementById('statusWaterMarkerBtn');
+  if (waterBtn) waterBtn.textContent = plant?.needs_water ? '💧 マーカー解除' : '💧 明日水やり(マーカー)';
+  overlay.classList.remove('hidden');
+  popover.classList.remove('hidden');
+  const rect = ev?.target?.getBoundingClientRect?.();
+  if (rect) {
+    popover.style.left = `${rect.left}px`;
+    popover.style.top = `${rect.bottom + 4}px`;
+    popover.style.transform = '';
+  } else {
+    popover.style.left = '50%';
+    popover.style.top = '50%';
+    popover.style.transform = 'translate(-50%, -50%)';
+  }
+};
+window.closeStatusPopover = () => {
+  els.statusPopoverOverlay?.classList.add('hidden');
+  els.statusPopover?.classList.add('hidden');
+  currentStatusPlantId = null;
 };
 
 window.openRenameModal = (plantId) => {
@@ -592,6 +648,113 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async () =>
   await addPlantToDB(id);
 });
 
+// Status ポップオーバー: 明日水やりマーカー（トグル: 既に true なら false に）
+document.getElementById('statusWaterMarkerBtn')?.addEventListener('click', async () => {
+  if (!currentStatusPlantId) return;
+  const plant = plants.find(p => p.id === currentStatusPlantId);
+  const newValue = plant?.needs_water ? false : true;
+  await setNeedsWater(currentStatusPlantId, newValue);
+  closeStatusPopover();
+});
+
+// Status ポップオーバー: 状態を記録
+document.getElementById('statusRecordBtn')?.addEventListener('click', () => {
+  if (!currentStatusPlantId) return;
+  openConditionModal(currentStatusPlantId);
+  closeStatusPopover();
+});
+
+// 状態記録タグ定義
+const CONDITION_TAGS = {
+  Good: ['新芽が出た', '花が咲いた', 'ツヤツヤ', '元気'],
+  Normal: [],
+  Bad: ['葉が黄色い', 'しおれている', '虫・病気', '元気がない']
+};
+
+window.openConditionModal = (plantId) => {
+  currentConditionPlantId = plantId;
+  conditionStep = 1;
+  selectedCondition = null;
+  selectedTags = [];
+  els.conditionStep1?.classList.remove('hidden');
+  els.conditionStep2?.classList.add('hidden');
+  els.conditionBackBtn?.classList.add('hidden');
+  els.conditionModal?.classList.remove('hidden');
+};
+window.closeConditionModal = (e) => {
+  if (!e || e.target === els.conditionModal) {
+    els.conditionModal?.classList.add('hidden');
+    currentConditionPlantId = null;
+  }
+};
+
+// Step 1: 状態選択
+document.querySelectorAll('.condition-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedCondition = btn.dataset.condition;
+    const tags = CONDITION_TAGS[selectedCondition];
+    if (tags.length === 0) {
+      // Normal: そのまま保存可能、戻るボタン表示
+      els.conditionStep1?.classList.add('hidden');
+      els.conditionStep2?.classList.add('hidden');
+      els.conditionBackBtn?.classList.remove('hidden');
+      return;
+    }
+    els.conditionStep1?.classList.add('hidden');
+    els.conditionStep2?.classList.remove('hidden');
+    els.conditionBackBtn?.classList.remove('hidden');
+    selectedTags = [];
+    const container = els.conditionTags;
+    if (!container) return;
+    container.innerHTML = '';
+    tags.forEach(tag => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'px-4 py-2.5 rounded-xl border-2 border-white/20 bg-white/5 text-gray-300 font-semibold text-sm hover:bg-white/10 hover:border-white/30 transition active:scale-95';
+      b.textContent = tag;
+      b.dataset.tag = tag;
+      b.addEventListener('click', () => {
+        const idx = selectedTags.indexOf(tag);
+        if (idx >= 0) selectedTags.splice(idx, 1);
+        else selectedTags.push(tag);
+        b.classList.toggle('border-emerald-500', selectedTags.includes(tag));
+        b.classList.toggle('bg-emerald-500/20', selectedTags.includes(tag));
+        b.classList.toggle('text-emerald-300', selectedTags.includes(tag));
+      });
+      container.appendChild(b);
+    });
+  });
+});
+
+document.getElementById('conditionCancelBtn')?.addEventListener('click', () => closeConditionModal());
+
+document.getElementById('conditionBackBtn')?.addEventListener('click', () => {
+  conditionStep = 1;
+  selectedCondition = null;
+  selectedTags = [];
+  els.conditionStep1?.classList.remove('hidden');
+  els.conditionStep2?.classList.add('hidden');
+  els.conditionBackBtn?.classList.add('hidden');
+});
+
+document.getElementById('conditionSaveBtn')?.addEventListener('click', async () => {
+  if (!currentConditionPlantId) return;
+  const plant = plants.find(p => p.id === currentConditionPlantId);
+  if (!plant) return;
+
+  updateSyncStatus('loading');
+  const { error } = await supabase.from('logs').insert({
+    user_id: currentUser.id,
+    plant_db_id: plant.db_id,
+    type: '状態',
+    condition: selectedCondition || 'Normal',
+    tags: selectedTags.length > 0 ? selectedTags : []
+  });
+  if (error) console.error(error);
+  closeConditionModal();
+  await fetchPlants();
+});
+
 document.getElementById('renameSubmitBtn').addEventListener('click', async () => {
   const newName = els.renameInput.value.trim();
   if (!newName) {
@@ -717,10 +880,13 @@ const render = () => {
     const lastDate = lastLog ? formatDate(lastLog.ts) : '---';
     const lastType = lastLog ? lastLog.type : '';
     const isAlert = isAlertNeeded(p);
+    const needsWater = p.needs_water === true;
 
     const card = document.createElement('div');
-    const cardClass = isAlert ? 'glass-card-alert' : 'glass-card';
-    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert ? 'hover:border-emerald-500/30' : ''}`;
+    let cardClass = 'glass-card';
+    if (needsWater) cardClass = 'glass-card-water';
+    else if (isAlert) cardClass = 'glass-card-alert';
+    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert && !needsWater ? 'hover:border-emerald-500/30' : ''}`;
 
     const badgeAvgClass = isAlert ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
     const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</span>` : '';
@@ -732,7 +898,7 @@ const render = () => {
       : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
     const alertPing = isAlert ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>' : '';
 
-    const displayLogs = sortedLogs.slice(0, 5);
+    const displayLogs = sortedLogs.filter(l => l.type !== '状態').slice(0, 5);
     const logsHtml = displayLogs.map(l => `
       <div class="flex justify-between py-2.5 border-b border-white/10 last:border-0">
         <span class="text-gray-400 font-mono text-[10.5px] flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1.5 opacity-70"></i>${escapeHtml(formatDate(l.ts).slice(-5))}</span>
@@ -786,10 +952,13 @@ const render = () => {
           </div>
           <div class="flex justify-end gap-4 pt-2 mt-6 border-t border-white/5">
             <button onclick="openRenameModal('${safeId}')" class="text-xs text-gray-500 hover:text-emerald-400 transition flex items-center gap-1">
-              <i data-lucide="edit-3" class="w-3 h-3"></i> Rename Plant
+              <i data-lucide="edit-3" class="w-3 h-3"></i> Rename
+            </button>
+            <button onclick="openStatusPopover('${safeId}', event)" class="text-xs text-gray-500 hover:text-emerald-400 transition flex items-center gap-1">
+              <i data-lucide="clipboard-list" class="w-3 h-3"></i> Status
             </button>
             <button onclick="deletePlant('${safeId}')" class="text-xs text-gray-500 hover:text-red-400 transition flex items-center gap-1">
-              <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
+              <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
             </button>
           </div>
         </div>

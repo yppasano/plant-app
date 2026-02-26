@@ -3,26 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Plant Tracker - Stylish</title>
+  <title>Plant Tracker - Advanced UI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
     
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      /* 背景に植物の画像を薄く配置 */
       background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1080&auto=format&fit=crop');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
     }
     
-    /* すりガラスエフェクト（グラスモーフィズム） */
     .glass {
       background: rgba(20, 30, 25, 0.6);
       backdrop-filter: blur(12px);
@@ -37,14 +32,20 @@
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
     }
     .glass-card-alert {
-      background: rgba(45, 20, 25, 0.75); /* 赤みがかった背景色 */
+      background: rgba(45, 20, 25, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(244, 63, 94, 0.25); /* ローズ系のボーダー */
+      border: 1px solid rgba(244, 63, 94, 0.25);
       box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 15px 0 rgba(244, 63, 94, 0.1);
     }
+    .glass-card-water {
+      background: rgba(15, 35, 45, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 15px 0 rgba(6, 182, 212, 0.15);
+    }
     
-    /* アコーディオンのアニメーション */
     .accordion-content {
       max-height: 0;
       overflow: hidden;
@@ -52,277 +53,300 @@
       opacity: 0;
     }
     .accordion-content.expanded {
-      max-height: 500px;
+      max-height: 800px;
       opacity: 1;
     }
     .arrow-icon.rotated {
       transform: rotate(180deg);
     }
+    /* @applyを使っていたstatus-tagのCSSは削除し、JS内で直接Tailwindクラスを付与するように修正しました */
   </style>
 </head>
 <body class="text-gray-100 antialiased h-screen overflow-hidden relative">
-  <!-- 全体にかかる暗いオーバーレイ -->
   <div class="absolute inset-0 bg-slate-950/70 z-0 pointer-events-none"></div>
 
   <div class="relative z-10 max-w-md mx-auto h-full flex flex-col shadow-2xl bg-black/20">
     
-    <!-- ==========================================
-         ログイン画面 (スタイリッシュ版)
-         ========================================== -->
+    <!-- ログイン画面 (モック) -->
     <div id="authScreen" class="absolute inset-0 glass z-50 flex flex-col justify-center items-center p-8 transition-opacity duration-500">
       <div class="glass-card p-8 rounded-3xl w-full max-w-sm text-center">
         <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg border border-emerald-500/30">
-          <!-- オリジナルのジグザグ葉脈ロゴ -->
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10">
-            <!-- 葉の輪郭 -->
-            <path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" />
-            <!-- ジグザグの葉脈と茎 -->
-            <polyline points="12 2 12 9 6 12 16 15 12 17 12 23" />
-          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>
         </div>
         <h1 class="text-3xl font-bold mb-2 tracking-tight">Plantify</h1>
         <p class="text-emerald-400/80 text-sm mb-8">Your botanical companion</p>
-        
-        <div class="space-y-4">
-          <div class="relative">
-            <i data-lucide="mail" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input type="email" id="emailInput" placeholder="Email address" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition">
-          </div>
-          <div class="relative">
-            <i data-lucide="lock" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-            <input type="password" id="passwordInput" placeholder="Password" class="w-full bg-black/30 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition">
-          </div>
-          <p id="authError" class="text-red-400 text-xs text-left hidden"></p>
-          <button id="signInBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold py-3.5 rounded-2xl shadow-lg shadow-emerald-900/50 transition-all active:scale-95">
-            Sign In / Sign Up
-          </button>
-        </div>
+        <button id="signInBtn" class="w-full bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-semibold py-3.5 rounded-2xl shadow-lg transition-all active:scale-95">Enter Preview</button>
       </div>
     </div>
 
-    <!-- ==========================================
-         メインアプリ画面
-         ========================================== -->
-    <div id="appScreen" class="flex-1 flex flex-col h-full hidden">
-      <!-- ヘッダー (固定解除・タイトルと並び替えの2カラム・メルアド削除) -->
-      <header class="pt-12 pb-2 px-6">
+    <!-- メインアプリ画面 -->
+    <div id="appScreen" class="flex-1 flex flex-col h-full hidden relative">
+      <header class="pt-12 pb-2 px-6 shrink-0">
         <div class="flex justify-between items-end">
           <div>
             <h2 class="text-3xl font-bold tracking-tight text-white">My Garden</h2>
             <div class="flex items-center gap-2 text-xs text-emerald-400/80 mt-1">
-              <span id="syncDot" class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
-              <span id="syncText">Online</span>
+              <span class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
+              <span>Online (Mock)</span>
             </div>
           </div>
-          <!-- 並び替えドロップダウン -->
           <div class="relative mb-1">
-            <select id="sortSelect" class="bg-white/5 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-xs text-gray-300 focus:outline-none appearance-none backdrop-blur-sm hover:bg-white/10 transition shadow-sm cursor-pointer">
+            <select id="sortSelect" class="bg-white/5 border border-white/10 rounded-lg py-2 pl-3 pr-8 text-xs text-gray-300 focus:outline-none appearance-none backdrop-blur-sm cursor-pointer">
               <option value="id" class="bg-gray-800">Name</option>
               <option value="dry_fast" class="bg-gray-800">Dry Fast</option>
-              <option value="dry_slow" class="bg-gray-800">Dry Slow</option>
             </select>
             <i data-lucide="chevron-down" class="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none"></i>
           </div>
         </div>
       </header>
 
-      <!-- 植物リスト (スクロール領域) -->
-      <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 scroll-smooth" id="plantList">
-        <!-- JSでカードがここに生成されます -->
-      </main>
+      <main class="flex-1 overflow-y-auto p-4 space-y-4 pb-24 scroll-smooth" id="plantList"></main>
 
-      <!-- ボトムナビゲーション (固定メニュー) -->
+      <!-- ボトムナビゲーション -->
       <nav class="absolute bottom-0 left-0 right-0 glass pb-4 pt-2 px-2 z-30 border-t border-white/10 flex justify-around items-center rounded-t-3xl">
-        <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
-            <i data-lucide="camera" class="w-6 h-6"></i>
-          </div>
-          <span class="text-[10px] font-semibold tracking-wide">Camera</span>
-        </button>
-        <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
-            <i data-lucide="edit-3" class="w-6 h-6"></i>
-          </div>
-          <span class="text-[10px] font-semibold tracking-wide">Manual</span>
-        </button>
-        <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
-            <i data-lucide="search" class="w-6 h-6"></i>
-          </div>
-          <span class="text-[10px] font-semibold tracking-wide">Search</span>
-        </button>
-        <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-          <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1">
-            <i data-lucide="settings" class="w-6 h-6"></i>
-          </div>
-          <span class="text-[10px] font-semibold tracking-wide">Settings</span>
-        </button>
+        <button class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95"><div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 mb-1"><i data-lucide="camera" class="w-6 h-6"></i></div><span class="text-[10px] font-semibold">Camera</span></button>
+        <button onclick="document.getElementById('manualInputModal').classList.remove('hidden')" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95"><div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 mb-1"><i data-lucide="edit-3" class="w-6 h-6"></i></div><span class="text-[10px] font-semibold">Manual</span></button>
+        <button onclick="document.getElementById('searchSheetOverlay').classList.remove('hidden'); document.getElementById('searchSheet').classList.remove('translate-y-full')" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95"><div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 mb-1"><i data-lucide="search" class="w-6 h-6"></i></div><span class="text-[10px] font-semibold">Search</span></button>
+        <button onclick="document.getElementById('settingsModal').classList.remove('hidden')" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95"><div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div><span class="text-[10px] font-semibold">Settings</span></button>
       </nav>
     </div>
 
     <!-- ==========================================
-         モーダル＆アクションシート類 (UIのみ)
+         モーダル群
          ========================================== -->
-    <!-- 検索ボトムシート (下からスライドアップ) -->
-    <div id="searchSheetOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity" onclick="closeSearchSheet()"></div>
-    <div id="searchSheet" class="absolute bottom-0 left-0 w-full glass rounded-t-3xl p-6 pb-10 z-50 transform translate-y-full transition-transform duration-300">
-      <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div>
-      <h3 class="text-lg font-bold mb-4 px-2">Search Plants</h3>
-      <div class="relative">
-        <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-        <input type="text" id="searchInput" placeholder="Search plants..." class="w-full bg-black/30 border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition shadow-inner">
-      </div>
-    </div>
-
-    <!-- 設定モーダル -->
-    <div id="settingsModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="closeSettingsModal(event)">
-      <div class="glass-card w-full max-w-sm rounded-3xl overflow-hidden" onclick="event.stopPropagation()">
-        <div class="p-6 border-b border-white/10">
-          <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5 text-gray-400"></i> Settings</h3>
-        </div>
-        <div class="p-2">
-          <button id="importBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-gray-300">
-            <i data-lucide="download-cloud" class="w-5 h-5 text-emerald-400"></i> 
-            <div><p class="font-semibold">Restore Data</p><p class="text-xs text-gray-500">Import from JSON backup</p></div>
-          </button>
-          <button id="logoutBtn" class="w-full flex items-center gap-3 p-4 hover:bg-white/5 transition text-left text-red-400 mt-2 border-t border-white/5">
-            <i data-lucide="log-out" class="w-5 h-5"></i> 
-            <span class="font-semibold">Sign Out</span>
-          </button>
-        </div>
-      </div>
-    </div>
     
-    <!-- 手動入力モーダル -->
-    <div id="manualInputModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="closeManualModal(event)">
+    <!-- Rename Modal -->
+    <div id="renameModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="this.classList.add('hidden')">
       <div class="glass-card p-6 rounded-3xl w-full max-w-sm" onclick="event.stopPropagation()">
-        <h3 class="text-xl font-bold mb-4">Plant Name</h3>
-        <input type="text" id="manualIdInput" placeholder="e.g. Monstera" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white mb-6 focus:outline-none focus:border-emerald-500/50">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="edit-2" class="w-5 h-5 text-emerald-400"></i> Rename Plant</h3>
+        <input type="hidden" id="renameOriginalId">
+        <input type="text" id="renameInput" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white mb-6 focus:outline-none focus:border-emerald-500/50">
         <div class="flex gap-3">
-          <button onclick="closeManualModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold">Cancel</button>
-          <button id="manualSubmitBtn" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition font-semibold text-white shadow-lg shadow-emerald-900/50">Add</button>
+          <button onclick="document.getElementById('renameModal').classList.add('hidden')" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold">Cancel</button>
+          <button onclick="saveRename()" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition font-semibold text-white shadow-lg">Save</button>
         </div>
       </div>
     </div>
 
-    <input type="file" id="importFileInput" accept=".json" class="hidden">
-    <input type="file" id="imageFileInput" accept="image/*" class="hidden">
+    <!-- 状態記録 Modal -->
+    <div id="statusRecordModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="closeStatusModal()">
+      <div class="glass-card p-6 rounded-3xl w-full max-w-sm" onclick="event.stopPropagation()">
+        <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="clipboard-list" class="w-5 h-5 text-emerald-400"></i> Record Status</h3>
+        <input type="hidden" id="statusTargetId">
+        
+        <!-- Step 1: コンディション選択 -->
+        <p class="text-sm text-gray-400 mb-2">Step 1: How is it doing?</p>
+        <div class="grid grid-cols-3 gap-2 mb-6">
+          <button onclick="selectCondition('good')" id="cond-good" class="cond-btn bg-white/5 border border-white/10 py-3 rounded-xl text-2xl hover:bg-white/10 transition active:scale-95 text-center">😄</button>
+          <button onclick="selectCondition('normal')" id="cond-normal" class="cond-btn bg-white/5 border border-white/10 py-3 rounded-xl text-2xl hover:bg-white/10 transition active:scale-95 text-center">😐</button>
+          <button onclick="selectCondition('bad')" id="cond-bad" class="cond-btn bg-white/5 border border-white/10 py-3 rounded-xl text-2xl hover:bg-white/10 transition active:scale-95 text-center">😢</button>
+        </div>
+
+        <!-- Step 2: 詳細タグ (動的に切り替え) -->
+        <div id="step2Area" class="hidden mb-6">
+          <p class="text-sm text-gray-400 mb-2">Step 2: Add details <span class="text-[10px] text-gray-500 font-normal">(複数選択可)</span></p>
+          <div id="tagsContainer" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <div class="flex gap-3 mt-4 border-t border-white/10 pt-4">
+          <button onclick="closeStatusModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 transition font-semibold">Cancel</button>
+          <button onclick="saveStatusRecord()" id="saveStatusBtn" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition font-semibold text-white shadow-lg opacity-50 cursor-not-allowed" disabled>Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- その他既存のモーダル (ダミー) -->
+    <div id="searchSheetOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="this.classList.add('hidden'); document.getElementById('searchSheet').classList.add('translate-y-full')"></div>
+    <div id="searchSheet" class="absolute bottom-0 left-0 w-full glass rounded-t-3xl p-6 pb-10 z-50 transform translate-y-full transition-transform duration-300">
+      <div class="relative"><i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i><input type="text" placeholder="Search plants..." class="w-full bg-black/30 border border-white/10 rounded-2xl py-3.5 pl-12 pr-4 text-white"></div>
+    </div>
+    <div id="manualInputModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="this.classList.add('hidden')">
+      <div class="glass-card p-6 rounded-3xl w-full max-w-sm" onclick="event.stopPropagation()"><h3 class="text-xl font-bold mb-4">Add Plant</h3><input type="text" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white mb-6"><button class="w-full py-3 rounded-xl bg-emerald-600 font-semibold text-white">Add</button></div>
+    </div>
+    <div id="settingsModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4" onclick="this.classList.add('hidden')">
+      <div class="glass-card w-full max-w-sm rounded-3xl overflow-hidden" onclick="event.stopPropagation()"><div class="p-6 border-b border-white/10"><h3 class="text-xl font-bold">Settings</h3></div><div class="p-4 text-center text-gray-400 text-sm">Preview mode</div></div>
+    </div>
+
   </div>
 
   <script>
-    // Lucideアイコンの初期化
     lucide.createIcons();
 
-    // ==========================================
-    // UI制御用モックスクリプト (デザインプレビュー用)
-    // ==========================================
-    const els = {
-      authScreen: document.getElementById('authScreen'),
-      appScreen: document.getElementById('appScreen'),
-      signInBtn: document.getElementById('signInBtn'),
-      plantList: document.getElementById('plantList'),
-      
-      // 新しいナビゲーションとシートの参照
-      navCameraBtn: document.getElementById('navCameraBtn'),
-      navManualBtn: document.getElementById('navManualBtn'),
-      navSearchBtn: document.getElementById('navSearchBtn'),
-      navSettingsBtn: document.getElementById('navSettingsBtn'),
-      searchSheet: document.getElementById('searchSheet'),
-      searchSheetOverlay: document.getElementById('searchSheetOverlay'),
-      
-      settingsModal: document.getElementById('settingsModal'),
-      manualInputModal: document.getElementById('manualInputModal')
-    };
-
-    // 今日を基準にモックデータの日付を生成
     const getDaysAgo = (days) => {
-      const d = new Date();
-      d.setDate(d.getDate() - days);
+      const d = new Date(); d.setDate(d.getDate() - days);
       return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
     };
 
-    // サンプルデータ
-    const mockPlants = [
-      { id: 'Monstera Deliciosa', avg: 5, lastDate: getDaysAgo(4), image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(4)}, {type: '液肥', date: getDaysAgo(14)}] },
-      { id: 'Pothos', avg: 3, lastDate: getDaysAgo(1), image: null, logs: [{type: '水', date: getDaysAgo(1)}] },
-      { id: 'Snake Plant', avg: 14, lastDate: getDaysAgo(10), image: 'https://images.unsplash.com/photo-1599009586118-2029ea97ea70?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(10)}] }
+    // モックデータ (needs_water を追加)
+    let mockPlants = [
+      { id: 'Monstera Deliciosa', avg: 5, lastDate: getDaysAgo(4), image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(4)}], needs_water: false },
+      { id: 'Pothos', avg: null, lastDate: getDaysAgo(1), image: null, logs: [{type: '液肥', date: getDaysAgo(1)}], needs_water: true },
+      { id: 'Snake Plant', avg: 14, lastDate: getDaysAgo(10), image: 'https://images.unsplash.com/photo-1599009586118-2029ea97ea70?w=400&auto=format&fit=crop', logs: [{type: '水', date: getDaysAgo(10)}], needs_water: false }
     ];
 
-    // サインインのモック
-    els.signInBtn.addEventListener('click', () => {
-      els.authScreen.classList.add('opacity-0');
-      setTimeout(() => {
-        els.authScreen.classList.add('hidden');
-        els.appScreen.classList.remove('hidden');
-        renderMockData();
-      }, 500);
+    document.getElementById('signInBtn').addEventListener('click', () => {
+      document.getElementById('authScreen').classList.add('opacity-0');
+      setTimeout(() => { document.getElementById('authScreen').classList.add('hidden'); document.getElementById('appScreen').classList.remove('hidden'); renderMockData(); }, 500);
     });
 
-    // --- ボトムナビゲーションの動作制御 ---
-    
-    // 1. Camera
-    els.navCameraBtn.addEventListener('click', () => {
-      // 実際のアプリではここにカメラスキャンの処理が入ります
-      alert('Camera feature activated (Mock)');
-    });
-
-    // 2. Manual Entry
-    els.navManualBtn.addEventListener('click', () => {
-      els.manualInputModal.classList.remove('hidden');
-    });
-
-    // 3. Search & Sort
-    els.navSearchBtn.addEventListener('click', () => {
-      els.searchSheetOverlay.classList.remove('hidden');
-      setTimeout(() => els.searchSheet.classList.remove('translate-y-full'), 10);
-    });
-    
-    // 検索シートを閉じる
-    window.closeSearchSheet = () => {
-      els.searchSheet.classList.add('translate-y-full');
-      setTimeout(() => els.searchSheetOverlay.classList.add('hidden'), 300);
-    };
-
-    // 4. Settings
-    els.navSettingsBtn.addEventListener('click', () => {
-      els.settingsModal.classList.remove('hidden');
-    });
-
-    // 各種モーダルを閉じる処理
-    window.closeSettingsModal = (e) => { if(!e || e.target === els.settingsModal) els.settingsModal.classList.add('hidden'); };
-    window.closeManualModal = (e) => { if(!e || e.target === els.manualInputModal) els.manualInputModal.classList.add('hidden'); };
-
-    // アコーディオンの開閉
     window.toggleAccordion = (id) => {
-      const content = document.getElementById(`acc-content-${id}`);
-      const arrow = document.getElementById(`acc-arrow-${id}`);
-      content.classList.toggle('expanded');
-      arrow.classList.toggle('rotated');
+      document.getElementById(`acc-content-${id}`).classList.toggle('expanded');
+      document.getElementById(`acc-arrow-${id}`).classList.toggle('rotated');
     };
 
-    // モックデータの描画 (デザイン確認用)
-    const renderMockData = () => {
-      els.plantList.innerHTML = '';
+    // --- Action Functions ---
+    window.mockWatering = (id) => {
+      const plant = mockPlants.find(p => p.id === id);
+      if(plant) {
+        plant.needs_water = false; // 水やりでマーカー解除
+        plant.lastDate = getDaysAgo(0);
+        plant.logs.unshift({type: '水', date: getDaysAgo(0)});
+        renderMockData();
+      }
+    };
+
+    // Status メニューの表示切替
+    window.toggleStatusMenu = (id) => {
+      const menu = document.getElementById(`status-menu-${id}`);
+      menu.classList.toggle('hidden');
+    };
+
+    // マーカー機能
+    window.toggleWaterMarker = (id) => {
+      const plant = mockPlants.find(p => p.id === id);
+      if(plant) {
+        plant.needs_water = !plant.needs_water;
+        renderMockData();
+      }
+    };
+
+    // --- Rename機能 ---
+    window.openRenameModal = (id) => {
+      document.getElementById('renameOriginalId').value = id;
+      document.getElementById('renameInput').value = id;
+      document.getElementById('renameModal').classList.remove('hidden');
+    };
+    window.saveRename = () => {
+      const oldId = document.getElementById('renameOriginalId').value;
+      const newId = document.getElementById('renameInput').value.trim();
+      if(!newId || newId === oldId) return;
+      if(mockPlants.find(p => p.id === newId)) { alert('Already exists!'); return; }
       
+      const plant = mockPlants.find(p => p.id === oldId);
+      if(plant) { plant.id = newId; renderMockData(); }
+      document.getElementById('renameModal').classList.add('hidden');
+    };
+
+    // --- 状態記録機能 ---
+    let currentCondition = null;
+    let selectedTags = new Set();
+    const TAGS = {
+      good: ['新芽が出た', '花が咲いた', 'ツヤツヤ', '元気'],
+      bad: ['葉が黄色い', 'しおれている', '虫・病気', '元気がない']
+    };
+
+    window.openStatusModal = (id) => {
+      document.getElementById('statusTargetId').value = id;
+      currentCondition = null; selectedTags.clear();
+      document.querySelectorAll('.cond-btn').forEach(b => {
+        b.classList.remove('bg-emerald-500/20', 'border-emerald-500/50');
+        b.classList.add('bg-white/5', 'border-white/10');
+      });
+      document.getElementById('step2Area').classList.add('hidden');
+      document.getElementById('saveStatusBtn').disabled = true;
+      document.getElementById('saveStatusBtn').classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('statusRecordModal').classList.remove('hidden');
+      // 親のメニューは閉じる
+      const menu = document.getElementById(`status-menu-${id}`);
+      if(menu) menu.classList.add('hidden');
+    };
+    window.closeStatusModal = () => document.getElementById('statusRecordModal').classList.add('hidden');
+
+    window.selectCondition = (cond) => {
+      currentCondition = cond;
+      selectedTags.clear();
+      // UIリセット
+      document.querySelectorAll('.cond-btn').forEach(b => { b.classList.remove('bg-emerald-500/20', 'border-emerald-500/50'); b.classList.add('bg-white/5', 'border-white/10'); });
+      document.getElementById(`cond-${cond}`).classList.remove('bg-white/5', 'border-white/10');
+      document.getElementById(`cond-${cond}`).classList.add('bg-emerald-500/20', 'border-emerald-500/50');
+      
+      const step2 = document.getElementById('step2Area');
+      const container = document.getElementById('tagsContainer');
+      container.innerHTML = '';
+
+      if (cond === 'normal') {
+        step2.classList.add('hidden');
+      } else {
+        step2.classList.remove('hidden');
+        TAGS[cond].forEach(tag => {
+          const btn = document.createElement('button');
+          // Tailwindクラスを直接付与（ボタンとしてしっかり見せる）
+          btn.className = 'bg-white/5 border border-white/10 text-gray-300 px-3 py-2.5 rounded-xl text-xs font-bold cursor-pointer transition-all hover:bg-white/10 active:scale-95 flex items-center justify-center text-center shadow-sm';
+          btn.textContent = tag;
+          
+          btn.onclick = () => {
+            if(selectedTags.has(tag)) { 
+              selectedTags.delete(tag); 
+              // 非選択状態のクラスに戻す
+              btn.classList.remove('bg-emerald-500/20', 'border-emerald-500/50', 'text-emerald-400', 'shadow-[0_0_12px_rgba(16,185,129,0.15)]'); 
+              btn.classList.add('bg-white/5', 'border-white/10', 'text-gray-300');
+            } else { 
+              selectedTags.add(tag); 
+              // 選択状態のクラスにする
+              btn.classList.remove('bg-white/5', 'border-white/10', 'text-gray-300');
+              btn.classList.add('bg-emerald-500/20', 'border-emerald-500/50', 'text-emerald-400', 'shadow-[0_0_12px_rgba(16,185,129,0.15)]'); 
+            }
+          };
+          container.appendChild(btn);
+        });
+      }
+      document.getElementById('saveStatusBtn').disabled = false;
+      document.getElementById('saveStatusBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+    };
+
+    window.saveStatusRecord = () => {
+      // 実際には logsテーブルに type:'状態', condition:currentCondition, tags:Array.from(selectedTags) を保存する処理
+      alert(`Saved Status:\nCondition: ${currentCondition}\nTags: ${Array.from(selectedTags).join(', ')}`);
+      closeStatusModal();
+    };
+
+    // --- Render ---
+    const renderMockData = () => {
+      const list = document.getElementById('plantList');
+      list.innerHTML = '';
       const today = new Date();
       
       mockPlants.forEach((p, index) => {
-        const safeId = p.id.replace(/\s+/g, '-');
+        const safeId = p.id;
+        const domId = p.id.replace(/\s+/g, '-');
         
-        // 7日間水やりをしていないか判定
         const lastDateObj = new Date(p.lastDate);
         const diffDays = Math.floor((today - lastDateObj) / (1000 * 60 * 60 * 24));
-        const needsWater = diffDays >= 7;
-        
-        // バッジとテキストのカラー分岐 (注意喚起時は赤系)
-        let badgeAvgClass = needsWater 
-          ? "bg-rose-900/80 text-rose-300 border-rose-500/30"
-          : "bg-emerald-900/80 text-emerald-300 border-emerald-500/30";
-        let badgeAvg = p.avg ? `<div class="${badgeAvgClass} text-[10px] px-2.5 py-1 rounded-lg border font-bold backdrop-blur-sm shadow-sm">AVG ${p.avg}d</div>` : '';
-        
-        let avgTextColor = needsWater ? "text-rose-400/80" : "text-emerald-400/80";
+        const alertNeedsWater = diffDays >= 7; // 自動アラート
+        const manualMarker = p.needs_water;    // 手動マーカー
 
-        // 2カラムで幅が狭くなるため、日付の年号を省いて(MM/DD)コンパクトに表示
+        // カード全体の色判定 (マーカー優先)
+        let cardClass = 'glass-card hover:border-emerald-500/30';
+        if (manualMarker) cardClass = 'glass-card-water';
+        else if (alertNeedsWater) cardClass = 'glass-card-alert';
+
+        // アイコン背景とマークの色
+        let iconBg = 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
+        let svgIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>`;
+        
+        if (manualMarker) {
+          iconBg = 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30';
+          svgIcon = `<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+        } else if (alertNeedsWater) {
+          iconBg = 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30';
+          svgIcon = `<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`;
+        }
+
+        let badgeAvgClass = alertNeedsWater && !manualMarker ? "bg-rose-900/80 text-rose-300 border-rose-500/30" : "bg-emerald-900/80 text-emerald-300 border-emerald-500/30";
+        let badgeAvg = p.avg ? `<div class="${badgeAvgClass} text-[10px] px-2.5 py-1 rounded-lg border font-bold backdrop-blur-sm shadow-sm">AVG ${p.avg}d</div>` : '';
+
+        let avgTextColor = alertNeedsWater && !manualMarker ? "text-rose-400/80" : "text-emerald-400/80";
+
         const logsHtml = p.logs.map(l => `
           <div class="flex justify-between items-center py-2.5 border-b border-white/10 last:border-0">
             <span class="text-gray-400 font-mono text-[10.5px] flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1.5 opacity-70"></i>${l.date.slice(-5)}</span>
@@ -330,51 +354,34 @@
           </div>`).join('');
 
         const card = document.createElement('div');
-        // アラート時は赤ベースの専用クラスを適用する
-        card.className = `${needsWater ? 'glass-card-alert' : 'glass-card'} rounded-2xl overflow-hidden transition-all duration-300 relative ${!needsWater ? 'hover:border-emerald-500/30' : ''}`;
+        card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative`;
         
-        // アイコン背景の色分岐
-        let iconBg = needsWater 
-          ? 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30' 
-          : (index%2===0 ? 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10' : 'from-lime-500/20 to-emerald-500/10 text-lime-400 border-white/10');
-
-        // リスト左側のアイコンSVG（状態によって切り替え）
-        const listIconSvg = needsWater
-          ? `<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`
-          : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>`;
-
         card.innerHTML = `
-          <!-- 右上のバッジコンテナ -->
-          <div class="absolute top-4 right-14 flex gap-2 z-10">
-            ${badgeAvg}
-          </div>
+          <div class="absolute top-4 right-12 flex gap-2 z-10">${badgeAvg}</div>
           
-          <!-- カードヘッダー -->
-          <div class="p-5 flex items-center justify-between cursor-pointer group" onclick="toggleAccordion('${safeId}')">
+          <div class="p-5 flex items-center justify-between cursor-pointer group" onclick="toggleAccordion('${domId}')">
             <div class="flex items-center gap-4">
-              <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner">
-                ${listIconSvg}
-                ${needsWater ? `<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>` : ''}
+              <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">
+                ${svgIcon}
               </div>
-              <div>
-                <div class="font-bold text-lg ${needsWater ? 'text-rose-50' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors">${p.id}</div>
-                <div class="text-xs ${needsWater ? 'text-rose-400' : 'text-gray-400'} mt-0.5 flex items-center gap-1">
-                  <i data-lucide="clock" class="w-3 h-3"></i> Last: <span class="${needsWater ? 'text-rose-300 font-bold' : 'text-gray-200'}">${p.lastDate} (${diffDays} days)</span>
+              <div class="min-w-0">
+                <div class="font-bold text-lg text-gray-100 transition-colors truncate">${safeId}</div>
+                <div class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3 h-3"></i> Last: <span class="text-gray-200">${p.lastDate}</span>
                 </div>
               </div>
             </div>
-            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition">
-              <i data-lucide="chevron-down" id="acc-arrow-${safeId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
+            <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition shrink-0">
+              <i data-lucide="chevron-down" id="acc-arrow-${domId}" class="arrow-icon w-5 h-5 text-gray-400 transition-transform duration-300"></i>
             </div>
           </div>
           
-          <!-- アコーディオン中身 -->
-          <div id="acc-content-${safeId}" class="accordion-content bg-black/40 shadow-inner">
+          <div id="acc-content-${domId}" class="accordion-content bg-black/40 shadow-inner relative">
             <div class="p-5 border-t border-white/5 space-y-5">
               
-              <!-- アクションボタン (より目立たせるデザインに) -->
+              <!-- アクションボタン -->
               <div class="grid grid-cols-3 gap-3">
-                <button class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
+                <button onclick="mockWatering('${safeId}')" class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(6,182,212,0.15)]">
                   <i data-lucide="droplets" class="w-5 h-5 drop-shadow-md"></i> 水やり
                 </button>
                 <button class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95 shadow-[0_0_12px_rgba(16,185,129,0.15)]">
@@ -385,36 +392,52 @@
                 </button>
               </div>
 
-              <!-- 履歴と画像の2カラムエリア (写真を右へ) -->
+              <!-- 履歴と画像の2カラム -->
               <div class="flex gap-4 items-stretch">
-                <!-- 左：履歴エリア (枠や背景をなくし、区切り線のみに) -->
                 <div class="w-3/5 flex flex-col">
                   <div class="flex justify-between text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-1 border-b border-white/10 pb-2">
-                    <span>History</span>
-                    <span class="${avgTextColor}">Avg: ${p.avg ? p.avg+'d' : '--'}</span>
+                    <span>History</span><span class="${avgTextColor}">Avg: ${p.avg ? p.avg+'d' : '--'}</span>
                   </div>
-                  <div class="flex-1 overflow-y-auto px-1">
-                    ${logsHtml}
-                  </div>
+                  <div class="flex-1 overflow-y-auto px-1">${logsHtml}</div>
                 </div>
-
-                <!-- 右：画像エリア (スマホの縦長写真に合わせた3:4の比率) -->
                 <div class="w-2/5 aspect-[3/4] bg-black/50 rounded-xl overflow-hidden border border-white/10 relative group cursor-pointer shadow-inner shrink-0">
-                  ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-[10px] gap-1.5"><i data-lucide="image" class="w-6 h-6 opacity-50"></i><span class="text-center">Add photo</span></div>`}
-                  <div class="absolute inset-0 bg-emerald-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold transition-opacity backdrop-blur-sm"><i data-lucide="camera" class="w-4 h-4 mr-1"></i></div>
+                  ${p.image ? `<img src="${p.image}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition duration-500 group-hover:scale-105">` : `<div class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-[10px] gap-1.5"><i data-lucide="image" class="w-6 h-6 opacity-50"></i><span>Photo</span></div>`}
                 </div>
               </div>
               
-              <!-- 削除ボタン -->
-              <div class="text-right pt-2 border-t border-white/5">
-                <button class="text-xs text-gray-500 hover:text-red-400 transition flex items-center justify-end gap-1 ml-auto">
-                  <i data-lucide="trash-2" class="w-3 h-3"></i> Delete Plant
+              <!-- 統合下部UI (右寄せ & 余白gap-4) -->
+              <div class="relative pt-4 mt-2 border-t border-white/5 flex justify-end items-center gap-4 px-1">
+                <button onclick="openRenameModal('${safeId}')" class="text-xs font-medium text-gray-400 hover:text-emerald-400 transition flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/5">
+                  <i data-lucide="edit-2" class="w-3.5 h-3.5"></i> Rename
+                </button>
+                
+                <!-- Status ボタン -->
+                <div class="relative">
+                  <button onclick="toggleStatusMenu('${domId}')" class="text-xs font-medium text-gray-400 hover:text-cyan-400 transition flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 shadow-sm">
+                    <i data-lucide="activity" class="w-3.5 h-3.5"></i> Status <i data-lucide="chevron-up" class="w-3 h-3"></i>
+                  </button>
+                  
+                  <!-- Status ポップオーバーメニュー -->
+                  <div id="status-menu-${domId}" class="hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-48 bg-gray-800 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20">
+                    <button onclick="toggleWaterMarker('${safeId}'); toggleStatusMenu('${domId}')" class="w-full text-left px-4 py-3 text-xs text-cyan-300 hover:bg-white/5 flex items-center gap-2 border-b border-white/5 transition">
+                      <i data-lucide="droplet" class="w-4 h-4"></i> 
+                      ${manualMarker ? 'マーカーを外す' : '明日水やり(マーカー)'}
+                    </button>
+                    <button onclick="openStatusModal('${safeId}')" class="w-full text-left px-4 py-3 text-xs text-gray-200 hover:bg-white/5 flex items-center gap-2 transition">
+                      <i data-lucide="clipboard-list" class="w-4 h-4 text-emerald-400"></i> 状態を記録する
+                    </button>
+                  </div>
+                </div>
+
+                <button class="text-xs font-medium text-gray-400 hover:text-red-400 transition flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-white/5">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
                 </button>
               </div>
+
             </div>
           </div>
         `;
-        els.plantList.appendChild(card);
+        list.appendChild(card);
       });
       lucide.createIcons();
     };
