@@ -50,6 +50,7 @@ let searchQuery = '';
 let currentImageTargetPlantId = null;
 let currentRenamePlantId = null;
 let currentStatusPlantId = null;
+let statusPopoverScrollHandler = null;
 let currentConditionPlantId = null;
 let conditionStep = 1;
 let selectedCondition = null;
@@ -88,6 +89,7 @@ const els = {
   importFileInput: document.getElementById('importFileInput'),
   statusPopover: document.getElementById('statusPopover'),
   statusPopoverOverlay: document.getElementById('statusPopoverOverlay'),
+  scrollContainer: document.getElementById('scrollContainer'),
   conditionModal: document.getElementById('conditionModal'),
   conditionStep1: document.getElementById('conditionStep1'),
   conditionStep2: document.getElementById('conditionStep2'),
@@ -359,21 +361,52 @@ window.openStatusPopover = (plantId, ev) => {
   if (waterBtn) waterBtn.textContent = plant?.needs_water ? '💧 マーカー解除' : '💧 明日水やり(マーカー)';
   overlay.classList.remove('hidden');
   popover.classList.remove('hidden');
+
+  // ビューポート内に収まるよう位置を計算
   const rect = ev?.target?.getBoundingClientRect?.();
+  const pad = 12;
   if (rect) {
-    popover.style.left = `${rect.left}px`;
-    popover.style.top = `${rect.bottom + 4}px`;
+    let left = rect.left;
+    let top = rect.bottom + 4;
+    popover.style.left = `${left}px`;
+    popover.style.top = `${top}px`;
     popover.style.transform = '';
+    // 表示後にサイズを取得してビューポート内に収める
+    requestAnimationFrame(() => {
+      const pw = popover.offsetWidth;
+      const ph = popover.offsetHeight;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      if (left + pw > vw - pad) left = Math.max(pad, vw - pw - pad);
+      if (left < pad) left = pad;
+      if (top + ph > vh - pad) top = rect.top - ph - 4;
+      if (top < pad) top = pad;
+      popover.style.left = `${left}px`;
+      popover.style.top = `${top}px`;
+    });
   } else {
     popover.style.left = '50%';
     popover.style.top = '50%';
     popover.style.transform = 'translate(-50%, -50%)';
   }
+
+  // スクロール時にポップオーバーを閉じる（該当IDがわからなくなるのを防ぐ）
+  const scrollEl = els.scrollContainer || els.plantList?.parentElement;
+  if (statusPopoverScrollHandler) {
+    scrollEl?.removeEventListener('scroll', statusPopoverScrollHandler);
+  }
+  statusPopoverScrollHandler = () => closeStatusPopover();
+  scrollEl?.addEventListener('scroll', statusPopoverScrollHandler);
 };
 window.closeStatusPopover = () => {
   els.statusPopoverOverlay?.classList.add('hidden');
   els.statusPopover?.classList.add('hidden');
   currentStatusPlantId = null;
+  const scrollEl = els.scrollContainer || els.plantList?.parentElement;
+  if (statusPopoverScrollHandler) {
+    scrollEl?.removeEventListener('scroll', statusPopoverScrollHandler);
+    statusPopoverScrollHandler = null;
+  }
 };
 
 window.openRenameModal = (plantId) => {
