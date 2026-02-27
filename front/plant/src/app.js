@@ -878,14 +878,24 @@ window.toggleAccordion = (id) => {
   if (arrow) arrow.classList.toggle('rotated');
 };
 
+// needs_water を最優先し、同じなら secondary で比較
+const byNeedsWaterFirst = (secondaryCompare) => (a, b) => {
+  if (a.needs_water && !b.needs_water) return -1;
+  if (!a.needs_water && b.needs_water) return 1;
+  return secondaryCompare(a, b);
+};
+
 const render = () => {
   let data = plants;
   if (searchQuery) data = data.filter(p => p.id.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const sortType = els.sortSelect?.value || 'created';
-  if (sortType === 'id') data = [...data].sort((a, b) => a.id.localeCompare(b.id));
-  else if (sortType === 'alert') {
-    data = [...data].sort((a, b) => {
+  const sortType = els.sortSelect?.value || 'id';
+  data = [...data].map((p, i) => ({ ...p, _sortIndex: i }));
+
+  if (sortType === 'id') {
+    data.sort(byNeedsWaterFirst((a, b) => a.id.localeCompare(b.id)));
+  } else if (sortType === 'alert') {
+    data.sort(byNeedsWaterFirst((a, b) => {
       const aDanger = isAlertNeeded(a);
       const bDanger = isAlertNeeded(b);
       if (aDanger && !bDanger) return -1;
@@ -895,9 +905,15 @@ const render = () => {
       const aTime = aLog ? aLog.ts : 0;
       const bTime = bLog ? bLog.ts : 0;
       return aTime - bTime;
-    });
-  } else if (sortType === 'dry_slow') data = [...data].sort((a, b) => (calculateAverageInterval(b) || 0) - (calculateAverageInterval(a) || 0));
-  else if (sortType === 'dry_fast') data = [...data].sort((a, b) => (calculateAverageInterval(a) || 999) - (calculateAverageInterval(b) || 999));
+    }));
+  } else if (sortType === 'dry_slow') {
+    data.sort(byNeedsWaterFirst((a, b) => (calculateAverageInterval(b) || 0) - (calculateAverageInterval(a) || 0)));
+  } else if (sortType === 'dry_fast') {
+    data.sort(byNeedsWaterFirst((a, b) => (calculateAverageInterval(a) || 999) - (calculateAverageInterval(b) || 999)));
+  } else {
+    // created (Newest): 元の並び順を維持
+    data.sort(byNeedsWaterFirst((a, b) => a._sortIndex - b._sortIndex));
+  }
 
   els.plantList.innerHTML = '';
   if (data.length === 0) {
