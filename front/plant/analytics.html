@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>解析ダッシュボード - Ageta</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1080&auto=format&fit=crop'); background-size: cover; background-position: center; background-attachment: fixed; color: #f3f4f6; }
+    .bg-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); z-index: 0; pointer-events: none; }
+    .glass { background: rgba(20, 30, 25, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glass-card { background: rgba(30, 41, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    .loader { border: 3px solid #374151; border-top: 3px solid #2dd4bf; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-teal-500 selection:text-white relative">
+  <div class="bg-overlay"></div>
+
+  <div class="relative z-10 max-w-6xl mx-auto px-4 py-6 pb-16">
+    <!-- ナビゲーション -->
+    <nav class="mb-6">
+      <a href="./index.html" class="inline-flex items-center gap-2 glass px-4 py-2.5 rounded-xl text-gray-200 hover:text-emerald-400 transition border border-white/10">
+        <span>🏠</span> 管理画面へ戻る
+      </a>
+    </nav>
+
+    <header class="mb-8">
+      <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-white">解析ダッシュボード</h1>
+      <p class="text-emerald-400/80 text-sm mt-1">植物のお世話データ分析</p>
+    </header>
+
+    <!-- ローディング -->
+    <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+      <div class="loader"></div>
+      <p class="text-gray-500 text-sm mt-3">データを読み込み中...</p>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div id="dashboardContent" class="hidden space-y-6 md:space-y-8 md:grid md:grid-cols-2 md:gap-6 md:items-start">
+      <!-- 1. 今月のお世話サマリー -->
+      <section class="glass-card rounded-2xl p-5 md:p-6 md:col-span-2">
+        <h2 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+          <span>📊</span> 今月のお世話サマリー
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="glass rounded-xl p-4 border border-cyan-500/30">
+            <p class="text-cyan-400/80 text-xs font-semibold mb-1">💧 水やり</p>
+            <p id="summaryWater" class="text-2xl font-bold text-cyan-300">0</p>
+            <p class="text-gray-500 text-[10px] mt-1">回（今月）</p>
+          </div>
+          <div class="glass rounded-xl p-4 border border-emerald-500/30">
+            <p class="text-emerald-400/80 text-xs font-semibold mb-1">🧪 液肥</p>
+            <p id="summaryLiquid" class="text-2xl font-bold text-emerald-300">0</p>
+            <p class="text-gray-500 text-[10px] mt-1">回（今月）</p>
+          </div>
+          <div class="glass rounded-xl p-4 border border-amber-500/30">
+            <p class="text-amber-400/80 text-xs font-semibold mb-1">⚡ 活力剤</p>
+            <p id="summaryVitality" class="text-2xl font-bold text-amber-300">0</p>
+            <p class="text-gray-500 text-[10px] mt-1">回（今月）</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. お世話ヒートマップ（過去30日） -->
+      <section class="glass-card rounded-2xl p-5 md:p-6">
+        <h2 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+          <span>🗓️</span> お世話ヒートマップ
+        </h2>
+        <p class="text-gray-400 text-xs mb-3">過去30日間の活動（色が濃いほど回数が多い）</p>
+        <div id="heatmapContainer" class="grid grid-cols-6 sm:grid-cols-10 gap-1"></div>
+      </section>
+
+      <!-- 3. 水やり間隔の変動トレンド -->
+      <section class="glass-card rounded-2xl p-5 md:p-6">
+        <h2 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+          <span>📈</span> 水やり間隔の変動トレンド
+        </h2>
+        <p class="text-gray-400 text-xs mb-4">直近3回の間隔（日数）</p>
+        <div id="trendContainer" class="space-y-4"></div>
+      </section>
+
+      <!-- 4. アラートリスト -->
+      <section class="glass-card rounded-2xl p-5 md:p-6 md:col-span-2">
+        <h2 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
+          <span>⚠️</span> アラートリスト
+        </h2>
+        <p class="text-gray-400 text-xs mb-4">液肥・活力剤から30日以上経過している植物</p>
+        <div id="alertContainer" class="space-y-2"></div>
+      </section>
+    </div>
+
+    <!-- 認証エラー表示 -->
+    <div id="authError" class="hidden glass-card rounded-2xl p-8 text-center">
+      <div class="text-5xl mb-4">🔒</div>
+      <h3 class="text-xl font-bold text-gray-100 mb-2">ログインが必要です</h3>
+      <p class="text-gray-400 text-sm mb-4">解析ダッシュボードを利用するには、管理画面でログインしてください。</p>
+      <a href="./index.html" class="inline-flex items-center gap-2 glass px-4 py-2.5 rounded-xl text-emerald-400 transition">管理画面へ</a>
+    </div>
+  </div>
+
+  <script type="module" src="./src/analytics.js"></script>
+</body>
+</html>

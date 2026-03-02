@@ -2,6 +2,14 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   base: '/',
+  build: {
+    rollupOptions: {
+      input: {
+        main: 'index.html',
+        analytics: 'analytics.html'
+      }
+    }
+  },
   server: {
     port: 3000,
     host: true,
