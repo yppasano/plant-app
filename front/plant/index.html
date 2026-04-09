@@ -7,7 +7,7 @@
   <title>Ageta</title>
   
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#111827">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
   <link rel="apple-touch-icon" href="icon-512.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -19,12 +19,44 @@
   
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background-image: url('https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=1080&auto=format&fit=crop'); background-size: cover; background-position: center; background-attachment: fixed; color: #f3f4f6; }
-    .bg-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); z-index: 0; pointer-events: none; }
+    /* ログイン前は従来のダークガラス。メイン（#appScreen）は下で白ベース */
+    body { background: #f3f4f6; color: #111827; }
+    .bg-overlay { position: fixed; inset: 0; background: transparent; z-index: 0; pointer-events: none; }
     .glass { background: rgba(20, 30, 25, 0.6); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     .glass-card { background: rgba(30, 41, 35, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
     .glass-card-alert { background: rgba(45, 20, 25, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(244, 63, 94, 0.25); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
     .glass-card-water { background: rgba(15, 35, 45, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(6, 182, 212, 0.4); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), 0 0 20px 0 rgba(6, 182, 212, 0.2); }
+    /* --- リスト画面（sample02 系: 白・黒テキスト） --- */
+    #appScreen {
+      background: #ffffff;
+      color: #111827;
+    }
+    #appScreen .glass-card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    #appScreen .glass-card:hover { border-color: #d1d5db; }
+    #appScreen .glass-card-alert {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      box-shadow: 0 4px 20px rgba(244, 63, 94, 0.08);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    #appScreen .glass-card-water {
+      background: #ecfeff;
+      border: 1px solid #a5f3fc;
+      box-shadow: 0 4px 20px rgba(6, 182, 212, 0.12);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+    #appScreen .loader {
+      border: 3px solid #e5e7eb;
+      border-top: 3px solid #111827;
+    }
     .guide-frame {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
       width: 80%; height: 200px; border: 3px dashed #2dd4bf; border-radius: 12px; pointer-events: none;
@@ -51,14 +83,28 @@
     .arrow-icon.rotated { transform: rotate(180deg); }
     .loader { border: 3px solid #374151; border-top: 3px solid #2dd4bf; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .bottom-nav { background: rgba(20, 30, 25, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
+    .bottom-nav {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid #e5e7eb;
+      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.06);
+    }
     .search-sheet { transform: translateY(100%); transition: transform 0.3s ease-out; }
     .search-sheet.open { transform: translateY(0); }
     /* 詳細画面（リストから切り替え） */
     #detailScreen { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    /* 検索シート（リストのナビから） */
+    #searchSheet {
+      background: #ffffff !important;
+      border-top: 1px solid #e5e7eb;
+      color: #111827;
+      border-left: none;
+      border-right: none;
+    }
   </style>
 </head>
-<body class="min-h-screen antialiased selection:bg-teal-500 selection:text-white relative">
+<body class="min-h-screen antialiased selection:bg-gray-300 selection:text-black relative">
   <div class="bg-overlay"></div>
 
   <div id="authScreen" class="fixed inset-0 z-[100] glass flex flex-col items-center justify-center p-8 transition-opacity duration-500">
@@ -93,45 +139,45 @@
       <header class="pt-6 pb-2 px-4">
         <div class="flex justify-between items-end">
           <div>
-            <h1 class="text-2xl font-bold tracking-tight text-white">Ageta</h1>
-            <div id="syncStatus" class="flex items-center gap-2 text-xs text-emerald-400/80 mt-1">
-              <span class="w-2 h-2 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]" id="syncDot"></span>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">Ageta</h1>
+            <div id="syncStatus" class="flex items-center gap-2 text-xs text-gray-500 mt-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-500" id="syncDot"></span>
               <span id="syncText">Offline</span>
             </div>
           </div>
           <div class="relative mb-1">
-            <select id="sortSelect" class="bg-white/5 border border-white/10 text-gray-300 text-xs font-bold rounded-lg py-2 pl-3 pr-8 appearance-none focus:outline-none focus:border-emerald-500/50 backdrop-blur-sm cursor-pointer">
+            <select id="sortSelect" class="bg-white border-2 border-gray-900 text-gray-900 text-xs font-bold rounded-xl py-2 pl-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer shadow-sm">
             <option value="id" selected>🔤 Name (ID順)</option>
             <option value="created">▼ Newest</option>
             <option value="alert">⚠️ Alert</option>
             <option value="dry_slow">🐢 Slow Dry</option>
             <option value="dry_fast">🐇 Fast Dry</option>
             </select>
-            <i data-lucide="chevron-down" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none"></i>
+            <i data-lucide="chevron-down" class="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-900 pointer-events-none"></i>
           </div>
         </div>
       </header>
       <main id="plantList" class="p-4 space-y-4 pb-24">
-        <div class="text-center py-10"><div class="loader mx-auto"></div><p class="text-gray-500 text-sm mt-2">Loading data...</p></div>
+        <div class="text-center py-10"><div class="loader mx-auto"></div><p class="text-gray-600 text-sm mt-2">Loading data...</p></div>
       </main>
     </div>
 
     <!-- 下固定メニュー -->
-    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 bottom-nav rounded-t-3xl pt-2 px-2 z-30 flex justify-around items-center" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-      <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="camera" class="w-6 h-6"></i></div>
+    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 bottom-nav rounded-t-3xl pt-2 px-2 z-30 flex justify-around items-center text-gray-900" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
+      <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="camera" class="w-6 h-6"></i></div>
         <span class="text-[10px] font-semibold tracking-wide">Scan Tag</span>
       </button>
-      <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="edit-3" class="w-6 h-6"></i></div>
+      <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="edit-3" class="w-6 h-6"></i></div>
         <span class="text-[10px] font-semibold tracking-wide">Manual</span>
       </button>
-      <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="search" class="w-6 h-6"></i></div>
+      <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="search" class="w-6 h-6"></i></div>
         <span class="text-[10px] font-semibold tracking-wide">Search</span>
       </button>
-      <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-400 hover:text-emerald-400 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-emerald-500/10 transition mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div>
+      <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
+        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div>
         <span class="text-[10px] font-semibold tracking-wide">Settings</span>
       </button>
     </nav>
@@ -193,12 +239,12 @@
 
   <!-- 検索ボトムシート -->
   <div id="searchSheetOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden" onclick="closeSearchSheet()"></div>
-  <div id="searchSheet" class="fixed bottom-0 left-0 right-0 search-sheet glass rounded-t-3xl p-6 pb-10 z-50">
-    <div class="w-12 h-1.5 bg-gray-600 rounded-full mx-auto mb-6"></div>
-    <h3 class="text-lg font-bold text-gray-100 mb-4 px-2">ID 検索</h3>
+  <div id="searchSheet" class="fixed bottom-0 left-0 right-0 search-sheet rounded-t-3xl p-6 pb-10 z-50 shadow-[0_-8px_32px_rgba(0,0,0,0.08)]">
+    <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6"></div>
+    <h3 class="text-lg font-bold text-gray-900 mb-4 px-2">ID 検索</h3>
     <div class="relative">
-      <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></i>
-      <input type="text" id="searchInput" placeholder="Search plants..." class="w-full pl-12 pr-4 py-3.5 bg-black/30 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/50 transition" />
+      <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
+      <input type="text" id="searchInput" placeholder="Search plants..." class="w-full pl-12 pr-4 py-3.5 bg-gray-50 border-2 border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-900 transition" />
     </div>
   </div>
 

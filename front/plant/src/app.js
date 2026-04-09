@@ -262,10 +262,10 @@ const showApp = () => {
 // ========================================
 const updateSyncStatus = (status) => {
   if (status === 'loading') {
-    els.syncDot.className = "w-2 h-2 rounded-full bg-yellow-400 animate-pulse mr-1";
+    els.syncDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
     els.syncText.textContent = "Syncing...";
   } else if (status === 'online') {
-    els.syncDot.className = "w-2 h-2 rounded-full bg-teal-500 mr-1";
+    els.syncDot.className = "w-2 h-2 rounded-full bg-emerald-500";
     els.syncText.textContent = "Online";
   }
 };
@@ -1062,7 +1062,7 @@ const render = () => {
 
   els.plantList.innerHTML = '';
   if (data.length === 0) {
-    els.plantList.innerHTML = `<div class="text-center py-20 text-gray-500"><div class="text-6xl mb-4 opacity-20">🌱</div>No Data</div>`;
+    els.plantList.innerHTML = `<div class="text-center py-20 text-gray-600"><div class="text-6xl mb-4 opacity-30">🌱</div>No Data</div>`;
     return;
   }
 
@@ -1075,43 +1075,43 @@ const render = () => {
     let cardClass = 'glass-card';
     if (needsWater) cardClass = 'glass-card-water';
     else if (isAlert) cardClass = 'glass-card-alert';
-    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert && !needsWater ? 'hover:border-emerald-500/30' : ''}`;
+    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert && !needsWater ? 'hover:shadow-md' : ''}`;
 
-    const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-900/80 text-rose-300 border-rose-500/30' : needsWater ? 'bg-cyan-900/80 text-cyan-300 border-cyan-500/30' : 'bg-emerald-900/80 text-emerald-300 border-emerald-500/30';
-    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold backdrop-blur-sm">AVG ${escapeHtml(String(avg))}d</span>` : '';
-    let iconBg = 'from-emerald-500/20 to-teal-500/10 text-emerald-400 border-white/10';
+    const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-100 text-rose-800 border-rose-200' : needsWater ? 'bg-cyan-100 text-cyan-800 border-cyan-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
+    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold">AVG ${escapeHtml(String(avg))}d</span>` : '';
+    let iconBg = 'from-emerald-100 to-teal-50 text-emerald-700 border-gray-200';
     let listIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
     if (needsWater) {
-      iconBg = 'from-cyan-500/20 to-blue-500/10 text-cyan-400 border-cyan-500/30';
+      iconBg = 'from-cyan-100 to-sky-50 text-cyan-700 border-cyan-200';
       listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
     } else if (isAlert) {
-      iconBg = 'from-rose-500/20 to-orange-500/10 text-rose-400 border-rose-500/30';
+      iconBg = 'from-rose-100 to-orange-50 text-rose-700 border-rose-200';
       listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>';
     }
-    const alertPing = isAlert && !needsWater ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-gray-900"></span></span>' : '';
+    const alertPing = isAlert && !needsWater ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-white"></span></span>' : '';
 
     const wLogs = getWateringLogsNewestFirst(p);
     const wRecent = wLogs[0];
     const wPrev = wLogs[1];
     const recentLine = wRecent
-      ? `<span class="text-[10px] text-gray-500 shrink-0">直近</span><span class="text-[10px] font-semibold ${isAlert && !needsWater ? 'text-rose-200' : needsWater ? 'text-cyan-200' : 'text-gray-200'}">${escapeHtml(formatDate(wRecent.ts).slice(-5))}</span><span class="text-[9px] opacity-80">${escapeHtml(wRecent.type)}</span>`
+      ? `<span class="text-[10px] text-gray-500 shrink-0">直近</span><span class="text-[10px] font-semibold ${isAlert && !needsWater ? 'text-rose-800' : needsWater ? 'text-cyan-800' : 'text-gray-900'}">${escapeHtml(formatDate(wRecent.ts).slice(-5))}</span><span class="text-[9px] text-gray-600">${escapeHtml(wRecent.type)}</span>`
       : '';
     const prevLine = wRecent
       ? (wPrev
-        ? `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] font-semibold text-gray-300">${escapeHtml(formatDate(wPrev.ts).slice(-5))}</span><span class="text-[9px] text-gray-500">${escapeHtml(wPrev.type)}</span>`
-        : `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] text-gray-500">—</span>`)
+        ? `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] font-semibold text-gray-800">${escapeHtml(formatDate(wPrev.ts).slice(-5))}</span><span class="text-[9px] text-gray-600">${escapeHtml(wPrev.type)}</span>`
+        : `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] text-gray-400">—</span>`)
       : '';
 
     const displayTitle = escapeHtml(p.name || p.id);
     const safeId = escapeHtml(p.id);
-    const subLine = p.subtitle ? `<div class="text-[10px] text-gray-500 truncate font-mono">${safeId} · ${escapeHtml(p.subtitle)}</div>` : `<div class="text-[10px] text-gray-500 truncate font-mono">${safeId}</div>`;
+    const subLine = p.subtitle ? `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId} · ${escapeHtml(p.subtitle)}</div>` : `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId}</div>`;
 
     card.innerHTML = `
       <div class="p-4 flex items-center gap-3 cursor-pointer group">
         <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
         <div class="min-w-0 flex-1 flex flex-col gap-1">
           <div class="flex items-center gap-2 min-w-0">
-            <span class="font-bold text-base ${isAlert && !needsWater ? 'text-rose-50' : needsWater ? 'text-cyan-50 group-hover:text-cyan-300' : 'text-gray-100 group-hover:text-emerald-300'} transition-colors truncate">${displayTitle}</span>
+            <span class="font-bold text-base ${isAlert && !needsWater ? 'text-rose-900' : needsWater ? 'text-cyan-900 group-hover:text-cyan-950' : 'text-gray-900 group-hover:text-black'} transition-colors truncate">${displayTitle}</span>
             ${avgBadgeEl}
           </div>
           ${subLine}
@@ -1119,8 +1119,8 @@ const render = () => {
             ${wRecent ? `<div class="flex items-center gap-1 min-w-0">${recentLine}</div><div class="flex items-center gap-1 min-w-0">${prevLine}</div>` : `<span class="text-gray-500">水やり記録なし</span>`}
           </div>
         </div>
-        <div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition shrink-0">
-          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-400"></i>
+        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition shrink-0">
+          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
         </div>
       </div>
     `;

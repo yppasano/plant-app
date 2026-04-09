@@ -102,3 +102,27 @@ git push
 ```
 
 **注意**: 「no upstream branch」エラーが出る場合は、`git push --set-upstream origin main` を実行してください。履歴を書き換えた場合など、upstream設定が失われることがあります。
+
+---
+
+## デザイン（sample02.html 参考）変更メモ
+
+### リスト画面まわり（白・黒テキスト）— 対応済み
+
+| 対象 | 内容 |
+|------|------|
+| `index.html` `body` / `.bg-overlay` | 背景を明るく（オーバーレイは実質オフ） |
+| `#appScreen` | 白背景・黒系テキスト |
+| `#appScreen .glass-card` 系 | 白／アラート・水やり用の淡い色＋枠線（CSS で上書き） |
+| ヘッダー（タイトル・同期・ソート） | `text-gray-900`、ソートは白地＋黒枠（sample02 近い） |
+| 下部ナビ `.bottom-nav` | 白系＋グレー枠・アイコンは黒寄り |
+| 検索ボトムシート `#searchSheet` | 白背景・入力欄グレー枠・黒テキスト |
+| `app.js` `render()` | カード内タイトル・直近/次直近・バッジ・矢印をライト向けクラスに変更 |
+| `updateSyncStatus` | 同期ドット表記をライト画面向けに調整 |
+
+### 未着手（次のステップ例）
+
+- ログイン画面 `#authScreen`（現状はダークガラスのまま）
+- 詳細 `#detailScreen`（まだダーク UI）
+- 各種モーダル（Manual / Rename / Settings / Condition / スキャンオーバーレイ）
+- `statusPopover`、`manifest` の `theme-color` 以外のアイコン画像など
