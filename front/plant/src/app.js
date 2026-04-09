@@ -1079,48 +1079,76 @@ const render = () => {
 
     const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-100 text-rose-800 border-rose-200' : needsWater ? 'bg-cyan-100 text-cyan-800 border-cyan-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
     const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold">AVG ${escapeHtml(String(avg))}d</span>` : '';
-    let iconBg = 'from-emerald-100 to-teal-50 text-emerald-700 border-gray-200';
-    let listIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2 C 22 6 22 16 12 20 C 2 16 2 6 12 2 Z" /><polyline points="12 2 12 9 6 12 16 15 12 17 12 23" /></svg>';
-    if (needsWater) {
-      iconBg = 'from-cyan-100 to-sky-50 text-cyan-700 border-cyan-200';
-      listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>';
-    } else if (isAlert) {
-      iconBg = 'from-rose-100 to-orange-50 text-rose-700 border-rose-200';
-      listIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 drop-shadow-sm"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>';
-    }
-    const alertPing = isAlert && !needsWater ? '<span class="absolute -top-1 -right-1 flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-rose-500 border border-white"></span></span>' : '';
 
     const wLogs = getWateringLogsNewestFirst(p);
     const wRecent = wLogs[0];
     const wPrev = wLogs[1];
-    const recentLine = wRecent
-      ? `<span class="text-[10px] text-gray-500 shrink-0">直近</span><span class="text-[10px] font-semibold ${isAlert && !needsWater ? 'text-rose-800' : needsWater ? 'text-cyan-800' : 'text-gray-900'}">${escapeHtml(formatDate(wRecent.ts).slice(-5))}</span><span class="text-[9px] text-gray-600">${escapeHtml(wRecent.type)}</span>`
-      : '';
-    const prevLine = wRecent
-      ? (wPrev
-        ? `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] font-semibold text-gray-800">${escapeHtml(formatDate(wPrev.ts).slice(-5))}</span><span class="text-[9px] text-gray-600">${escapeHtml(wPrev.type)}</span>`
-        : `<span class="text-[10px] text-gray-500 shrink-0">次直近</span><span class="text-[10px] text-gray-400">—</span>`)
-      : '';
+
+    /** 水やり種別アイコン（sample02 と同系の Lucide） */
+    const iconForCareType = (type) => {
+      if (type === '水' || type === '水やり') {
+        return '<i data-lucide="droplet" class="w-4 h-4 text-cyan-600 shrink-0"></i>';
+      }
+      if (type === '液肥') {
+        return '<i data-lucide="flask-conical" class="w-4 h-4 text-emerald-600 shrink-0"></i>';
+      }
+      if (type === '活力剤') {
+        return '<i data-lucide="sparkles" class="w-4 h-4 text-amber-500 shrink-0"></i>';
+      }
+      return '<i data-lucide="droplet" class="w-4 h-4 text-gray-400 shrink-0"></i>';
+    };
+
+    /** 日付（MM/DD）＋種類アイコン（ラベルなし） */
+    const logRowHtml = (log) => {
+      if (!log) {
+        return '<div class="flex items-center gap-1.5 min-h-[18px]"><span class="text-[10px] text-gray-400">—</span></div>';
+      }
+      const d = formatDate(log.ts).slice(-5);
+      return `<div class="flex items-center gap-1.5"><span class="text-[10px] font-semibold text-gray-900">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
+    };
+
+    let logsBlock = '';
+    if (wRecent) {
+      logsBlock = `<div class="flex flex-col gap-0.5 mt-0.5">${logRowHtml(wRecent)}${logRowHtml(wPrev)}</div>`;
+    } else {
+      logsBlock = '<span class="text-[10px] text-gray-500 mt-0.5">水やり記録なし</span>';
+    }
+
+    const imgSrc = p.image ? escapeHtml(p.image) : '';
+    const thumbInner = p.image
+      ? `<img src="${imgSrc}" alt="" class="w-full h-full object-cover">`
+      : `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
+
+    const thumbBadge = needsWater
+      ? '<div class="absolute -top-0.5 -right-0.5 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"><i data-lucide="droplet" class="w-3.5 h-3.5 text-white"></i></div>'
+      : (isAlert
+        ? '<div class="absolute -top-0.5 -right-0.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-white"></i></div>'
+        : '');
 
     const displayTitle = escapeHtml(p.name || p.id);
     const safeId = escapeHtml(p.id);
     const subLine = p.subtitle ? `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId} · ${escapeHtml(p.subtitle)}</div>` : `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId}</div>`;
 
     card.innerHTML = `
-      <div class="p-4 flex items-center gap-3 cursor-pointer group">
-        <div class="relative w-12 h-12 rounded-xl bg-gradient-to-br ${iconBg} border flex items-center justify-center shadow-inner shrink-0">${listIconSvg}${alertPing}</div>
-        <div class="min-w-0 flex-1 flex flex-col gap-1">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="font-bold text-base ${isAlert && !needsWater ? 'text-rose-900' : needsWater ? 'text-cyan-900 group-hover:text-cyan-950' : 'text-gray-900 group-hover:text-black'} transition-colors truncate">${displayTitle}</span>
-            ${avgBadgeEl}
-          </div>
-          ${subLine}
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[10px] mt-0.5">
-            ${wRecent ? `<div class="flex items-center gap-1 min-w-0">${recentLine}</div><div class="flex items-center gap-1 min-w-0">${prevLine}</div>` : `<span class="text-gray-500">水やり記録なし</span>`}
-          </div>
+      <div class="flex cursor-pointer group min-h-[88px]">
+        <div class="relative w-24 shrink-0 self-stretch min-h-[88px] rounded-l-2xl overflow-hidden bg-gray-100 border-r border-gray-100">
+          ${thumbInner}
+          ${thumbBadge}
         </div>
-        <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition shrink-0">
-          <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+        <div class="flex-1 min-w-0 flex items-stretch pl-3 pr-2 py-3">
+          <div class="min-w-0 flex-1 flex flex-col justify-center gap-0.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="font-bold text-base ${isAlert && !needsWater ? 'text-rose-900' : needsWater ? 'text-cyan-900' : 'text-gray-900'} truncate">${displayTitle}</span>
+              ${avgBadgeEl}
+            </div>
+            ${subLine}
+            ${logsBlock}
+          </div>
+          <div class="flex items-center shrink-0 pl-1">
+            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition">
+              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+            </div>
+          </div>
         </div>
       </div>
     `;
