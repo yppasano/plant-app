@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env
 
+# ローカル試作・参考用（リモートに載せない）
+sample02.html
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
