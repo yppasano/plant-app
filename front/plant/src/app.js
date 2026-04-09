@@ -1099,23 +1099,24 @@ const render = () => {
     /** 日付（MM/DD）＋種類アイコン（ラベルなし） */
     const logRowHtml = (log) => {
       if (!log) {
-        return '<div class="flex items-center gap-1 min-h-[16px]"><span class="text-[10px] font-bold text-gray-300">—</span></div>';
+        return '<div class="flex items-center gap-1 shrink-0"><span class="text-[10px] font-bold text-gray-300">—</span></div>';
       }
       const d = formatDate(log.ts).slice(-5);
-      return `<div class="flex items-center gap-1 min-w-0 max-w-full"><span class="text-[10px] font-extrabold text-black truncate">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
+      return `<div class="flex items-center gap-0.5 shrink-0 min-w-0"><span class="text-[10px] font-extrabold text-black whitespace-nowrap">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
     };
 
     let logsBlock = '';
     if (wRecent) {
-      logsBlock = `<div class="flex flex-col gap-0.5 min-w-0 flex-1">${logRowHtml(wRecent)}${logRowHtml(wPrev)}</div>`;
+      logsBlock = `<div class="flex flex-row items-center gap-1.5 min-w-0 flex-1 overflow-hidden">${logRowHtml(wRecent)}<span class="text-gray-300 shrink-0 text-[10px] font-light">|</span>${logRowHtml(wPrev)}</div>`;
     } else {
-      logsBlock = '<span class="text-[11px] text-gray-400 font-bold">水やり記録なし</span>';
+      logsBlock = '<span class="text-[11px] text-gray-400 font-bold whitespace-nowrap truncate">水やり記録なし</span>';
     }
 
     const imgSrc = p.image ? escapeHtml(p.image) : '';
+    /* 行の高さ 90px 固定＝画像の縦も最大 90px */
     const thumbInner = p.image
-      ? `<img src="${imgSrc}" alt="" class="w-full h-full min-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
-      : `<div class="w-full min-h-[90px] h-full flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-10 h-10 opacity-50"></i></div>`;
+      ? `<img src="${imgSrc}" alt="" class="w-full h-[90px] max-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
+      : `<div class="w-full h-[90px] max-h-[90px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
 
     /** sample02 と同じ色面・バッジ・AVG 下線色 */
     let statusClass = 'bg-[#B3D48E]';
@@ -1142,25 +1143,25 @@ const render = () => {
       : `<span class="text-[12px] text-gray-400 font-mono truncate">| ${safeId}</span>`;
 
     card.innerHTML = `
-      <div class="flex min-h-[90px] cursor-pointer group relative z-10">
-        <div class="relative w-32 shrink-0 z-10 overflow-visible transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none self-stretch min-h-[90px]">
+      <div class="flex h-[90px] max-h-[90px] min-h-[90px] cursor-pointer group relative z-10 overflow-hidden">
+        <div class="relative w-32 h-[90px] max-h-[90px] shrink-0 z-10 overflow-hidden transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none">
           ${thumbInner}
         </div>
-        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 min-h-[90px] transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
+        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[90px] max-h-[90px] transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
           ${badgeHtml}
           <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px]"></div>
-          <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-3 py-2 flex flex-col justify-center">
-            <div class="flex items-baseline justify-start gap-2 mb-2 w-full min-w-0">
-              <h3 class="font-extrabold text-[15px] leading-none text-black truncate">${displayTitle}</h3>
+          <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-2 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
+            <div class="flex items-baseline justify-start gap-1.5 mb-1 w-full min-w-0 shrink-0">
+              <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${displayTitle}</h3>
               ${titlePipe}
               ${avgBadgeEl}
             </div>
-            <div class="flex items-start justify-start gap-3">
-              <div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0">
-                <span class="text-[11px] font-black uppercase ${avgTextColor}">AVG</span>
-                <span class="text-[16px] font-extrabold ${avgValueColor}">${avgDisplay}<span class="text-[12px] ml-0.5">日</span></span>
+            <div class="flex items-center justify-start gap-2 min-h-0 min-w-0">
+              <div class="flex items-baseline gap-0.5 border-b-2 ${underlineColor} pb-0.5 shrink-0">
+                <span class="text-[10px] font-black uppercase ${avgTextColor}">AVG</span>
+                <span class="text-[14px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[10px] ml-0.5">日</span></span>
               </div>
-              <div class="flex-1 min-w-0 overflow-hidden">
+              <div class="flex-1 min-w-0 overflow-hidden flex items-center">
                 ${logsBlock}
               </div>
             </div>
