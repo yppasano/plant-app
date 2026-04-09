@@ -1073,7 +1073,8 @@ const render = () => {
 
     const card = document.createElement('div');
     /* sample02 風：ガラスカードではなく「左サムネ＋重ねた白カード」 */
-    card.className = 'relative z-10';
+    /* バッジが枠外にはみ出すため overflow-visible。上に少し余白 */
+    card.className = 'relative z-10 overflow-visible pt-1';
 
     const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-100 text-rose-800 border-rose-200' : needsWater ? 'bg-cyan-100 text-cyan-800 border-cyan-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
     const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[9px] px-1.5 py-0.5 rounded border font-bold ml-1">${escapeHtml(String(avg))}d</span>` : '';
@@ -1082,43 +1083,7 @@ const render = () => {
     const wRecent = wLogs[0];
     const wPrev = wLogs[1];
 
-    /** 水やり種別アイコン（sample02 と同系の Lucide） */
-    const iconForCareType = (type) => {
-      if (type === '水' || type === '水やり') {
-        return '<i data-lucide="droplet" class="w-[14px] h-[14px] text-[#06B6D4] shrink-0"></i>';
-      }
-      if (type === '液肥') {
-        return '<i data-lucide="flask-conical" class="w-[14px] h-[14px] text-[#8CBA5A] shrink-0"></i>';
-      }
-      if (type === '活力剤') {
-        return '<i data-lucide="sparkles" class="w-[14px] h-[14px] text-[#D8C243] shrink-0"></i>';
-      }
-      return '<i data-lucide="droplet" class="w-[14px] h-[14px] text-gray-400 shrink-0"></i>';
-    };
-
-    /** 日付（MM/DD）＋種類アイコン（ラベルなし） */
-    const logRowHtml = (log) => {
-      if (!log) {
-        return '<div class="flex items-center gap-1 shrink-0"><span class="text-[10px] font-bold text-gray-300">—</span></div>';
-      }
-      const d = formatDate(log.ts).slice(-5);
-      return `<div class="flex items-center gap-0.5 shrink-0 min-w-0"><span class="text-[10px] font-extrabold text-black whitespace-nowrap">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
-    };
-
-    let logsBlock = '';
-    if (wRecent) {
-      logsBlock = `<div class="flex flex-row items-center gap-1.5 min-w-0 flex-1 overflow-hidden">${logRowHtml(wRecent)}<span class="text-gray-300 shrink-0 text-[10px] font-light">|</span>${logRowHtml(wPrev)}</div>`;
-    } else {
-      logsBlock = '<span class="text-[11px] text-gray-400 font-bold whitespace-nowrap truncate">水やり記録なし</span>';
-    }
-
-    const imgSrc = p.image ? escapeHtml(p.image) : '';
-    /* 行の高さ 90px 固定＝画像の縦も最大 90px */
-    const thumbInner = p.image
-      ? `<img src="${imgSrc}" alt="" class="w-full h-[90px] max-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
-      : `<div class="w-full h-[90px] max-h-[90px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
-
-    /** sample02 と同じ色面・バッジ・AVG 下線色 */
+    /** sample02 と同じ色面・バッジ・AVG 下線色（ログ下線にも流用） */
     let statusClass = 'bg-[#B3D48E]';
     let badgeHtml = '';
     let underlineColor = 'border-[#D0D0D0]';
@@ -1135,6 +1100,45 @@ const render = () => {
       badgeHtml = '<div class="absolute -top-[0.3rem] -left-3 w-7 h-7 bg-[#E7445B] rounded-full flex items-center justify-center text-white z-30 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 -mt-0.5 text-white"><path d="M12 2L1 21h22L12 2zm-1 7h2v5h-2V9zm0 7h2v2h-2v-2z"/></svg></div>';
     }
 
+    /** 水やり種別アイコン（AVG の「日」数字と同じ 14px 相当の見た目） */
+    const iconForCareType = (type) => {
+      const sz = 'w-[14px] h-[14px]';
+      if (type === '水' || type === '水やり') {
+        return `<i data-lucide="droplet" class="${sz} text-[#06B6D4] shrink-0"></i>`;
+      }
+      if (type === '液肥') {
+        return `<i data-lucide="flask-conical" class="${sz} text-[#8CBA5A] shrink-0"></i>`;
+      }
+      if (type === '活力剤') {
+        return `<i data-lucide="sparkles" class="${sz} text-[#D8C243] shrink-0"></i>`;
+      }
+      return `<i data-lucide="droplet" class="${sz} text-gray-400 shrink-0"></i>`;
+    };
+
+    /** 日付（MM/DD）＋アイコン、AVG と同じ下線 */
+    const logRowHtml = (log) => {
+      if (!log) {
+        return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0"><span class="text-[14px] font-extrabold text-gray-300 leading-none">—</span></div>`;
+      }
+      const d = formatDate(log.ts).slice(-5);
+      return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0 min-w-0">
+        <span class="text-[14px] font-extrabold text-black whitespace-nowrap leading-none">${escapeHtml(d)}</span>${iconForCareType(log.type)}
+      </div>`;
+    };
+
+    let logsBlock = '';
+    if (wRecent) {
+      logsBlock = `<div class="flex flex-row items-end gap-1.5 min-w-0 flex-1 overflow-visible">${logRowHtml(wRecent)}<span class="text-gray-300 shrink-0 text-[12px] leading-none pb-0.5">|</span>${logRowHtml(wPrev)}</div>`;
+    } else {
+      logsBlock = `<span class="text-[11px] text-gray-400 font-bold border-b-2 ${underlineColor} pb-0.5 whitespace-nowrap truncate leading-none">水やり記録なし</span>`;
+    }
+
+    const imgSrc = p.image ? escapeHtml(p.image) : '';
+    /* 行の高さ 90px 固定＝画像の縦も最大 90px */
+    const thumbInner = p.image
+      ? `<img src="${imgSrc}" alt="" class="w-full h-[90px] max-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
+      : `<div class="w-full h-[90px] max-h-[90px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
+
     const avgDisplay = avg != null ? escapeHtml(String(avg)) : '--';
     const displayTitle = escapeHtml(p.name || p.id);
     const safeId = escapeHtml(p.id);
@@ -1143,25 +1147,25 @@ const render = () => {
       : `<span class="text-[12px] text-gray-400 font-mono truncate">| ${safeId}</span>`;
 
     card.innerHTML = `
-      <div class="flex h-[90px] max-h-[90px] min-h-[90px] cursor-pointer group relative z-10 overflow-hidden">
+      <div class="flex h-[90px] max-h-[90px] min-h-[90px] cursor-pointer group relative z-10 overflow-visible">
         <div class="relative w-32 h-[90px] max-h-[90px] shrink-0 z-10 overflow-hidden transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none">
           ${thumbInner}
         </div>
-        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[90px] max-h-[90px] transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
+        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[90px] max-h-[90px] overflow-visible transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
           ${badgeHtml}
-          <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px]"></div>
+          <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px] pointer-events-none"></div>
           <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-2 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
             <div class="flex items-baseline justify-start gap-1.5 mb-1 w-full min-w-0 shrink-0">
               <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${displayTitle}</h3>
               ${titlePipe}
               ${avgBadgeEl}
             </div>
-            <div class="flex items-center justify-start gap-2 min-h-0 min-w-0">
+            <div class="flex items-end justify-start gap-2 min-h-0 min-w-0">
               <div class="flex items-baseline gap-0.5 border-b-2 ${underlineColor} pb-0.5 shrink-0">
                 <span class="text-[10px] font-black uppercase ${avgTextColor}">AVG</span>
                 <span class="text-[14px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[10px] ml-0.5">日</span></span>
               </div>
-              <div class="flex-1 min-w-0 overflow-hidden flex items-center">
+              <div class="flex-1 min-w-0 overflow-visible flex items-end">
                 ${logsBlock}
               </div>
             </div>
