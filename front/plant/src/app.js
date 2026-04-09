@@ -1072,13 +1072,11 @@ const render = () => {
     const needsWater = p.needs_water === true;
 
     const card = document.createElement('div');
-    let cardClass = 'glass-card';
-    if (needsWater) cardClass = 'glass-card-water';
-    else if (isAlert) cardClass = 'glass-card-alert';
-    card.className = `${cardClass} rounded-2xl overflow-hidden transition-all duration-300 relative ${!isAlert && !needsWater ? 'hover:shadow-md' : ''}`;
+    /* sample02 風：ガラスカードではなく「左サムネ＋重ねた白カード」 */
+    card.className = 'relative z-10';
 
     const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-100 text-rose-800 border-rose-200' : needsWater ? 'bg-cyan-100 text-cyan-800 border-cyan-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
-    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[10px] px-2 py-0.5 rounded-lg border font-bold">AVG ${escapeHtml(String(avg))}d</span>` : '';
+    const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[9px] px-1.5 py-0.5 rounded border font-bold ml-1">${escapeHtml(String(avg))}d</span>` : '';
 
     const wLogs = getWateringLogsNewestFirst(p);
     const wRecent = wLogs[0];
@@ -1087,66 +1085,84 @@ const render = () => {
     /** 水やり種別アイコン（sample02 と同系の Lucide） */
     const iconForCareType = (type) => {
       if (type === '水' || type === '水やり') {
-        return '<i data-lucide="droplet" class="w-4 h-4 text-cyan-600 shrink-0"></i>';
+        return '<i data-lucide="droplet" class="w-[14px] h-[14px] text-[#06B6D4] shrink-0"></i>';
       }
       if (type === '液肥') {
-        return '<i data-lucide="flask-conical" class="w-4 h-4 text-emerald-600 shrink-0"></i>';
+        return '<i data-lucide="flask-conical" class="w-[14px] h-[14px] text-[#8CBA5A] shrink-0"></i>';
       }
       if (type === '活力剤') {
-        return '<i data-lucide="sparkles" class="w-4 h-4 text-amber-500 shrink-0"></i>';
+        return '<i data-lucide="sparkles" class="w-[14px] h-[14px] text-[#D8C243] shrink-0"></i>';
       }
-      return '<i data-lucide="droplet" class="w-4 h-4 text-gray-400 shrink-0"></i>';
+      return '<i data-lucide="droplet" class="w-[14px] h-[14px] text-gray-400 shrink-0"></i>';
     };
 
     /** 日付（MM/DD）＋種類アイコン（ラベルなし） */
     const logRowHtml = (log) => {
       if (!log) {
-        return '<div class="flex items-center gap-1.5 min-h-[18px]"><span class="text-[10px] text-gray-400">—</span></div>';
+        return '<div class="flex items-center gap-1 min-h-[16px]"><span class="text-[10px] font-bold text-gray-300">—</span></div>';
       }
       const d = formatDate(log.ts).slice(-5);
-      return `<div class="flex items-center gap-1.5"><span class="text-[10px] font-semibold text-gray-900">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
+      return `<div class="flex items-center gap-1 min-w-0 max-w-full"><span class="text-[10px] font-extrabold text-black truncate">${escapeHtml(d)}</span>${iconForCareType(log.type)}</div>`;
     };
 
     let logsBlock = '';
     if (wRecent) {
-      logsBlock = `<div class="flex flex-col gap-0.5 mt-0.5">${logRowHtml(wRecent)}${logRowHtml(wPrev)}</div>`;
+      logsBlock = `<div class="flex flex-col gap-0.5 min-w-0 flex-1">${logRowHtml(wRecent)}${logRowHtml(wPrev)}</div>`;
     } else {
-      logsBlock = '<span class="text-[10px] text-gray-500 mt-0.5">水やり記録なし</span>';
+      logsBlock = '<span class="text-[11px] text-gray-400 font-bold">水やり記録なし</span>';
     }
 
     const imgSrc = p.image ? escapeHtml(p.image) : '';
     const thumbInner = p.image
-      ? `<img src="${imgSrc}" alt="" class="w-full h-full object-cover">`
-      : `<div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
+      ? `<img src="${imgSrc}" alt="" class="w-full h-full min-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
+      : `<div class="w-full min-h-[90px] h-full flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-10 h-10 opacity-50"></i></div>`;
 
-    const thumbBadge = needsWater
-      ? '<div class="absolute -top-0.5 -right-0.5 w-6 h-6 bg-cyan-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"><i data-lucide="droplet" class="w-3.5 h-3.5 text-white"></i></div>'
-      : (isAlert
-        ? '<div class="absolute -top-0.5 -right-0.5 w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center border-2 border-white shadow-sm z-10"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-white"></i></div>'
-        : '');
+    /** sample02 と同じ色面・バッジ・AVG 下線色 */
+    let statusClass = 'bg-[#B3D48E]';
+    let badgeHtml = '';
+    let underlineColor = 'border-[#D0D0D0]';
+    let avgTextColor = 'text-gray-800';
+    let avgValueColor = 'text-black';
+    if (needsWater) {
+      statusClass = 'bg-[#06B6D4]';
+      badgeHtml = '<div class="absolute -top-[0.3rem] -left-3 w-7 h-7 bg-[#06B6D4] rounded-full flex items-center justify-center text-white z-30 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"><i data-lucide="droplet" class="w-3.5 h-3.5 text-white fill-current"></i></div>';
+    } else if (isAlert) {
+      statusClass = 'bg-[#E7445B]';
+      underlineColor = 'border-[#E7445B]';
+      avgTextColor = 'text-[#E7445B]';
+      avgValueColor = 'text-[#E7445B]';
+      badgeHtml = '<div class="absolute -top-[0.3rem] -left-3 w-7 h-7 bg-[#E7445B] rounded-full flex items-center justify-center text-white z-30 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"><svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 -mt-0.5 text-white"><path d="M12 2L1 21h22L12 2zm-1 7h2v5h-2V9zm0 7h2v2h-2v-2z"/></svg></div>';
+    }
 
+    const avgDisplay = avg != null ? escapeHtml(String(avg)) : '--';
     const displayTitle = escapeHtml(p.name || p.id);
     const safeId = escapeHtml(p.id);
-    const subLine = p.subtitle ? `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId} · ${escapeHtml(p.subtitle)}</div>` : `<div class="text-[10px] text-gray-600 truncate font-mono">${safeId}</div>`;
+    const titlePipe = p.subtitle
+      ? `<span class="text-[12px] text-gray-500 font-bold truncate">| ${escapeHtml(p.subtitle)}</span>`
+      : `<span class="text-[12px] text-gray-400 font-mono truncate">| ${safeId}</span>`;
 
     card.innerHTML = `
-      <div class="flex cursor-pointer group min-h-[88px]">
-        <div class="relative w-24 shrink-0 self-stretch min-h-[88px] rounded-l-2xl overflow-hidden bg-gray-100 border-r border-gray-100">
+      <div class="flex min-h-[90px] cursor-pointer group relative z-10">
+        <div class="relative w-32 shrink-0 z-10 overflow-visible transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none self-stretch min-h-[90px]">
           ${thumbInner}
-          ${thumbBadge}
         </div>
-        <div class="flex-1 min-w-0 flex items-stretch pl-3 pr-2 py-3">
-          <div class="min-w-0 flex-1 flex flex-col justify-center gap-0.5">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="font-bold text-base ${isAlert && !needsWater ? 'text-rose-900' : needsWater ? 'text-cyan-900' : 'text-gray-900'} truncate">${displayTitle}</span>
+        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 min-h-[90px] transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
+          ${badgeHtml}
+          <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px]"></div>
+          <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-3 py-2 flex flex-col justify-center">
+            <div class="flex items-baseline justify-start gap-2 mb-2 w-full min-w-0">
+              <h3 class="font-extrabold text-[15px] leading-none text-black truncate">${displayTitle}</h3>
+              ${titlePipe}
               ${avgBadgeEl}
             </div>
-            ${subLine}
-            ${logsBlock}
-          </div>
-          <div class="flex items-center shrink-0 pl-1">
-            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-gray-200 transition">
-              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-600"></i>
+            <div class="flex items-start justify-start gap-3">
+              <div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0">
+                <span class="text-[11px] font-black uppercase ${avgTextColor}">AVG</span>
+                <span class="text-[16px] font-extrabold ${avgValueColor}">${avgDisplay}<span class="text-[12px] ml-0.5">日</span></span>
+              </div>
+              <div class="flex-1 min-w-0 overflow-hidden">
+                ${logsBlock}
+              </div>
             </div>
           </div>
         </div>
