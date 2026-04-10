@@ -1115,14 +1115,14 @@ const render = () => {
       return `<i data-lucide="droplet" class="${sz} text-gray-400 shrink-0"></i>`;
     };
 
-    /** 日付（MM/DD）＋アイコン、AVG と同じ下線 */
+    /** 日付（MM/DD）＋アイコン、AVG と同じ下線。日付は AVG ラベルと同じ文字サイズ */
     const logRowHtml = (log) => {
       if (!log) {
-        return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0"><span class="text-[14px] font-extrabold text-gray-300 leading-none">—</span></div>`;
+        return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
       }
       const d = formatDate(log.ts).slice(-5);
       return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0 min-w-0">
-        <span class="text-[14px] font-extrabold text-black whitespace-nowrap leading-none">${escapeHtml(d)}</span>${iconForCareType(log.type)}
+        <span class="text-[10px] font-extrabold text-black whitespace-nowrap leading-none">${escapeHtml(d)}</span>${iconForCareType(log.type)}
       </div>`;
     };
 
@@ -1134,10 +1134,10 @@ const render = () => {
     }
 
     const imgSrc = p.image ? escapeHtml(p.image) : '';
-    /* 行の高さ 90px 固定＝画像の縦も最大 90px */
+    /* 行の高さ 96px（タイトル〜AVG 行間を広げた分の余裕） */
     const thumbInner = p.image
-      ? `<img src="${imgSrc}" alt="" class="w-full h-[90px] max-h-[90px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
-      : `<div class="w-full h-[90px] max-h-[90px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
+      ? `<img src="${imgSrc}" alt="" class="w-full h-[96px] max-h-[96px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
+      : `<div class="w-full h-[96px] max-h-[96px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
 
     const avgDisplay = avg != null ? escapeHtml(String(avg)) : '--';
     const displayTitle = escapeHtml(p.name || p.id);
@@ -1147,15 +1147,15 @@ const render = () => {
       : `<span class="text-[12px] text-gray-400 font-mono truncate">| ${safeId}</span>`;
 
     card.innerHTML = `
-      <div class="flex h-[90px] max-h-[90px] min-h-[90px] cursor-pointer group relative z-10 overflow-visible">
-        <div class="relative w-32 h-[90px] max-h-[90px] shrink-0 z-10 overflow-hidden transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none">
+      <div class="flex h-[96px] max-h-[96px] min-h-[96px] cursor-pointer group relative z-10 overflow-visible">
+        <div class="relative w-32 h-[96px] max-h-[96px] shrink-0 z-10 overflow-hidden transition-transform group-active:scale-95 rounded-l-[20px] rounded-r-none">
           ${thumbInner}
         </div>
-        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[90px] max-h-[90px] overflow-visible transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
+        <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[96px] max-h-[96px] overflow-visible transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
           ${badgeHtml}
           <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px] pointer-events-none"></div>
           <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-2 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
-            <div class="flex items-baseline justify-start gap-1.5 mb-1 w-full min-w-0 shrink-0">
+            <div class="flex items-baseline justify-start gap-1.5 mb-2.5 w-full min-w-0 shrink-0">
               <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${displayTitle}</h3>
               ${titlePipe}
               ${avgBadgeEl}
@@ -1163,7 +1163,7 @@ const render = () => {
             <div class="flex items-end justify-start gap-2 min-h-0 min-w-0">
               <div class="flex items-baseline gap-0.5 border-b-2 ${underlineColor} pb-0.5 shrink-0">
                 <span class="text-[10px] font-black uppercase ${avgTextColor}">AVG</span>
-                <span class="text-[14px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[10px] ml-0.5">日</span></span>
+                <span class="text-[15px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[11px] ml-0.5">日</span></span>
               </div>
               <div class="flex-1 min-w-0 overflow-visible flex items-end">
                 ${logsBlock}
