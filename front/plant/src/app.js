@@ -87,6 +87,8 @@ const els = {
   detailPlantName: document.getElementById('detailPlantName'),
   detailPlantIdBadge: document.getElementById('detailPlantIdBadge'),
   detailPlantSubtitle: document.getElementById('detailPlantSubtitle'),
+  detailHeaderCard: document.getElementById('detailHeaderCard'),
+  detailTitleSeparator: document.getElementById('detailTitleSeparator'),
   detailImage: document.getElementById('detailImage'),
   detailImageWrap: document.getElementById('detailImageWrap'),
   detailImagePlaceholder: document.getElementById('detailImagePlaceholder'),
@@ -769,16 +771,53 @@ function detailLogTypeIcon (type) {
   return `<i data-lucide="droplet" class="${sz} text-gray-400"></i>`;
 }
 
+/** 詳細ヒーロー下部カード：通常／水やりマーカー／アラートで背景・文字色（sample02 の updateDetailHeader に準拠） */
+function applyDetailHeroHeaderStyles (plant) {
+  const needsWater = plant.needs_water === true;
+  const urgent = isAlertNeeded(plant) && !needsWater;
+  const card = els.detailHeaderCard;
+  const sep = els.detailTitleSeparator;
+  if (!card || !sep || !els.detailPlantName || !els.detailPlantIdBadge || !els.detailPlantSubtitle) return;
+
+  const baseName = 'text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0';
+  const baseSep = 'text-[15px] sm:text-[16px] font-bold leading-none shrink-0';
+  const baseId = 'text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0';
+  const baseSub = 'text-[13px] font-bold mt-1.5 truncate';
+
+  if (needsWater) {
+    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-colors bg-[#06B6D4]';
+    els.detailPlantName.className = `${baseName} text-white`;
+    sep.className = `${baseSep} text-white`;
+    els.detailPlantIdBadge.className = `${baseId} text-white`;
+    els.detailPlantSubtitle.className = `${baseSub} text-white/90`;
+  } else if (urgent) {
+    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-colors bg-[#E7445B]';
+    els.detailPlantName.className = `${baseName} text-white`;
+    sep.className = `${baseSep} text-white`;
+    els.detailPlantIdBadge.className = `${baseId} text-white`;
+    els.detailPlantSubtitle.className = `${baseSub} text-white/90`;
+  } else {
+    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-colors bg-white';
+    els.detailPlantName.className = `${baseName} text-[#B3D48E]`;
+    sep.className = `${baseSep} text-black`;
+    els.detailPlantIdBadge.className = `${baseId} text-black`;
+    els.detailPlantSubtitle.className = `${baseSub} text-gray-700`;
+  }
+}
+
 function populateDetail (plant) {
   if (!plant || !els.detailScreen) return;
   const displayName = plant.name || plant.id;
   els.detailPlantName.textContent = displayName;
   els.detailPlantIdBadge.textContent = plant.id;
+  els.detailPlantSubtitle.textContent = plant.subtitle ? plant.subtitle : '';
+  applyDetailHeroHeaderStyles(plant);
   if (plant.subtitle) {
-    els.detailPlantSubtitle.textContent = ` · ${plant.subtitle}`;
+    els.detailPlantSubtitle.classList.remove('hidden');
   } else {
-    els.detailPlantSubtitle.textContent = '';
+    els.detailPlantSubtitle.classList.add('hidden');
   }
+
   const avg = calculateAverageInterval(plant);
   const urgent = isAlertNeeded(plant) && !plant.needs_water;
   /** テキストはベース黒。注意時は AVG 行の下線のみアクセント */

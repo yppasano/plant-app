@@ -183,26 +183,33 @@
     </nav>
   </div>
 
-  <!-- 植物詳細（sample02 系: 白ベース・黒テキスト、Watering → Average/History） -->
+  <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・名前/IDは画像下） -->
   <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
-    <header class="shrink-0 flex items-center gap-3 p-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-200 bg-white">
-      <button type="button" onclick="closeDetail()" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 transition active:scale-95" aria-label="戻る">
-        <i data-lucide="chevron-left" class="w-6 h-6"></i>
-      </button>
-      <div class="min-w-0 flex-1">
-        <h2 id="detailPlantName" class="text-lg font-bold text-black truncate leading-tight">—</h2>
-        <p id="detailPlantMeta" class="text-xs text-gray-600 truncate mt-0.5"><span id="detailPlantIdBadge" class="font-mono text-gray-800"></span><span id="detailPlantSubtitle" class=""></span></p>
-      </div>
-    </header>
     <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain pb-8 bg-white">
-      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative mx-4 mt-4 aspect-[4/3] max-h-64 rounded-2xl overflow-hidden border-2 border-black bg-gray-100 cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-        <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 hidden">
+      <!-- ヒーロー：上・左右フルブリード -->
+      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative w-full aspect-square max-h-[min(100vw,500px)] shrink-0 overflow-hidden bg-gray-100 cursor-pointer group">
+        <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 z-0">
           <i data-lucide="image" class="w-10 h-10 opacity-40"></i>
           <span>写真を追加</span>
         </div>
-        <img id="detailImage" src="" alt="" class="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition" />
-        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition pointer-events-none">
+        <img id="detailImage" src="" alt="" class="relative z-[1] w-full h-full object-cover opacity-95 group-hover:opacity-100 transition" />
+        <div id="detailImageGradient" class="absolute bottom-0 left-0 right-0 h-[42%] bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-[2]"></div>
+        <button type="button" onclick="event.stopPropagation(); closeDetail();" class="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-4 z-30 w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:scale-95 transition-transform border-0 outline-none" aria-label="戻る">
+          <i data-lucide="chevron-left" class="w-7 h-7 text-black -ml-0.5"></i>
+        </button>
+        <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition pointer-events-none z-[5]">
           <span class="text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="camera" class="w-5 h-5"></i> 写真を変更</span>
+        </div>
+        <!-- ⑥ 名前・ID（アラート／水やりマーカーで背景色切替は JS） -->
+        <div class="absolute bottom-0 left-0 right-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-16 pointer-events-none">
+          <div id="detailHeaderCard" class="mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-colors bg-white">
+            <div class="flex items-center justify-center gap-2 min-w-0">
+              <h2 id="detailPlantName" class="text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0 text-[#B3D48E]">—</h2>
+              <span id="detailTitleSeparator" class="text-[15px] sm:text-[16px] font-bold leading-none shrink-0 text-black">|</span>
+              <p id="detailPlantIdBadge" class="text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0 text-black">—</p>
+            </div>
+            <p id="detailPlantSubtitle" class="text-[13px] font-bold mt-1.5 truncate hidden text-gray-700"></p>
+          </div>
         </div>
       </div>
 
