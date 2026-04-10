@@ -183,54 +183,71 @@
     </nav>
   </div>
 
-  <!-- 植物詳細（アコーディオン廃止・全画面） -->
-  <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-gray-950/98 backdrop-blur-md hidden overflow-hidden" style="transform: translateX(100%);">
-    <header class="shrink-0 flex items-center gap-3 p-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-white/10">
-      <button type="button" onclick="closeDetail()" class="p-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white transition active:scale-95" aria-label="戻る">
+  <!-- 植物詳細（sample02 系: 白ベース・黒テキスト、Watering → Average/History） -->
+  <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
+    <header class="shrink-0 flex items-center gap-3 p-4 pt-[max(1rem,env(safe-area-inset-top))] border-b border-gray-200 bg-white">
+      <button type="button" onclick="closeDetail()" class="p-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 transition active:scale-95" aria-label="戻る">
         <i data-lucide="chevron-left" class="w-6 h-6"></i>
       </button>
       <div class="min-w-0 flex-1">
-        <h2 id="detailPlantName" class="text-lg font-bold text-white truncate leading-tight">—</h2>
-        <p id="detailPlantMeta" class="text-xs text-gray-400 truncate mt-0.5"><span id="detailPlantIdBadge" class="font-mono text-emerald-400/90"></span><span id="detailPlantSubtitle" class=""></span></p>
+        <h2 id="detailPlantName" class="text-lg font-bold text-black truncate leading-tight">—</h2>
+        <p id="detailPlantMeta" class="text-xs text-gray-600 truncate mt-0.5"><span id="detailPlantIdBadge" class="font-mono text-gray-800"></span><span id="detailPlantSubtitle" class=""></span></p>
       </div>
     </header>
-    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain pb-8">
-      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative mx-4 mt-4 aspect-[4/3] max-h-64 rounded-2xl overflow-hidden border border-white/10 bg-black/40 cursor-pointer group">
+    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain pb-8 bg-white">
+      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative mx-4 mt-4 aspect-[4/3] max-h-64 rounded-2xl overflow-hidden border-2 border-black bg-gray-100 cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
         <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 hidden">
           <i data-lucide="image" class="w-10 h-10 opacity-40"></i>
           <span>写真を追加</span>
         </div>
-        <img id="detailImage" src="" alt="" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition" />
+        <img id="detailImage" src="" alt="" class="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition" />
         <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition pointer-events-none">
           <span class="text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="camera" class="w-5 h-5"></i> 写真を変更</span>
         </div>
       </div>
-      <div class="px-4 mt-6">
-        <div class="flex justify-between items-end text-[10px] font-semibold text-gray-500 uppercase tracking-wider px-1 mb-2 border-b border-white/10 pb-2">
-          <span>History</span>
-          <span id="detailAvgLabel" class="text-emerald-400/90">Avg: —</span>
+
+      <!-- Watering（平均・履歴より上 / sample02 風シャドウカード） -->
+      <section class="px-4 mt-8">
+        <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Watering</h3>
+        <div class="grid grid-cols-3 gap-3">
+          <button type="button" onclick="confirmAndAddLogFromDetail('活力剤')" class="relative group w-full p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98]">
+            <div class="absolute inset-0 bg-[#D8C243] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5 pointer-events-none"></div>
+            <div class="relative bg-white border-2 border-black py-3 rounded-2xl flex flex-col items-center gap-1.5 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+              <i data-lucide="sparkles" class="w-6 h-6 text-[#D8C243]"></i>
+              <span class="text-[11px] font-extrabold text-[#D8C243]">活力剤</span>
+            </div>
+          </button>
+          <button type="button" onclick="confirmAndAddLogFromDetail('水')" class="relative group w-full p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98]">
+            <div class="absolute inset-0 bg-[#06B6D4] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5 pointer-events-none"></div>
+            <div class="relative bg-white border-2 border-black py-3 rounded-2xl flex flex-col items-center gap-1.5 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+              <i data-lucide="droplet" class="w-6 h-6 text-[#06B6D4]"></i>
+              <span class="text-[11px] font-extrabold text-[#06B6D4]">水</span>
+            </div>
+          </button>
+          <button type="button" onclick="confirmAndAddLogFromDetail('液肥')" class="relative group w-full p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98]">
+            <div class="absolute inset-0 bg-[#8CBA5A] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5 pointer-events-none"></div>
+            <div class="relative bg-white border-2 border-black py-3 rounded-2xl flex flex-col items-center gap-1.5 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+              <i data-lucide="flask-conical" class="w-6 h-6 text-[#8CBA5A]"></i>
+              <span class="text-[11px] font-extrabold text-[#8CBA5A]">液肥</span>
+            </div>
+          </button>
         </div>
-        <div id="detailHistoryList" class="space-y-0 max-h-48 overflow-y-auto"></div>
-      </div>
-      <div class="px-4 mt-6 grid grid-cols-3 gap-3">
-        <button type="button" onclick="confirmAndAddLogFromDetail('液肥')" class="bg-gradient-to-b from-emerald-500/20 to-emerald-600/5 border border-emerald-500/50 text-emerald-300 py-3 rounded-xl text-xs font-bold hover:from-emerald-500/30 transition flex flex-col items-center gap-1.5 active:scale-95">
-          <i data-lucide="flask-conical" class="w-5 h-5"></i> 液肥
-        </button>
-        <button type="button" onclick="confirmAndAddLogFromDetail('水')" class="bg-gradient-to-b from-cyan-500/20 to-cyan-600/5 border border-cyan-500/50 text-cyan-300 py-3 rounded-xl text-xs font-bold hover:from-cyan-500/30 transition flex flex-col items-center gap-1.5 active:scale-95">
-          <i data-lucide="droplets" class="w-5 h-5"></i> 水
-        </button>
-        <button type="button" onclick="confirmAndAddLogFromDetail('活力剤')" class="bg-gradient-to-b from-amber-500/20 to-amber-600/5 border border-amber-500/50 text-amber-300 py-3 rounded-xl text-xs font-bold hover:from-amber-500/30 transition flex flex-col items-center gap-1.5 active:scale-95">
-          <i data-lucide="sparkles" class="w-5 h-5"></i> 活力剤
-        </button>
-      </div>
-      <div class="px-4 mt-8 flex flex-wrap gap-3 justify-end border-t border-white/5 pt-6">
-        <button type="button" onclick="openRenameModalFromDetail()" class="text-xs text-gray-400 hover:text-emerald-400 transition flex items-center gap-1 px-2 py-1">
+      </section>
+
+      <!-- Average / History（AVG1 + ログ最大5 = 計6セル・最大3カラム） -->
+      <section class="px-4 mt-8">
+        <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Average / History</h3>
+        <div id="detailHistoryList" class="grid grid-cols-3 gap-x-3 gap-y-5 w-full"></div>
+      </section>
+
+      <div class="px-4 mt-10 flex flex-wrap gap-3 justify-end border-t border-gray-200 pt-6">
+        <button type="button" onclick="openRenameModalFromDetail()" class="text-xs text-gray-600 hover:text-black transition flex items-center gap-1 px-2 py-1">
           <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> 名前・IDを変更
         </button>
-        <button type="button" onclick="openStatusPopoverFromDetail()" class="text-xs text-gray-400 hover:text-emerald-400 transition flex items-center gap-1 px-2 py-1">
+        <button type="button" onclick="openStatusPopoverFromDetail()" class="text-xs text-gray-600 hover:text-black transition flex items-center gap-1 px-2 py-1">
           <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i> Status
         </button>
-        <button type="button" onclick="deletePlantFromDetail()" class="text-xs text-gray-400 hover:text-red-400 transition flex items-center gap-1 px-2 py-1">
+        <button type="button" onclick="deletePlantFromDetail()" class="text-xs text-gray-600 hover:text-red-600 transition flex items-center gap-1 px-2 py-1">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
         </button>
       </div>

@@ -91,7 +91,6 @@ const els = {
   detailImageWrap: document.getElementById('detailImageWrap'),
   detailImagePlaceholder: document.getElementById('detailImagePlaceholder'),
   detailHistoryList: document.getElementById('detailHistoryList'),
-  detailAvgLabel: document.getElementById('detailAvgLabel'),
   settingsModal: document.getElementById('settingsModal'),
   searchInput: document.getElementById('searchInput'),
   sortSelect: document.getElementById('sortSelect'),
@@ -695,6 +694,21 @@ const getWateringLogsNewestFirst = (plant) => {
     .sort((a, b) => b.ts - a.ts);
 };
 
+/** 詳細グリッド用：お世話ログ種別アイコン（sample02 系カラー） */
+function detailLogTypeIcon (type) {
+  const sz = 'w-5 h-5 shrink-0';
+  if (type === '水' || type === '水やり') {
+    return `<i data-lucide="droplet" class="${sz} text-[#06B6D4]"></i>`;
+  }
+  if (type === '液肥') {
+    return `<i data-lucide="flask-conical" class="${sz} text-[#8CBA5A]"></i>`;
+  }
+  if (type === '活力剤') {
+    return `<i data-lucide="sparkles" class="${sz} text-[#D8C243]"></i>`;
+  }
+  return `<i data-lucide="droplet" class="${sz} text-gray-400"></i>`;
+}
+
 function populateDetail (plant) {
   if (!plant || !els.detailScreen) return;
   const displayName = plant.name || plant.id;
@@ -707,8 +721,8 @@ function populateDetail (plant) {
   }
   const avg = calculateAverageInterval(plant);
   const urgent = isAlertNeeded(plant) && !plant.needs_water;
-  els.detailAvgLabel.textContent = avg != null ? `Avg: ${avg}d` : 'Avg: —';
-  els.detailAvgLabel.className = urgent ? 'text-rose-400/90' : plant.needs_water ? 'text-cyan-400/90' : 'text-emerald-400/90';
+  /** テキストはベース黒。注意時は AVG 行の下線のみアクセント */
+  const avgBorder = urgent ? 'border-[#E7445B]' : 'border-black';
 
   if (plant.image) {
     els.detailImage.src = plant.image;
@@ -720,15 +734,32 @@ function populateDetail (plant) {
     els.detailImagePlaceholder?.classList.remove('hidden');
   }
 
-  const sortedLogs = [...plant.logs].sort((a, b) => b.ts - a.ts);
-  const displayLogs = sortedLogs.filter(l => l.type !== '状態').slice(0, 12);
-  els.detailHistoryList.innerHTML = displayLogs.length
-    ? displayLogs.map(l => `
-      <div class="flex justify-between py-2 border-b border-white/10 last:border-0">
-        <span class="text-gray-400 font-mono text-[10.5px] flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1.5 opacity-70"></i>${escapeHtml(formatDate(l.ts).slice(-5))}</span>
-        <span class="text-gray-200 text-[10.5px] font-medium">${escapeHtml(l.type)}</span>
-      </div>`).join('')
-    : '<div class="p-2 text-center text-xs text-gray-600">No logs</div>';
+  const waterLogs = getWateringLogsNewestFirst(plant).slice(0, 5);
+  const avgNum = avg != null ? escapeHtml(String(avg)) : '—';
+
+  const avgCell = `
+    <div class="min-w-0 flex flex-col justify-end">
+      <div class="flex items-baseline justify-between border-b-[3px] ${avgBorder} pb-1.5 px-0.5 w-full">
+        <span class="text-[11px] font-black uppercase text-black tracking-wide">AVG</span>
+        <span class="text-[18px] font-extrabold text-black leading-none">${avgNum}<span class="text-[11px] ml-0.5 font-extrabold">日</span></span>
+      </div>
+    </div>`;
+
+  const logCells = waterLogs.map((l) => {
+    const d = escapeHtml(formatDate(l.ts).slice(-5));
+    return `
+    <div class="min-w-0 flex flex-col justify-end">
+      <div class="flex items-center justify-between gap-1 border-b-[3px] border-[#D0D0D0] pb-1.5 px-0.5 w-full min-w-0">
+        <span class="text-[11px] font-extrabold text-black leading-none truncate">${d}</span>
+        ${detailLogTypeIcon(l.type)}
+      </div>
+    </div>`;
+  });
+
+  els.detailHistoryList.innerHTML = waterLogs.length
+    ? avgCell + logCells.join('')
+    : `${avgCell}<div class="col-span-2 min-w-0 flex flex-col justify-end"><p class="text-[11px] font-bold text-gray-500 pb-1.5 border-b-[3px] border-dashed border-gray-300">水やり履歴はまだありません</p></div>`;
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
