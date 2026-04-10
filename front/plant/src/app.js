@@ -1152,26 +1152,26 @@ const render = () => {
      * リスト2行目: 3カラム（AVG | 直近ログ | 次直近ログ）。
      * Grid で行の高さを揃え、各セル内は flex items-center でテキストとアイコンの縦位置を統一する。
      */
-    const avgColHtml = `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center gap-0.5 min-w-0 self-stretch">
+    const avgColHtml = `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center justify-center gap-1 min-w-0 self-stretch">
       <span class="text-[10px] font-black uppercase leading-none ${avgTextColor}">AVG</span>
       <span class="text-[15px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[11px] ml-0.5">日</span></span>
     </div>`;
 
     const logCellHtml = (log) => {
       if (!log) {
-        return `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center justify-start min-w-0 self-stretch"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
+        return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center justify-center min-w-0 self-stretch"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
       }
       const d = formatDate(log.ts).slice(-5);
-      return `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center gap-1 min-w-0 justify-start self-stretch">
+      return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center gap-1 min-w-0 justify-center self-stretch">
         <span class="text-[10px] font-extrabold text-black whitespace-nowrap leading-none truncate">${escapeHtml(d)}</span>${iconForCareType(log.type)}
       </div>`;
     };
 
     let statsRow = '';
     if (wRecent) {
-      statsRow = `<div class="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">${avgColHtml}${logCellHtml(wRecent)}${logCellHtml(wPrev)}</div>`;
+      statsRow = `<div class="grid grid-cols-3 gap-x-2 w-full min-w-0 items-stretch">${avgColHtml}${logCellHtml(wRecent)}${logCellHtml(wPrev)}</div>`;
     } else {
-      statsRow = `<div class="grid grid-cols-[60px_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">
+      statsRow = `<div class="grid grid-cols-3 gap-x-2 w-full min-w-0 items-stretch">
         ${avgColHtml}
         <div class="border-b-2 ${underlineColor} pb-0.5 flex items-center min-w-0 self-stretch"><span class="text-[11px] text-gray-400 font-bold leading-none truncate">水やり記録なし</span></div>
       </div>`;
@@ -1197,7 +1197,7 @@ const render = () => {
         <div class="relative flex-1 -ml-[2.4rem] z-20 min-w-0 h-[96px] max-h-[96px] overflow-visible transition-transform group-active:translate-y-0.5 group-active:translate-x-0.5">
           ${badgeHtml}
           <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px] pointer-events-none"></div>
-          <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-2 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
+          <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-3 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
             <div class="flex items-baseline justify-start gap-1.5 mb-2.5 w-full min-w-0 shrink-0">
               <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${displayTitle}</h3>
               ${titlePipe}
