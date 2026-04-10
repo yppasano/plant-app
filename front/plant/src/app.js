@@ -1133,7 +1133,7 @@ const render = () => {
 
     /** 水やり種別アイコン（AVG の「日」数字と同じ 14px 相当の見た目） */
     const iconForCareType = (type) => {
-      const sz = 'w-[18px] h-[18px]';
+      const sz = 'w-[20x] h-[20px]';
       if (type === '水' || type === '水やり') {
         return `<i data-lucide="droplet" class="${sz} text-[#06B6D4] shrink-0"></i>`;
       }
