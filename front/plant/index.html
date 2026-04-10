@@ -240,6 +240,12 @@
         <div id="detailHistoryList" class="grid grid-cols-3 gap-x-3 gap-y-5 w-full"></div>
       </section>
 
+      <!-- 水やりマーカー（Status から移設・sample02 Other 相当） -->
+      <section class="px-4 mt-8">
+        <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Other</h3>
+        <div id="detailWaterMarkerContainer" class="w-full max-w-[272px]"></div>
+      </section>
+
       <div class="px-4 mt-10 flex flex-wrap gap-3 justify-end border-t border-gray-200 pt-6">
         <button type="button" onclick="openRenameModalFromDetail()" class="text-xs text-gray-600 hover:text-black transition flex items-center gap-1 px-2 py-1">
           <i data-lucide="edit-3" class="w-3.5 h-3.5"></i> 名前・IDを変更
@@ -250,6 +256,28 @@
         <button type="button" onclick="deletePlantFromDetail()" class="text-xs text-gray-600 hover:text-red-600 transition flex items-center gap-1 px-2 py-1">
           <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- お世話記録の確認（sample02 の actionConfirmModal 相当・OK で記録後リストへ） -->
+  <div id="careConfirmModal" class="hidden fixed inset-0 z-[100] backdrop-blur-sm flex justify-center items-center p-6 transition-colors duration-300 bg-black/40" onclick="closeCareConfirmModal()">
+    <div class="bg-white shadow-[8px_8px_16px_rgba(0,0,0,0.25)] px-6 py-10 rounded-[2.5rem] w-full max-w-sm text-center" onclick="event.stopPropagation()">
+      <div id="careConfirmIcon" class="flex items-center justify-center mx-auto mb-6 min-h-[72px]"></div>
+      <h3 id="careConfirmTitle" class="text-[18px] font-extrabold mb-10 text-black tracking-tight">記録する</h3>
+      <div class="flex justify-center gap-4">
+        <div class="relative group cursor-pointer w-full max-w-[128px] h-[48px]" onclick="closeCareConfirmModal()">
+          <div class="absolute inset-0 bg-[#E5E7EB] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
+          <div class="relative bg-white border-2 border-black h-full rounded-2xl flex items-center justify-center group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+            <span class="text-[13px] font-extrabold text-[#9CA3AF] uppercase tracking-wider">Cancel</span>
+          </div>
+        </div>
+        <div class="relative group cursor-pointer w-full max-w-[128px] h-[48px]" onclick="executeCareConfirm()">
+          <div id="careConfirmOkShadow" class="absolute inset-0 bg-[#06B6D4] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
+          <div class="relative bg-white border-2 border-black h-full rounded-2xl flex items-center justify-center group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+            <span id="careConfirmOkText" class="text-[13px] font-extrabold text-[#06B6D4] uppercase tracking-wider">OK</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -276,13 +304,10 @@
     </div>
   </div>
 
-  <!-- Status ポップオーバー（明日水やり・状態記録） -->
-  <div id="statusPopoverOverlay" class="hidden fixed inset-0 z-50" onclick="closeStatusPopover()"></div>
-  <div id="statusPopover" class="hidden fixed z-[60] glass rounded-xl border border-white/10 shadow-2xl py-2 min-w-[200px]">
-    <button id="statusWaterMarkerBtn" class="w-full flex items-center gap-2 px-4 py-3 text-left text-gray-200 hover:bg-white/10 transition text-sm">
-      <span>💧</span> 明日水やり(マーカー)
-    </button>
-    <button id="statusRecordBtn" class="w-full flex items-center gap-2 px-4 py-3 text-left text-gray-200 hover:bg-white/10 transition text-sm">
+  <!-- Status ポップオーバー（状態記録のみ・水やりマーカーは詳細画面） -->
+  <div id="statusPopoverOverlay" class="hidden fixed inset-0 z-50 bg-black/20" onclick="closeStatusPopover()"></div>
+  <div id="statusPopover" class="hidden fixed z-[60] bg-white rounded-xl border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] py-1 min-w-[200px]">
+    <button id="statusRecordBtn" type="button" class="w-full flex items-center gap-2 px-4 py-3 text-left text-gray-900 hover:bg-gray-100 transition text-sm font-semibold">
       <span>📝</span> 状態を記録する
     </button>
   </div>

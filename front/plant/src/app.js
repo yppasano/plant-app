@@ -317,11 +317,74 @@ const addPlantToDB = async (plantId, initialImageBlob = null) => {
   }
 };
 
-const LOG_LABELS = { '液肥': '🧪 液肥', '水': '💧 水', '活力剤': '⚡ 活力剤' };
+/** sample02 風・お世話記録確認モーダル用 */
+const CARE_CONFIRM_UI = {
+  水: {
+    title: '水を記録する',
+    iconHtml: '<i data-lucide="droplet" class="w-[72px] h-[72px] text-[#06B6D4]"></i>',
+    overlayBg: 'bg-[#06B6D4]/90',
+    okShadow: 'bg-[#06B6D4]',
+    okText: 'text-[#06B6D4]'
+  },
+  液肥: {
+    title: '液肥を記録する',
+    iconHtml: '<i data-lucide="flask-conical" class="w-[72px] h-[72px] text-[#8CBA5A]"></i>',
+    overlayBg: 'bg-[#8CBA5A]/90',
+    okShadow: 'bg-[#8CBA5A]',
+    okText: 'text-[#8CBA5A]'
+  },
+  活力剤: {
+    title: '活力剤を記録する',
+    iconHtml: '<i data-lucide="sparkles" class="w-[72px] h-[72px] text-[#D8C243]"></i>',
+    overlayBg: 'bg-[#D8C243]/90',
+    okShadow: 'bg-[#D8C243]',
+    okText: 'text-[#D8C243]'
+  }
+};
+
+let pendingCarePlantId = null;
+let pendingCareType = null;
+
+window.openCareConfirmModal = (plantId, type) => {
+  const cfg = CARE_CONFIRM_UI[type];
+  if (!cfg) return;
+  pendingCarePlantId = plantId;
+  pendingCareType = type;
+  const modal = document.getElementById('careConfirmModal');
+  const iconEl = document.getElementById('careConfirmIcon');
+  const titleEl = document.getElementById('careConfirmTitle');
+  const okShadow = document.getElementById('careConfirmOkShadow');
+  const okText = document.getElementById('careConfirmOkText');
+  if (!modal || !iconEl || !titleEl || !okShadow || !okText) return;
+  iconEl.innerHTML = cfg.iconHtml;
+  titleEl.textContent = cfg.title;
+  okShadow.className = `absolute inset-0 ${cfg.okShadow} border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5`;
+  okText.className = `text-[13px] font-extrabold ${cfg.okText} uppercase tracking-wider`;
+  okText.textContent = 'OK';
+  modal.className = `fixed inset-0 z-[100] backdrop-blur-sm flex justify-center items-center p-6 transition-colors duration-300 ${cfg.overlayBg}`;
+  modal.classList.remove('hidden');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.closeCareConfirmModal = () => {
+  document.getElementById('careConfirmModal')?.classList.add('hidden');
+  pendingCarePlantId = null;
+  pendingCareType = null;
+};
+
+window.executeCareConfirm = async () => {
+  if (!pendingCarePlantId || !pendingCareType) return;
+  const pid = pendingCarePlantId;
+  const t = pendingCareType;
+  await window.addLog(pid, t);
+  window.closeCareConfirmModal();
+  if (currentDetailPlantId === pid) {
+    window.closeDetail();
+  }
+};
+
 window.confirmAndAddLog = (plantId, type) => {
-  const label = LOG_LABELS[type] || type;
-  if (!confirm(`${label} を記録しますか？`)) return;
-  addLog(plantId, type);
+  window.openCareConfirmModal(plantId, type);
 };
 
 window.addLog = async (plantId, type) => {
@@ -375,9 +438,6 @@ window.openStatusPopover = (plantId, ev) => {
   const popover = els.statusPopover;
   const overlay = els.statusPopoverOverlay;
   if (!popover || !overlay) return;
-  const plant = plants.find(p => p.id === plantId);
-  const waterBtn = document.getElementById('statusWaterMarkerBtn');
-  if (waterBtn) waterBtn.textContent = plant?.needs_water ? '💧 マーカー解除' : '💧 明日水やり(マーカー)';
   overlay.classList.remove('hidden');
   popover.classList.remove('hidden');
 
@@ -760,8 +820,41 @@ function populateDetail (plant) {
     ? avgCell + logCells.join('')
     : `${avgCell}<div class="col-span-2 min-w-0 flex flex-col justify-end"><p class="text-[11px] font-bold text-gray-500 pb-1.5 border-b-[3px] border-dashed border-gray-300">水やり履歴はまだありません</p></div>`;
 
+  renderDetailWaterMarker(plant);
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
+
+/** 詳細の水やりマーカー（sample02 のマーカーボタン相当） */
+function renderDetailWaterMarker (plant) {
+  const el = document.getElementById('detailWaterMarkerContainer');
+  if (!el) return;
+  if (plant.needs_water) {
+    el.innerHTML = `
+      <button type="button" onclick="toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
+        <div class="absolute inset-0 bg-black border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
+        <div class="relative bg-[#06B6D4] border-2 border-black h-full rounded-2xl flex items-center justify-center gap-2 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+          <i data-lucide="droplet" class="w-4 h-4 text-black fill-current shrink-0"></i>
+          <span class="text-[15px] font-extrabold text-black">マーカー解除</span>
+        </div>
+      </button>`;
+  } else {
+    el.innerHTML = `
+      <button type="button" onclick="toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
+        <div class="absolute inset-0 bg-[#06B6D4] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
+        <div class="relative bg-white border-2 border-black h-full rounded-2xl flex items-center justify-center gap-2 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
+          <i data-lucide="droplet" class="w-4 h-4 text-[#06B6D4] shrink-0"></i>
+          <span class="text-[15px] font-extrabold text-[#06B6D4]">水やりマーカー</span>
+        </div>
+      </button>`;
+  }
+}
+
+window.toggleDetailWaterMarker = async () => {
+  if (!currentDetailPlantId) return;
+  const plant = plants.find(p => p.id === currentDetailPlantId);
+  if (!plant) return;
+  await setNeedsWater(currentDetailPlantId, !plant.needs_water);
+};
 
 window.openDetail = (plantId) => {
   const plant = plants.find(p => p.id === plantId);
@@ -846,16 +939,7 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async () =>
   await addPlantToDB(id);
 });
 
-// Status ポップオーバー: 明日水やりマーカー（トグル: 既に true なら false に）
-document.getElementById('statusWaterMarkerBtn')?.addEventListener('click', async () => {
-  if (!currentStatusPlantId) return;
-  const plant = plants.find(p => p.id === currentStatusPlantId);
-  const newValue = plant?.needs_water ? false : true;
-  await setNeedsWater(currentStatusPlantId, newValue);
-  closeStatusPopover();
-});
-
-// Status ポップオーバー: 状態を記録
+// Status ポップオーバー: 状態を記録（水やりマーカーは詳細画面のみ）
 document.getElementById('statusRecordBtn')?.addEventListener('click', () => {
   if (!currentStatusPlantId) return;
   openConditionModal(currentStatusPlantId);
