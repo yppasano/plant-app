@@ -1152,26 +1152,26 @@ const render = () => {
      * リスト2行目: 3カラム（AVG | 直近ログ | 次直近ログ）。
      * Grid で行の高さを揃え、各セル内は flex items-center でテキストとアイコンの縦位置を統一する。
      */
-    const avgColHtml = `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center gap-0.5 min-w-0 self-stretch">
+    const avgColHtml = `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center gap-0.5 min-w-0 self-stretch">
       <span class="text-[10px] font-black uppercase leading-none ${avgTextColor}">AVG</span>
       <span class="text-[15px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[11px] ml-0.5">日</span></span>
     </div>`;
 
     const logCellHtml = (log) => {
       if (!log) {
-        return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center justify-start min-w-0 self-stretch"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
+        return `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center justify-start min-w-0 self-stretch"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
       }
       const d = formatDate(log.ts).slice(-5);
-      return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center gap-1 min-w-0 justify-start self-stretch">
+      return `<div class="border-b-2 ${underlineColor} pb-0.5 px-0.5 flex items-center gap-1 min-w-0 justify-start self-stretch">
         <span class="text-[10px] font-extrabold text-black whitespace-nowrap leading-none truncate">${escapeHtml(d)}</span>${iconForCareType(log.type)}
       </div>`;
     };
 
     let statsRow = '';
     if (wRecent) {
-      statsRow = `<div class="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">${avgColHtml}${logCellHtml(wRecent)}${logCellHtml(wPrev)}</div>`;
+      statsRow = `<div class="grid grid-cols-[60px_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">${avgColHtml}${logCellHtml(wRecent)}${logCellHtml(wPrev)}</div>`;
     } else {
-      statsRow = `<div class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">
+      statsRow = `<div class="grid grid-cols-[60px_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">
         ${avgColHtml}
         <div class="border-b-2 ${underlineColor} pb-0.5 flex items-center min-w-0 self-stretch"><span class="text-[11px] text-gray-400 font-bold leading-none truncate">水やり記録なし</span></div>
       </div>`;
