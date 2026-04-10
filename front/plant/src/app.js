@@ -1115,22 +1115,35 @@ const render = () => {
       return `<i data-lucide="droplet" class="${sz} text-gray-400 shrink-0"></i>`;
     };
 
-    /** 日付（MM/DD）＋アイコン、AVG と同じ下線。日付は AVG ラベルと同じ文字サイズ */
-    const logRowHtml = (log) => {
+    const avgDisplay = avg != null ? escapeHtml(String(avg)) : '--';
+
+    /**
+     * リスト2行目: 3カラム（AVG | 直近ログ | 次直近ログ）。
+     * Grid で行の高さを揃え、各セル内は flex items-center でテキストとアイコンの縦位置を統一する。
+     */
+    const avgColHtml = `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center gap-0.5 min-w-0 self-stretch">
+      <span class="text-[10px] font-black uppercase leading-none ${avgTextColor}">AVG</span>
+      <span class="text-[15px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[11px] ml-0.5">日</span></span>
+    </div>`;
+
+    const logCellHtml = (log) => {
       if (!log) {
-        return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
+        return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center justify-start min-w-0 self-stretch"><span class="text-[10px] font-extrabold text-gray-300 leading-none">—</span></div>`;
       }
       const d = formatDate(log.ts).slice(-5);
-      return `<div class="flex items-baseline gap-1 border-b-2 ${underlineColor} pb-0.5 shrink-0 min-w-0">
-        <span class="text-[10px] font-extrabold text-black whitespace-nowrap leading-none">${escapeHtml(d)}</span>${iconForCareType(log.type)}
+      return `<div class="border-b-2 ${underlineColor} pb-0.5 flex items-center gap-1 min-w-0 justify-start self-stretch">
+        <span class="text-[10px] font-extrabold text-black whitespace-nowrap leading-none truncate">${escapeHtml(d)}</span>${iconForCareType(log.type)}
       </div>`;
     };
 
-    let logsBlock = '';
+    let statsRow = '';
     if (wRecent) {
-      logsBlock = `<div class="flex flex-row items-end gap-1.5 min-w-0 flex-1 overflow-visible">${logRowHtml(wRecent)}<span class="text-gray-300 shrink-0 text-[12px] leading-none pb-0.5">|</span>${logRowHtml(wPrev)}</div>`;
+      statsRow = `<div class="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">${avgColHtml}${logCellHtml(wRecent)}${logCellHtml(wPrev)}</div>`;
     } else {
-      logsBlock = `<span class="text-[11px] text-gray-400 font-bold border-b-2 ${underlineColor} pb-0.5 whitespace-nowrap truncate leading-none">水やり記録なし</span>`;
+      statsRow = `<div class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 w-full min-w-0 items-stretch">
+        ${avgColHtml}
+        <div class="border-b-2 ${underlineColor} pb-0.5 flex items-center min-w-0 self-stretch"><span class="text-[11px] text-gray-400 font-bold leading-none truncate">水やり記録なし</span></div>
+      </div>`;
     }
 
     const imgSrc = p.image ? escapeHtml(p.image) : '';
@@ -1139,7 +1152,6 @@ const render = () => {
       ? `<img src="${imgSrc}" alt="" class="w-full h-[96px] max-h-[96px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
       : `<div class="w-full h-[96px] max-h-[96px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
 
-    const avgDisplay = avg != null ? escapeHtml(String(avg)) : '--';
     const displayTitle = escapeHtml(p.name || p.id);
     const safeId = escapeHtml(p.id);
     const titlePipe = p.subtitle
@@ -1160,14 +1172,8 @@ const render = () => {
               ${titlePipe}
               ${avgBadgeEl}
             </div>
-            <div class="flex items-end justify-start gap-2 min-h-0 min-w-0">
-              <div class="flex items-baseline gap-0.5 border-b-2 ${underlineColor} pb-0.5 shrink-0">
-                <span class="text-[10px] font-black uppercase ${avgTextColor}">AVG</span>
-                <span class="text-[15px] font-extrabold leading-none ${avgValueColor}">${avgDisplay}<span class="text-[11px] ml-0.5">日</span></span>
-              </div>
-              <div class="flex-1 min-w-0 overflow-visible flex items-end">
-                ${logsBlock}
-              </div>
+            <div class="min-h-0 min-w-0 w-full">
+              ${statsRow}
             </div>
           </div>
         </div>
