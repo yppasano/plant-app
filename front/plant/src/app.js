@@ -808,7 +808,8 @@ function applyDetailHeroHeaderStyles (plant) {
     coloredBox.className = `relative w-full flex flex-col ${bgColor} rounded-t-[1.5rem] pt-6 pb-10 transition-all`;
     coloredBox.style.clipPath = 'polygon(0px 0px, 100% 0px, 100% calc(100% - 2.8rem), 0px 100%)';
 
-    idRow.className = 'flex items-center justify-center gap-2 transition-all mx-auto pt-3 px-4 w-full bg-transparent shadow-none';
+    // 通常時と同じ py-5 を維持（pt-3 だけだと行高が縮み、名前|ID ブロックが上下に跳ねる）
+    idRow.className = 'flex items-center justify-center gap-2 transition-all mx-auto px-4 py-5 w-full bg-transparent shadow-none';
     wateringTitleWrapper.className = 'pl-4 transition-all mt-[2.4rem] relative z-10';
     wateringButtonsWrapper.className = 'px-4 -mt-6 transition-all relative z-40';
 
