@@ -87,7 +87,12 @@ const els = {
   detailPlantName: document.getElementById('detailPlantName'),
   detailPlantIdBadge: document.getElementById('detailPlantIdBadge'),
   detailPlantSubtitle: document.getElementById('detailPlantSubtitle'),
-  detailHeaderCard: document.getElementById('detailHeaderCard'),
+  detailHeaderColoredBox: document.getElementById('detailHeaderColoredBox'),
+  detailIdRow: document.getElementById('detailIdRow'),
+  detailHeaderIconContainer: document.getElementById('detailHeaderIconContainer'),
+  detailWateringTitleWrapper: document.getElementById('detailWateringTitleWrapper'),
+  detailWateringTitle: document.getElementById('detailWateringTitle'),
+  detailWateringButtonsWrapper: document.getElementById('detailWateringButtonsWrapper'),
   detailTitleSeparator: document.getElementById('detailTitleSeparator'),
   detailImage: document.getElementById('detailImage'),
   detailImageWrap: document.getElementById('detailImageWrap'),
@@ -771,37 +776,74 @@ function detailLogTypeIcon (type) {
   return `<i data-lucide="droplet" class="${sz} text-gray-400"></i>`;
 }
 
-/** 詳細ヒーロー下部カード：通常／水やりマーカー／アラートで背景・文字色（sample02 の updateDetailHeader に準拠） */
+/** 詳細ヘッダー帯（sample02 の updateDetailHeader 相当：coloredBox・clip-path・Watering 見出し・左上アイコン） */
 function applyDetailHeroHeaderStyles (plant) {
   const needsWater = plant.needs_water === true;
   const urgent = isAlertNeeded(plant) && !needsWater;
-  const card = els.detailHeaderCard;
+  const coloredBox = els.detailHeaderColoredBox;
+  const idRow = els.detailIdRow;
+  const iconContainer = els.detailHeaderIconContainer;
+  const wateringTitleWrapper = els.detailWateringTitleWrapper;
+  const wateringButtonsWrapper = els.detailWateringButtonsWrapper;
+  const wateringTitle = els.detailWateringTitle;
   const sep = els.detailTitleSeparator;
-  if (!card || !sep || !els.detailPlantName || !els.detailPlantIdBadge || !els.detailPlantSubtitle) return;
+  if (!coloredBox || !idRow || !iconContainer || !wateringTitleWrapper || !wateringButtonsWrapper || !wateringTitle || !sep || !els.detailPlantName || !els.detailPlantIdBadge || !els.detailPlantSubtitle) return;
 
   const baseName = 'text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0';
   const baseSep = 'text-[15px] sm:text-[16px] font-bold leading-none shrink-0';
   const baseId = 'text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0';
-  const baseSub = 'text-[13px] font-bold mt-1.5 truncate';
+  const baseSub = 'text-[13px] font-bold mt-2 text-center truncate px-2';
+  const baseWateringTitle = 'text-[11px] font-extrabold tracking-[0.12em] uppercase transition-colors';
 
-  if (needsWater) {
-    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-colors bg-[#06B6D4]';
+  iconContainer.innerHTML = '';
+  iconContainer.classList.add('hidden');
+  coloredBox.style.clipPath = 'none';
+
+  if (needsWater || urgent) {
+    const bgColor = needsWater ? 'bg-[#06B6D4]' : 'bg-[#E7445B]';
+    const iconSvg = needsWater
+      ? '<i data-lucide="droplet" class="w-7 h-7 text-white fill-current -ml-[2px] -mt-[2px]"></i>'
+      : '<svg viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7 text-white -ml-[2px] -mt-[2px]" aria-hidden="true"><path d="M12 2L1 21h22L12 2zm-1 7h2v5h-2V9zm0 7h2v2h-2v-2z"/></svg>';
+
+    coloredBox.className = `relative w-full flex flex-col ${bgColor} rounded-t-[1.5rem] pt-6 pb-10 transition-all`;
+    coloredBox.style.clipPath = 'polygon(0px 0px, 100% 0px, 100% calc(100% - 2.8rem), 0px 100%)';
+
+    idRow.className = 'flex items-center justify-center gap-2 transition-all mx-auto pt-3 px-4 w-full bg-transparent shadow-none';
+    wateringTitleWrapper.className = 'pl-4 transition-all mt-[2.4rem] relative z-10';
+    wateringButtonsWrapper.className = 'px-4 -mt-6 transition-all relative z-40';
+
     els.detailPlantName.className = `${baseName} text-white`;
     sep.className = `${baseSep} text-white`;
     els.detailPlantIdBadge.className = `${baseId} text-white`;
-    els.detailPlantSubtitle.className = `${baseSub} text-white/90`;
-  } else if (urgent) {
-    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.2)] transition-colors bg-[#E7445B]';
-    els.detailPlantName.className = `${baseName} text-white`;
-    sep.className = `${baseSep} text-white`;
-    els.detailPlantIdBadge.className = `${baseId} text-white`;
-    els.detailPlantSubtitle.className = `${baseSub} text-white/90`;
+    els.detailPlantSubtitle.className = plant.subtitle
+      ? `${baseSub} text-white/90`
+      : `${baseSub} hidden text-white/90`;
+    wateringTitle.className = `${baseWateringTitle} text-white`;
+
+    iconContainer.classList.remove('hidden');
+    iconContainer.className = 'absolute -top-6 -left-[0.2rem] z-40';
+    iconContainer.innerHTML = `
+      <div class="relative w-[52px] h-[52px]">
+        <div class="absolute inset-0 bg-black rounded-full translate-x-[3px] translate-y-[3px]"></div>
+        <div class="relative w-full h-full ${bgColor} rounded-full flex items-center justify-center border-[2.5px] border-black">
+          ${iconSvg}
+        </div>
+      </div>`;
   } else {
-    card.className = 'mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-colors bg-white';
+    coloredBox.className = 'relative w-full flex flex-col bg-white rounded-t-[1.5rem] pt-6 pb-10 transition-all';
+    coloredBox.style.clipPath = 'none';
+
+    idRow.className = 'flex items-center justify-center gap-2 transition-all mx-auto px-4 py-5 w-full bg-transparent shadow-none';
+    wateringTitleWrapper.className = 'pl-4 transition-all mt-[2.4rem] relative z-10';
+    wateringButtonsWrapper.className = 'px-4 -mt-6 transition-all relative z-40';
+
     els.detailPlantName.className = `${baseName} text-[#B3D48E]`;
     sep.className = `${baseSep} text-black`;
     els.detailPlantIdBadge.className = `${baseId} text-black`;
-    els.detailPlantSubtitle.className = `${baseSub} text-gray-700`;
+    els.detailPlantSubtitle.className = plant.subtitle
+      ? `${baseSub} text-gray-700`
+      : `${baseSub} hidden text-gray-700`;
+    wateringTitle.className = `${baseWateringTitle} text-black`;
   }
 }
 
@@ -812,11 +854,6 @@ function populateDetail (plant) {
   els.detailPlantIdBadge.textContent = plant.id;
   els.detailPlantSubtitle.textContent = plant.subtitle ? plant.subtitle : '';
   applyDetailHeroHeaderStyles(plant);
-  if (plant.subtitle) {
-    els.detailPlantSubtitle.classList.remove('hidden');
-  } else {
-    els.detailPlantSubtitle.classList.add('hidden');
-  }
 
   const avg = calculateAverageInterval(plant);
   const urgent = isAlertNeeded(plant) && !plant.needs_water;
@@ -869,7 +906,7 @@ function renderDetailWaterMarker (plant) {
   if (!el) return;
   if (plant.needs_water) {
     el.innerHTML = `
-      <button type="button" onclick="toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
+      <button type="button" onclick="event.stopPropagation(); toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
         <div class="absolute inset-0 bg-black border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
         <div class="relative bg-[#06B6D4] border-2 border-black h-full rounded-2xl flex items-center justify-center gap-2 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
           <i data-lucide="droplet" class="w-4 h-4 text-black fill-current shrink-0"></i>
@@ -878,7 +915,7 @@ function renderDetailWaterMarker (plant) {
       </button>`;
   } else {
     el.innerHTML = `
-      <button type="button" onclick="toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
+      <button type="button" onclick="event.stopPropagation(); toggleDetailWaterMarker()" class="relative group w-full h-[48px] p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98] text-left">
         <div class="absolute inset-0 bg-[#06B6D4] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5"></div>
         <div class="relative bg-white border-2 border-black h-full rounded-2xl flex items-center justify-center gap-2 group-active:translate-x-0.5 group-active:translate-y-0.5 transition-transform">
           <i data-lucide="droplet" class="w-4 h-4 text-[#06B6D4] shrink-0"></i>

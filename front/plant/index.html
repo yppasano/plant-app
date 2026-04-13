@@ -185,7 +185,7 @@
 
   <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・名前/IDは画像下） -->
   <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
-    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain pb-8 bg-white">
+    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain bg-white pb-[max(3rem,calc(env(safe-area-inset-bottom,0px)+2rem))]">
       <!-- ヒーロー：上・左右フルブリード -->
       <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative w-full aspect-square max-h-[min(100vw,460px)] shrink-0 overflow-hidden bg-gray-100 cursor-pointer group">
         <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 z-0">
@@ -200,22 +200,31 @@
         <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition pointer-events-none z-[5]">
           <span class="text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="camera" class="w-5 h-5"></i> 写真を変更</span>
         </div>
-        <!-- ⑥ 名前・ID（アラート／水やりマーカーで背景色切替は JS） -->
-        <div class="absolute bottom-0 left-0 right-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-16 pointer-events-none">
-          <div id="detailHeaderCard" class="mx-auto w-full max-w-lg rounded-[2rem] px-4 py-4 text-center shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-colors bg-white">
-            <div class="flex items-center justify-center gap-2 min-w-0">
-              <h2 id="detailPlantName" class="text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0 text-[#B3D48E]">—</h2>
-              <span id="detailTitleSeparator" class="text-[15px] sm:text-[16px] font-bold leading-none shrink-0 text-black">|</span>
-              <p id="detailPlantIdBadge" class="text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0 text-black">—</p>
-            </div>
-            <p id="detailPlantSubtitle" class="text-[13px] font-bold mt-1.5 truncate hidden text-gray-700"></p>
+      </div>
+
+      <!-- 水やりマーカー：画像下端（帯より手前に表示） -->
+      <div class="relative z-[45] h-0 w-full shrink-0 pointer-events-none">
+        <div id="detailWaterMarkerContainer" class="absolute left-[20%] right-[20%] -top-[68px] h-12 pointer-events-auto"></div>
+      </div>
+
+      <!-- 名前|ID 〜 Watering 見出しまで sample02 同等の色付き帯（JS で clip-path・色切替） -->
+      <div id="detailHeaderOuter" class="relative z-30 mx-4 w-[calc(100%-2rem)] max-w-lg sm:mx-auto -mt-16">
+        <div id="detailHeaderIconContainer" class="absolute -top-6 -left-1 hidden z-40"></div>
+        <div id="detailHeaderColoredBox" class="relative w-full flex flex-col bg-transparent pb-0 transition-all">
+          <div id="detailIdRow" class="flex items-center justify-center gap-2 transition-all mx-auto px-4 py-5 w-full bg-white rounded-[2rem] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+            <h2 id="detailPlantName" class="text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0 text-[#B3D48E]">—</h2>
+            <span id="detailTitleSeparator" class="text-[15px] sm:text-[16px] font-bold leading-none shrink-0 text-black">|</span>
+            <p id="detailPlantIdBadge" class="text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0 text-black">—</p>
+          </div>
+          <p id="detailPlantSubtitle" class="text-[13px] font-bold mt-2 text-center truncate hidden text-gray-700 px-2"></p>
+          <div id="detailWateringTitleWrapper" class="pl-4 transition-all mt-[2.4rem] relative z-10">
+            <div id="detailWateringTitle" class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black transition-colors">Watering</div>
           </div>
         </div>
       </div>
 
-      <!-- Watering（平均・履歴より上 / sample02 風シャドウカード） -->
-      <section class="px-4 mt-8">
-        <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Watering</h3>
+      <!-- Watering ボタン（帯に -mt-6 で接続） -->
+      <section id="detailWateringButtonsWrapper" class="px-4 -mt-6 relative z-40">
         <div class="grid grid-cols-3 gap-3">
           <button type="button" onclick="confirmAndAddLogFromDetail('活力剤')" class="relative group w-full p-0 border-0 bg-transparent cursor-pointer active:scale-[0.98]">
             <div class="absolute inset-0 bg-[#D8C243] border-2 border-black rounded-2xl translate-x-1.5 translate-y-1.5 pointer-events-none"></div>
@@ -245,12 +254,6 @@
       <section class="px-4 mt-8">
         <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Average / History</h3>
         <div id="detailHistoryList" class="grid grid-cols-3 gap-x-3 gap-y-5 w-full"></div>
-      </section>
-
-      <!-- 水やりマーカー（Status から移設・sample02 Other 相当） -->
-      <section class="px-4 mt-8">
-        <h3 class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black mb-3">Other</h3>
-        <div id="detailWaterMarkerContainer" class="w-full max-w-[272px]"></div>
       </section>
 
       <div class="px-4 mt-10 flex flex-wrap gap-3 justify-end border-t border-gray-200 pt-6">
