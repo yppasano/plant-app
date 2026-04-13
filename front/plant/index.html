@@ -187,13 +187,13 @@
   <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
     <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain pb-8 bg-white">
       <!-- ヒーロー：上・左右フルブリード -->
-      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative w-full aspect-square max-h-[min(100vw,500px)] shrink-0 overflow-hidden bg-gray-100 cursor-pointer group">
+      <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative w-full aspect-square max-h-[min(100vw,460px)] shrink-0 overflow-hidden bg-gray-100 cursor-pointer group">
         <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 z-0">
           <i data-lucide="image" class="w-10 h-10 opacity-40"></i>
           <span>写真を追加</span>
         </div>
         <img id="detailImage" src="" alt="" class="relative z-[1] w-full h-full object-cover opacity-95 group-hover:opacity-100 transition" />
-        <div id="detailImageGradient" class="absolute bottom-0 left-0 right-0 h-[42%] bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-[2]"></div>
+        <div id="detailImageGradient" class="absolute bottom-0 left-0 right-0 h-[36%] bg-gradient-to-t from-white via-white/85 to-transparent pointer-events-none z-[2]"></div>
         <button type="button" onclick="event.stopPropagation(); closeDetail();" class="absolute top-[max(0.75rem,env(safe-area-inset-top))] left-4 z-30 w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.15)] active:scale-95 transition-transform border-0 outline-none" aria-label="戻る">
           <i data-lucide="chevron-left" class="w-7 h-7 text-black -ml-0.5"></i>
         </button>
