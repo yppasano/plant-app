@@ -185,7 +185,7 @@
 
   <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・名前/IDは画像下） -->
   <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
-    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain bg-white pb-[max(3rem,calc(env(safe-area-inset-bottom,0px)+2rem))]">
+    <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain bg-white pb-[max(6.5rem,calc(env(safe-area-inset-bottom,0px)+5.5rem))]">
       <!-- ヒーロー：上・左右フルブリード -->
       <div id="detailImageWrap" onclick="openImageUploadFromDetail()" class="relative w-full aspect-square max-h-[min(100vw,460px)] shrink-0 overflow-hidden bg-gray-100 cursor-pointer group">
         <div id="detailImagePlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 text-sm gap-2 z-0">
@@ -200,11 +200,6 @@
         <div class="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition pointer-events-none z-[5]">
           <span class="text-white text-sm font-semibold flex items-center gap-2"><i data-lucide="camera" class="w-5 h-5"></i> 写真を変更</span>
         </div>
-      </div>
-
-      <!-- 水やりマーカー：画像下端（帯より手前に表示） -->
-      <div class="relative z-[45] h-0 w-full shrink-0 pointer-events-none">
-        <div id="detailWaterMarkerContainer" class="absolute left-[20%] right-[20%] -top-[68px] h-12 pointer-events-auto"></div>
       </div>
 
       <!-- 名前|ID 〜 Watering 見出しまで sample02 同等の色付き帯（JS で clip-path・色切替） -->
@@ -268,6 +263,8 @@
         </button>
       </div>
     </div>
+    <!-- 水やりマーカー：詳細パネル下端から約20pxで画面下付き固定（スクロールと独立・親の transform に追従） -->
+    <div id="detailWaterMarkerContainer" class="fixed left-[20%] right-[20%] bottom-[max(1.25rem,env(safe-area-inset-bottom,0px))] z-[55] h-12 pointer-events-auto"></div>
   </div>
 
   <!-- お世話記録の確認（sample02 の actionConfirmModal 相当・OK で記録後リストへ） -->
