@@ -82,11 +82,9 @@ const els = {
   renameTargetId: document.getElementById('renameTargetId'),
   renameNameInput: document.getElementById('renameNameInput'),
   renameIdInput: document.getElementById('renameIdInput'),
-  renameSubtitleInput: document.getElementById('renameSubtitleInput'),
   detailScreen: document.getElementById('detailScreen'),
-  detailPlantName: document.getElementById('detailPlantName'),
-  detailPlantIdBadge: document.getElementById('detailPlantIdBadge'),
-  detailPlantSubtitle: document.getElementById('detailPlantSubtitle'),
+  detailDisplayId: document.getElementById('detailDisplayId'),
+  detailDisplayName: document.getElementById('detailDisplayName'),
   detailHeaderColoredBox: document.getElementById('detailHeaderColoredBox'),
   detailIdRow: document.getElementById('detailIdRow'),
   detailHeaderIconContainer: document.getElementById('detailHeaderIconContainer'),
@@ -500,11 +498,10 @@ window.openRenameModal = (plantId) => {
   if (!plant) return;
   currentRenamePlantId = plantId;
   if (els.renameTargetId) els.renameTargetId.value = plantId;
-  if (els.renameNameInput) els.renameNameInput.value = plant.name || plant.id;
   if (els.renameIdInput) els.renameIdInput.value = plant.id;
-  if (els.renameSubtitleInput) els.renameSubtitleInput.value = plant.subtitle || '';
+  if (els.renameNameInput) els.renameNameInput.value = plant.name || plant.id;
   els.renameModal.classList.remove('hidden');
-  els.renameNameInput?.focus();
+  els.renameIdInput?.focus();
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 window.closeRenameModal = (e) => {
@@ -787,12 +784,11 @@ function applyDetailHeroHeaderStyles (plant) {
   const wateringButtonsWrapper = els.detailWateringButtonsWrapper;
   const wateringTitle = els.detailWateringTitle;
   const sep = els.detailTitleSeparator;
-  if (!coloredBox || !idRow || !iconContainer || !wateringTitleWrapper || !wateringButtonsWrapper || !wateringTitle || !sep || !els.detailPlantName || !els.detailPlantIdBadge || !els.detailPlantSubtitle) return;
+  if (!coloredBox || !idRow || !iconContainer || !wateringTitleWrapper || !wateringButtonsWrapper || !wateringTitle || !sep || !els.detailDisplayId || !els.detailDisplayName) return;
 
   const baseName = 'text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0';
   const baseSep = 'text-[15px] sm:text-[16px] font-bold leading-none shrink-0';
   const baseId = 'text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0';
-  const baseSub = 'text-[13px] font-bold mt-2 text-center truncate px-2';
   const baseWateringTitle = 'text-[11px] font-extrabold tracking-[0.12em] uppercase transition-colors';
 
   iconContainer.innerHTML = '';
@@ -813,12 +809,10 @@ function applyDetailHeroHeaderStyles (plant) {
     wateringTitleWrapper.className = 'pl-4 transition-all mt-[2.4rem] relative z-10';
     wateringButtonsWrapper.className = 'px-4 -mt-6 transition-all relative z-40';
 
-    els.detailPlantName.className = `${baseName} text-white`;
+    // 左=ID（旧「名前」スタイル）、右=表示名（旧「ID」スタイル）
+    els.detailDisplayId.className = `${baseName} text-white`;
     sep.className = `${baseSep} text-white`;
-    els.detailPlantIdBadge.className = `${baseId} text-white`;
-    els.detailPlantSubtitle.className = plant.subtitle
-      ? `${baseSub} text-white/90`
-      : `${baseSub} hidden text-white/90`;
+    els.detailDisplayName.className = `${baseId} text-white`;
     wateringTitle.className = `${baseWateringTitle} text-white`;
 
     iconContainer.classList.remove('hidden');
@@ -838,22 +832,17 @@ function applyDetailHeroHeaderStyles (plant) {
     wateringTitleWrapper.className = 'pl-4 transition-all mt-[2.4rem] relative z-10';
     wateringButtonsWrapper.className = 'px-4 -mt-6 transition-all relative z-40';
 
-    els.detailPlantName.className = `${baseName} text-[#B3D48E]`;
+    els.detailDisplayId.className = `${baseName} text-[#B3D48E]`;
     sep.className = `${baseSep} text-black`;
-    els.detailPlantIdBadge.className = `${baseId} text-black`;
-    els.detailPlantSubtitle.className = plant.subtitle
-      ? `${baseSub} text-gray-700`
-      : `${baseSub} hidden text-gray-700`;
+    els.detailDisplayName.className = `${baseId} text-black`;
     wateringTitle.className = `${baseWateringTitle} text-black`;
   }
 }
 
 function populateDetail (plant) {
   if (!plant || !els.detailScreen) return;
-  const displayName = plant.name || plant.id;
-  els.detailPlantName.textContent = displayName;
-  els.detailPlantIdBadge.textContent = plant.id;
-  els.detailPlantSubtitle.textContent = plant.subtitle ? plant.subtitle : '';
+  els.detailDisplayId.textContent = plant.id;
+  els.detailDisplayName.textContent = plant.name || plant.id;
   applyDetailHeroHeaderStyles(plant);
 
   const avg = calculateAverageInterval(plant);
@@ -1118,14 +1107,13 @@ document.getElementById('renameSubmitBtn').addEventListener('click', async () =>
   const oldId = (els.renameTargetId?.value || currentRenamePlantId || '').trim();
   const newId = (els.renameIdInput?.value || '').trim();
   const displayName = (els.renameNameInput?.value || '').trim();
-  const subtitle = (els.renameSubtitleInput?.value || '').trim();
 
-  if (!displayName) {
-    alert('名前を入力してください');
-    return;
-  }
   if (!newId) {
     alert('IDを入力してください');
+    return;
+  }
+  if (!displayName) {
+    alert('名前を入力してください');
     return;
   }
   if (!oldId) return;
@@ -1141,10 +1129,13 @@ document.getElementById('renameSubmitBtn').addEventListener('click', async () =>
   }
 
   updateSyncStatus('loading');
+  const subtitleKeep = (plant.subtitle != null && String(plant.subtitle).trim() !== '')
+    ? String(plant.subtitle).trim()
+    : null;
   const payload = {
     plant_id: newId,
     display_name: displayName,
-    subtitle: subtitle || null
+    subtitle: subtitleKeep
   };
   const { error } = await supabase
     .from('plants')
@@ -1344,11 +1335,8 @@ const render = () => {
       ? `<img src="${imgSrc}" alt="" class="w-full h-[96px] max-h-[96px] object-cover rounded-l-[20px] rounded-r-none bg-gray-100">`
       : `<div class="w-full h-[96px] max-h-[96px] flex items-center justify-center bg-gray-100 rounded-l-[20px] rounded-r-none text-gray-400"><i data-lucide="image" class="w-8 h-8 opacity-50"></i></div>`;
 
-    const displayTitle = escapeHtml(p.name || p.id);
-    const safeId = escapeHtml(p.id);
-    const titlePipe = p.subtitle
-      ? `<span class="text-[12px] text-gray-500 font-bold truncate">| ${escapeHtml(p.subtitle)}</span>`
-      : `<span class="text-[12px] text-gray-400 font-mono truncate">| ${safeId}</span>`;
+    const idTitle = escapeHtml(p.id);
+    const nameTitle = escapeHtml(p.name || p.id);
 
     card.innerHTML = `
       <div class="flex h-[96px] max-h-[96px] min-h-[96px] cursor-pointer group relative z-10 overflow-visible">
@@ -1360,8 +1348,8 @@ const render = () => {
           <div class="absolute top-1.5 left-[0.375rem] right-0 bottom-0 ${statusClass} border-2 border-black rounded-[20px] pointer-events-none"></div>
           <div class="absolute top-0 left-0 right-1.5 bottom-1.5 bg-white border-2 border-black rounded-[20px] pl-[1.6rem] pr-3 py-1.5 flex flex-col justify-center min-h-0 overflow-hidden">
             <div class="flex items-baseline justify-start gap-1.5 mb-2.5 w-full min-w-0 shrink-0">
-              <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${displayTitle}</h3>
-              ${titlePipe}
+              <h3 class="font-extrabold text-[14px] leading-tight text-black truncate">${idTitle}</h3>
+              <span class="text-[12px] text-gray-400 font-mono font-bold truncate">| ${nameTitle}</span>
               ${avgBadgeEl}
             </div>
             <div class="min-h-0 min-w-0 w-full">

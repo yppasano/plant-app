@@ -183,7 +183,7 @@
     </nav>
   </div>
 
-  <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・名前/IDは画像下） -->
+  <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・ID|名前は帯） -->
   <div id="detailScreen" class="fixed inset-0 z-[48] flex flex-col bg-white hidden overflow-hidden text-gray-900" style="transform: translateX(100%);">
     <div id="detailScroll" class="flex-1 overflow-y-auto overscroll-contain bg-white pb-[max(6.5rem,calc(env(safe-area-inset-bottom,0px)+5.5rem))]">
       <!-- ヒーロー：上・左右フルブリード -->
@@ -202,16 +202,15 @@
         </div>
       </div>
 
-      <!-- 名前|ID 〜 Watering 見出しまで sample02 同等の色付き帯（JS で clip-path・色切替） -->
+      <!-- ID|名前（左=旧名前スタイル、右=旧IDスタイル）〜 Watering 見出しまで -->
       <div id="detailHeaderOuter" class="relative z-30 mx-4 w-[calc(100%-2rem)] max-w-lg sm:mx-auto -mt-16">
         <div id="detailHeaderIconContainer" class="absolute -top-6 -left-1 hidden z-40"></div>
         <div id="detailHeaderColoredBox" class="relative w-full flex flex-col bg-transparent pb-0 transition-all">
           <div id="detailIdRow" class="flex items-center justify-center gap-2 transition-all mx-auto px-4 py-5 w-full bg-white rounded-[2rem] shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
-            <h2 id="detailPlantName" class="text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0 text-[#B3D48E]">—</h2>
+            <h2 id="detailDisplayId" class="text-[22px] sm:text-[24px] font-extrabold leading-none truncate min-w-0 text-[#B3D48E]">—</h2>
             <span id="detailTitleSeparator" class="text-[15px] sm:text-[16px] font-bold leading-none shrink-0 text-black">|</span>
-            <p id="detailPlantIdBadge" class="text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0 text-black">—</p>
+            <p id="detailDisplayName" class="text-[15px] sm:text-[16px] font-bold font-mono leading-none truncate min-w-0 text-black">—</p>
           </div>
-          <p id="detailPlantSubtitle" class="text-[13px] font-bold mt-2 text-center truncate hidden text-gray-700 px-2"></p>
           <div id="detailWateringTitleWrapper" class="pl-4 transition-all mt-[2.4rem] relative z-10">
             <div id="detailWateringTitle" class="text-[11px] font-extrabold tracking-[0.12em] uppercase text-black transition-colors">Watering</div>
           </div>
@@ -350,16 +349,12 @@
       <input type="hidden" id="renameTargetId" />
       <div class="space-y-4 mb-6 text-left">
         <div>
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">名前</label>
-          <input type="text" id="renameNameInput" placeholder="表示名" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500/50" />
-        </div>
-        <div>
           <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">ID</label>
           <input type="text" id="renameIdInput" autocomplete="off" placeholder="タグID" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white font-mono text-sm focus:outline-none focus:border-emerald-500/50" />
         </div>
         <div>
-          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">サブタイトル</label>
-          <input type="text" id="renameSubtitleInput" placeholder="置き場所など" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500/50" />
+          <label class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-1.5">名前</label>
+          <input type="text" id="renameNameInput" placeholder="表示名" class="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-emerald-500/50" />
         </div>
       </div>
       <div class="flex gap-3">
