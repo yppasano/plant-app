@@ -980,12 +980,33 @@ window.deletePlantFromDetail = () => {
 // ========================================
 // UI操作系 (モーダルなど)
 // ========================================
-els.navSettingsBtn?.addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
+function setActiveNav(btn) {
+  document.querySelectorAll('#bottomNav .nav-item').forEach((item) => {
+    item.classList.remove('bg-black', 'text-white');
+    item.classList.add('text-black');
+  });
+  btn.classList.remove('text-black');
+  btn.classList.add('bg-black', 'text-white');
+}
+
+els.navSettingsBtn?.addEventListener('click', () => {
+  setActiveNav(els.navSettingsBtn);
+  els.settingsModal.classList.remove('hidden');
+});
 window.closeSettingsModal = (e) => { if (!e || e.target === els.settingsModal) els.settingsModal.classList.add('hidden'); };
 
-els.navCameraBtn?.addEventListener('click', () => { els.scanOverlay.classList.remove('hidden'); startCamera(); });
-els.navManualBtn?.addEventListener('click', () => { els.manualInputModal.classList.remove('hidden'); els.manualIdInput.focus(); });
+els.navCameraBtn?.addEventListener('click', () => {
+  setActiveNav(els.navCameraBtn);
+  els.scanOverlay.classList.remove('hidden');
+  startCamera();
+});
+els.navManualBtn?.addEventListener('click', () => {
+  setActiveNav(els.navManualBtn);
+  els.manualInputModal.classList.remove('hidden');
+  els.manualIdInput.focus();
+});
 els.navSearchBtn?.addEventListener('click', () => {
+  setActiveNav(els.navSearchBtn);
   els.searchSheetOverlay.classList.remove('hidden');
   els.searchSheet.classList.add('open');
   setTimeout(() => els.searchInput?.focus(), 100);

@@ -83,12 +83,14 @@
     .arrow-icon.rotated { transform: rotate(180deg); }
     .loader { border: 3px solid #374151; border-top: 3px solid #2dd4bf; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .bottom-nav {
-      background: rgba(255, 255, 255, 0.92);
+    /* リスト下部ピルナビ（ログイン画面の .glass と名前が被らないよう nav-glass） */
+    #appScreen .nav-glass {
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid #e5e7eb;
-      box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.06);
+    }
+    #appScreen .nav-shadow {
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.15);
     }
     .search-sheet { transform: translateY(100%); transition: transform 0.3s ease-out; }
     .search-sheet.open { transform: translateY(0); }
@@ -157,30 +159,28 @@
           </div>
         </div>
       </header>
-      <main id="plantList" class="p-4 space-y-4 pb-24">
+      <main id="plantList" class="p-4 space-y-4 pb-32">
         <div class="text-center py-10"><div class="loader mx-auto"></div><p class="text-gray-600 text-sm mt-2">Loading data...</p></div>
       </main>
     </div>
 
-    <!-- 下固定メニュー -->
-    <nav id="bottomNav" class="fixed bottom-0 left-0 right-0 bottom-nav rounded-t-3xl pt-2 px-2 z-30 flex justify-around items-center text-gray-900" style="padding-bottom: max(1rem, env(safe-area-inset-bottom));">
-      <button id="navCameraBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="camera" class="w-6 h-6"></i></div>
-        <span class="text-[10px] font-semibold tracking-wide">Scan Tag</span>
-      </button>
-      <button id="navManualBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="edit-3" class="w-6 h-6"></i></div>
-        <span class="text-[10px] font-semibold tracking-wide">Manual</span>
-      </button>
-      <button id="navSearchBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="search" class="w-6 h-6"></i></div>
-        <span class="text-[10px] font-semibold tracking-wide">Search</span>
-      </button>
-      <button id="navSettingsBtn" class="flex flex-col items-center p-2 text-gray-600 hover:text-gray-900 transition group active:scale-95">
-        <div class="p-1.5 rounded-xl group-hover:bg-gray-100 transition mb-1"><i data-lucide="settings" class="w-6 h-6"></i></div>
-        <span class="text-[10px] font-semibold tracking-wide">Settings</span>
-      </button>
-    </nav>
+    <!-- 下ピルナビ（sample02 系・最後に押した項目を黒で強調） -->
+    <div class="absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-0 right-0 z-30 px-6 pointer-events-none flex justify-center">
+      <nav id="bottomNav" class="nav-glass nav-shadow rounded-full p-1.5 flex justify-between items-center w-full max-w-sm pointer-events-auto">
+        <button type="button" id="navCameraBtn" aria-label="Scan Tag" class="nav-item text-black px-6 py-3 sm:px-8 rounded-full transition-all flex items-center justify-center active:scale-95">
+          <i data-lucide="camera" class="w-5 h-5"></i>
+        </button>
+        <button type="button" id="navManualBtn" aria-label="Manual" class="nav-item text-black px-6 py-3 sm:px-8 rounded-full transition-all flex items-center justify-center active:scale-95">
+          <i data-lucide="edit-3" class="w-5 h-5"></i>
+        </button>
+        <button type="button" id="navSearchBtn" aria-label="Search" class="nav-item text-black px-6 py-3 sm:px-8 rounded-full transition-all flex items-center justify-center active:scale-95">
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+        <button type="button" id="navSettingsBtn" aria-label="Settings" class="nav-item text-black px-6 py-3 sm:px-8 rounded-full transition-all flex items-center justify-center active:scale-95">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </button>
+      </nav>
+    </div>
   </div>
 
   <!-- 植物詳細（sample02 系ヒーロー：画像全面・グラデ・戻るは画像上・ID|名前は帯） -->
