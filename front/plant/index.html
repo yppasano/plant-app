@@ -164,8 +164,8 @@
       </main>
     </div>
 
-    <!-- 下ピルナビ（sample02 系・最後に押した項目を黒で強調） -->
-    <div class="absolute bottom-[max(2rem,env(safe-area-inset-bottom))] left-0 right-0 z-30 px-6 pointer-events-none flex justify-center">
+    <!-- 下ピルナビ：下端固定（上は pt・下はセーフエリアでナビ外に余白） -->
+    <div class="fixed bottom-0 left-0 right-0 z-30 px-6 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pointer-events-none flex justify-center">
       <nav id="bottomNav" class="nav-glass nav-shadow rounded-full p-1.5 flex justify-between items-center w-full max-w-sm pointer-events-auto">
         <button type="button" id="navCameraBtn" aria-label="Scan Tag" class="nav-item text-black px-6 py-3 sm:px-8 rounded-full transition-all flex items-center justify-center active:scale-95">
           <i data-lucide="camera" class="w-5 h-5"></i>
