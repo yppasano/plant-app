@@ -51,6 +51,10 @@ let currentImageTargetPlantId = null;
 let currentRenamePlantId = null;
 /** 詳細画面で表示中の植物 ID（plant_id） */
 let currentDetailPlantId = null;
+/** 詳細を開く直前の一覧スクロール位置（戻る時に復元） */
+let savedListScrollTop = 0;
+/** 詳細から戻るときにスクロール位置を合わせる植物 ID */
+let returnToPlantId = null;
 let currentStatusPlantId = null;
 let statusPopoverScrollHandler = null;
 let currentConditionPlantId = null;
@@ -922,9 +926,26 @@ window.toggleDetailWaterMarker = async () => {
   await setNeedsWater(currentDetailPlantId, !plant.needs_water);
 };
 
+/** 詳細から一覧へ戻るときのスクロール位置を復元する */
+function restoreListScrollPosition (plantId) {
+  const scrollEl = els.scrollContainer;
+  if (!scrollEl) return;
+  // hidden 解除直後はレイアウト未確定のため、次フレームで復元する
+  requestAnimationFrame(() => {
+    scrollEl.scrollTop = savedListScrollTop;
+    if (!plantId || !els.plantList) return;
+    const card = els.plantList.querySelector(`[data-plant-id="${CSS.escape(plantId)}"]`);
+    // 並び替え等でカードが画面外なら、最小限の調整で見える位置へ
+    if (card) card.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  });
+}
+
 window.openDetail = (plantId) => {
   const plant = plants.find(p => p.id === plantId);
   if (!plant || !els.detailScreen || !els.appScreen) return;
+  // 一覧のスクロール位置を保存（hidden にするとブラウザがリセットするため）
+  savedListScrollTop = els.scrollContainer?.scrollTop ?? 0;
+  returnToPlantId = plantId;
   currentDetailPlantId = plantId;
   populateDetail(plant);
   els.appScreen.classList.add('hidden');
@@ -939,11 +960,14 @@ window.openDetail = (plantId) => {
 
 window.closeDetail = () => {
   if (!els.detailScreen || !els.appScreen) return;
+  const plantIdToReveal = returnToPlantId;
   currentDetailPlantId = null;
+  returnToPlantId = null;
   els.detailScreen.style.transform = 'translateX(100%)';
   setTimeout(() => {
     els.detailScreen.classList.add('hidden');
     els.appScreen.classList.remove('hidden');
+    restoreListScrollPosition(plantIdToReveal);
   }, 300);
 };
 
@@ -1279,6 +1303,7 @@ const render = () => {
     /* sample02 風：ガラスカードではなく「左サムネ＋重ねた白カード」 */
     /* バッジが枠外にはみ出すため overflow-visible。上に少し余白 */
     card.className = 'relative z-10 overflow-visible pt-1';
+    card.dataset.plantId = p.id;
 
     const badgeAvgClass = isAlert && !needsWater ? 'bg-rose-100 text-rose-800 border-rose-200' : needsWater ? 'bg-cyan-100 text-cyan-800 border-cyan-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200';
     const avgBadgeEl = (sortType.includes('dry') && avg) ? `<span class="shrink-0 ${badgeAvgClass} text-[9px] px-1.5 py-0.5 rounded border font-bold ml-1">${escapeHtml(String(avg))}d</span>` : '';
