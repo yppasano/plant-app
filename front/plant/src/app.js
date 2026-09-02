@@ -55,12 +55,6 @@ let currentDetailPlantId = null;
 let savedListScrollTop = 0;
 /** 詳細から戻るときにスクロール位置を合わせる植物 ID */
 let returnToPlantId = null;
-let currentStatusPlantId = null;
-let statusPopoverScrollHandler = null;
-let currentConditionPlantId = null;
-let conditionStep = 1;
-let selectedCondition = null;
-let selectedTags = [];
 
 // DOM要素
 const els = {
@@ -109,15 +103,7 @@ const els = {
   scanStatus: document.getElementById('scanStatus'),
   imageFileInput: document.getElementById('imageFileInput'),
   importFileInput: document.getElementById('importFileInput'),
-  statusPopover: document.getElementById('statusPopover'),
-  statusPopoverOverlay: document.getElementById('statusPopoverOverlay'),
-  scrollContainer: document.getElementById('scrollContainer'),
-  conditionModal: document.getElementById('conditionModal'),
-  conditionStep1: document.getElementById('conditionStep1'),
-  conditionStep2: document.getElementById('conditionStep2'),
-  conditionTags: document.getElementById('conditionTags'),
-  conditionBackBtn: document.getElementById('conditionBackBtn'),
-  conditionSaveBtn: document.getElementById('conditionSaveBtn')
+  scrollContainer: document.getElementById('scrollContainer')
 };
 
 // ========================================
@@ -440,61 +426,6 @@ const setNeedsWater = async (plantId, value) => {
   const { error } = await supabase.from('plants').update({ needs_water: value }).eq('id', plant.db_id);
   if (error) console.error(error);
   await fetchPlants();
-};
-
-window.openStatusPopover = (plantId, ev) => {
-  currentStatusPlantId = plantId;
-  const popover = els.statusPopover;
-  const overlay = els.statusPopoverOverlay;
-  if (!popover || !overlay) return;
-  overlay.classList.remove('hidden');
-  popover.classList.remove('hidden');
-
-  // ビューポート内に収まるよう位置を計算
-  const rect = ev?.target?.getBoundingClientRect?.();
-  const pad = 12;
-  if (rect) {
-    let left = rect.left;
-    let top = rect.bottom + 4;
-    popover.style.left = `${left}px`;
-    popover.style.top = `${top}px`;
-    popover.style.transform = '';
-    // 表示後にサイズを取得してビューポート内に収める
-    requestAnimationFrame(() => {
-      const pw = popover.offsetWidth;
-      const ph = popover.offsetHeight;
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      if (left + pw > vw - pad) left = Math.max(pad, vw - pw - pad);
-      if (left < pad) left = pad;
-      if (top + ph > vh - pad) top = rect.top - ph - 4;
-      if (top < pad) top = pad;
-      popover.style.left = `${left}px`;
-      popover.style.top = `${top}px`;
-    });
-  } else {
-    popover.style.left = '50%';
-    popover.style.top = '50%';
-    popover.style.transform = 'translate(-50%, -50%)';
-  }
-
-  // スクロール時にポップオーバーを閉じる（該当IDがわからなくなるのを防ぐ）
-  const scrollEl = els.scrollContainer || els.plantList?.parentElement;
-  if (statusPopoverScrollHandler) {
-    scrollEl?.removeEventListener('scroll', statusPopoverScrollHandler);
-  }
-  statusPopoverScrollHandler = () => closeStatusPopover();
-  scrollEl?.addEventListener('scroll', statusPopoverScrollHandler);
-};
-window.closeStatusPopover = () => {
-  els.statusPopoverOverlay?.classList.add('hidden');
-  els.statusPopover?.classList.add('hidden');
-  currentStatusPlantId = null;
-  const scrollEl = els.scrollContainer || els.plantList?.parentElement;
-  if (statusPopoverScrollHandler) {
-    scrollEl?.removeEventListener('scroll', statusPopoverScrollHandler);
-    statusPopoverScrollHandler = null;
-  }
 };
 
 window.openRenameModal = (plantId) => {
@@ -992,11 +923,6 @@ window.openRenameModalFromDetail = () => {
   if (currentDetailPlantId) window.openRenameModal(currentDetailPlantId);
 };
 
-window.openStatusPopoverFromDetail = () => {
-  if (!currentDetailPlantId) return;
-  window.openStatusPopover(currentDetailPlantId, null);
-};
-
 window.deletePlantFromDetail = () => {
   if (currentDetailPlantId) window.deletePlant(currentDetailPlantId);
 };
@@ -1048,104 +974,6 @@ document.getElementById('manualSubmitBtn').addEventListener('click', async () =>
   if (exists) { alert('Already exists'); return; }
   closeManualModal();
   await addPlantToDB(id);
-});
-
-// Status ポップオーバー: 状態を記録（水やりマーカーは詳細画面のみ）
-document.getElementById('statusRecordBtn')?.addEventListener('click', () => {
-  if (!currentStatusPlantId) return;
-  openConditionModal(currentStatusPlantId);
-  closeStatusPopover();
-});
-
-// 状態記録タグ定義
-const CONDITION_TAGS = {
-  Good: ['新芽が出た', '花が咲いた', 'ツヤツヤ', '元気'],
-  Normal: [],
-  Bad: ['葉が黄色い', 'しおれている', '虫・病気', '元気がない']
-};
-
-window.openConditionModal = (plantId) => {
-  currentConditionPlantId = plantId;
-  conditionStep = 1;
-  selectedCondition = null;
-  selectedTags = [];
-  els.conditionStep1?.classList.remove('hidden');
-  els.conditionStep2?.classList.add('hidden');
-  els.conditionBackBtn?.classList.add('hidden');
-  els.conditionModal?.classList.remove('hidden');
-};
-window.closeConditionModal = (e) => {
-  if (!e || e.target === els.conditionModal) {
-    els.conditionModal?.classList.add('hidden');
-    currentConditionPlantId = null;
-  }
-};
-
-// Step 1: 状態選択
-document.querySelectorAll('.condition-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    selectedCondition = btn.dataset.condition;
-    const tags = CONDITION_TAGS[selectedCondition];
-    if (tags.length === 0) {
-      // Normal: そのまま保存可能、戻るボタン表示
-      els.conditionStep1?.classList.add('hidden');
-      els.conditionStep2?.classList.add('hidden');
-      els.conditionBackBtn?.classList.remove('hidden');
-      return;
-    }
-    els.conditionStep1?.classList.add('hidden');
-    els.conditionStep2?.classList.remove('hidden');
-    els.conditionBackBtn?.classList.remove('hidden');
-    selectedTags = [];
-    const container = els.conditionTags;
-    if (!container) return;
-    container.innerHTML = '';
-    tags.forEach(tag => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'px-4 py-2.5 rounded-xl border-2 border-white/20 bg-white/5 text-gray-300 font-semibold text-sm hover:bg-white/10 hover:border-white/30 transition active:scale-95';
-      b.textContent = tag;
-      b.dataset.tag = tag;
-      b.addEventListener('click', () => {
-        const idx = selectedTags.indexOf(tag);
-        if (idx >= 0) selectedTags.splice(idx, 1);
-        else selectedTags.push(tag);
-        b.classList.toggle('border-emerald-500', selectedTags.includes(tag));
-        b.classList.toggle('bg-emerald-500/20', selectedTags.includes(tag));
-        b.classList.toggle('text-emerald-300', selectedTags.includes(tag));
-      });
-      container.appendChild(b);
-    });
-  });
-});
-
-document.getElementById('conditionCancelBtn')?.addEventListener('click', () => closeConditionModal());
-
-document.getElementById('conditionBackBtn')?.addEventListener('click', () => {
-  conditionStep = 1;
-  selectedCondition = null;
-  selectedTags = [];
-  els.conditionStep1?.classList.remove('hidden');
-  els.conditionStep2?.classList.add('hidden');
-  els.conditionBackBtn?.classList.add('hidden');
-});
-
-document.getElementById('conditionSaveBtn')?.addEventListener('click', async () => {
-  if (!currentConditionPlantId) return;
-  const plant = plants.find(p => p.id === currentConditionPlantId);
-  if (!plant) return;
-
-  updateSyncStatus('loading');
-  const { error } = await supabase.from('logs').insert({
-    user_id: currentUser.id,
-    plant_db_id: plant.db_id,
-    type: '状態',
-    condition: selectedCondition || 'Normal',
-    tags: selectedTags.length > 0 ? selectedTags : []
-  });
-  if (error) console.error(error);
-  closeConditionModal();
-  await fetchPlants();
 });
 
 document.getElementById('renameSubmitBtn').addEventListener('click', async () => {

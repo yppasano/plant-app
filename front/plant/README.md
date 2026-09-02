@@ -142,6 +142,7 @@ git push
 ### 未着手（次のステップ例）
 
 - ログイン画面 `#authScreen`（現状はダークガラスのまま）
-- 詳細 `#detailScreen`（まだダーク UI）
-- 各種モーダル（Manual / Rename / Settings / Condition / スキャンオーバーレイ）
-- `statusPopover`、`manifest` の `theme-color` 以外のアイコン画像など
+- 各種モーダル（Manual / Rename / Settings / スキャンオーバーレイ）のライト化
+- `manifest` の `theme-color` 以外のアイコン画像など
+
+※ Status（状態記録）と解析ダッシュボードは削除済み。残存物は `REMOVED_FEATURES_LEFTOVERS.md` を参照。
